@@ -1,6 +1,26 @@
 # GitHub Copilot Repository Instructions – Frontend
 
-This repository contains the frontend of the Healthy Recipes Web Application, developed using React (TypeScript) and Tailwind CSS. Copilot should assist in building, testing, and maintaining features according to the SRS provided below.
+This repository contains the frontend of the Healthy Recipes Web Application, developed using React (TypeScript) and Tailwind CSS. Copilot shoul### 🛠️ Known Issues & Solutions
+
+### Build & CI/CD
+- **Issue**: Native binding errors with rolldown-vite in CI
+- **Solution**: ✅ Switched to standard Vite v6 for better CI compatibility
+- **Issue**: webidl-conversions/whatwg-url TypeError in CI test coverage
+- **Solution**: ✅ Updated Vitest config (pool: 'forks', jsdom environment) and CI workflow (NODE_ENV=test, npm config)
+
+### Code Quality
+- **Issue**: ESLint warnings in coverage folder
+- **Solution**: ✅ Coverage folder is ignored in .gitignore and eslint.config.js
+- **Issue**: Prettier formatting inconsistencies
+- **Solution**: ✅ Run `npm run format` then `npm run format:check`
+
+### Testing
+- **Issue**: Router conflicts in tests (multiple Router instances)
+- **Solution**: ✅ App.tsx includes BrowserRouter, tests don't need to wrap it
+- **Issue**: Co-located test file organization
+- **Solution**: ✅ Tests are placed next to components following React best practices
+- **Issue**: CI test coverage failing with dependency errors
+- **Solution**: ✅ Robust test environment configuration with forked processes and proper dependenciesg, testing, and maintaining features according to the SRS provided below.
 
 ## 🚀 Current Tech Stack (Implemented)
 - **Vite** - Build tool with React + TypeScript template
@@ -115,12 +135,11 @@ src/
 ```bash
 # Development
 npm run dev          # Start dev server (http://localhost:5173)
-npm run build        # Production build
+npm run build        # Production build (includes TypeScript check)
 npm run preview      # Preview production build
 
 # Testing
 npm test             # Run tests in watch mode
-npx vitest run       # Run tests once
 npm run test:ui      # Run tests with UI
 npm run test:coverage # Run tests with coverage report
 
@@ -161,6 +180,11 @@ npm run format:check # Check formatting without fixing
 - **Advanced Features**: Advanced search filters, User profile management, Infinite scroll, Image upload
 
 ## 🛡️ Quality Standards
+
+### Test Coverage Status
+- **Current Coverage**: ~26.5% overall (focusing on core UI components)
+- **Target Coverage**: >80% for production readiness
+- **Test Infrastructure**: ✅ Fully configured and working locally and in CI
 
 ### Performance Requirements
 - Load times:
