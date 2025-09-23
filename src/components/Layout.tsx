@@ -12,7 +12,7 @@ const mockUser = {
   id: '1',
   name: 'John Doe',
   role: 'admin' as 'chef' | 'admin' | 'customer',
-  avatar: null
+  avatar: null,
 };
 
 export function Layout({ children }: LayoutProps) {
@@ -42,21 +42,17 @@ export function Layout({ children }: LayoutProps) {
               <Link
                 to="/"
                 className={`text-sm font-medium transition-colors ${
-                  isActive('/') 
-                    ? 'text-primary-600' 
-                    : 'text-gray-500 hover:text-gray-900'
+                  isActive('/') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 Browse Recipes
               </Link>
-              
+
               {mockUser.role === 'chef' && (
                 <Link
                   to="/submit"
                   className={`text-sm font-medium transition-colors ${
-                    isActive('/submit') 
-                      ? 'text-primary-600' 
-                      : 'text-gray-500 hover:text-gray-900'
+                    isActive('/submit') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   Submit Recipe
@@ -67,9 +63,7 @@ export function Layout({ children }: LayoutProps) {
                 <Link
                   to="/admin"
                   className={`text-sm font-medium transition-colors ${
-                    isActive('/admin') 
-                      ? 'text-primary-600' 
-                      : 'text-gray-500 hover:text-gray-900'
+                    isActive('/admin') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   Recipe Approval
@@ -103,9 +97,7 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
 
       {/* Footer */}
       <footer className="bg-white border-t mt-16">
@@ -124,28 +116,68 @@ export function Layout({ children }: LayoutProps) {
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Recipes</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><Link to="/" className="hover:text-gray-900">Browse All</Link></li>
-                <li><Link to="/" className="hover:text-gray-900">Trending</Link></li>
-                <li><Link to="/" className="hover:text-gray-900">New Recipes</Link></li>
+                <li>
+                  <Link to="/" className="hover:text-gray-900">
+                    Browse All
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="hover:text-gray-900">
+                    Trending
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="hover:text-gray-900">
+                    New Recipes
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Community</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-gray-900">Top Chefs</a></li>
-                <li><a href="#" className="hover:text-gray-900">Reviews</a></li>
-                <li><a href="#" className="hover:text-gray-900">Forums</a></li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Top Chefs
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Reviews
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Forums
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Support</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-gray-900">Help Center</a></li>
-                <li><a href="#" className="hover:text-gray-900">Contact Us</a></li>
-                <li><a href="#" className="hover:text-gray-900">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-gray-900">Terms of Service</a></li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Contact Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-gray-900">
+                    Terms of Service
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

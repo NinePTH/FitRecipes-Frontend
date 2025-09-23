@@ -31,9 +31,17 @@ const mockPendingRecipes: Recipe[] = [
     totalComments: 0,
     status: 'pending',
     chefId: '2',
-    chef: { id: '2', email: 'chef2@example.com', firstName: 'John', lastName: 'Smith', role: 'chef', createdAt: '', updatedAt: '' },
+    chef: {
+      id: '2',
+      email: 'chef2@example.com',
+      firstName: 'John',
+      lastName: 'Smith',
+      role: 'chef',
+      createdAt: '',
+      updatedAt: '',
+    },
     createdAt: '2025-01-20T14:30:00Z',
-    updatedAt: '2025-01-20T14:30:00Z'
+    updatedAt: '2025-01-20T14:30:00Z',
   },
   {
     id: '2',
@@ -58,10 +66,18 @@ const mockPendingRecipes: Recipe[] = [
     totalComments: 0,
     status: 'pending',
     chefId: '3',
-    chef: { id: '3', email: 'chef3@example.com', firstName: 'Sarah', lastName: 'Johnson', role: 'chef', createdAt: '', updatedAt: '' },
+    chef: {
+      id: '3',
+      email: 'chef3@example.com',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      role: 'chef',
+      createdAt: '',
+      updatedAt: '',
+    },
     createdAt: '2025-01-19T09:15:00Z',
-    updatedAt: '2025-01-19T09:15:00Z'
-  }
+    updatedAt: '2025-01-19T09:15:00Z',
+  },
 ];
 
 export function AdminRecipeApprovalPage() {
@@ -70,7 +86,7 @@ export function AdminRecipeApprovalPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   // Infinite scroll state
   const [hasNextPage, setHasNextPage] = useState(true);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
@@ -93,7 +109,7 @@ export function AdminRecipeApprovalPage() {
     // TODO: Implement infinite scroll
     console.log('Loading more recipes...');
     setIsFetchingNextPage(true);
-    
+
     setTimeout(() => {
       setIsFetchingNextPage(false);
       // Simulate no more pages after first load
@@ -103,10 +119,10 @@ export function AdminRecipeApprovalPage() {
 
   const handleApprove = async (recipeId: string) => {
     setIsProcessing(true);
-    
+
     // TODO: Call API to approve recipe
     console.log('Approving recipe:', recipeId);
-    
+
     // Simulate API call
     setTimeout(() => {
       setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
@@ -124,10 +140,10 @@ export function AdminRecipeApprovalPage() {
     }
 
     setIsProcessing(true);
-    
+
     // TODO: Call API to reject recipe
     console.log('Rejecting recipe:', recipeId, 'Reason:', rejectionReason);
-    
+
     // Simulate API call
     setTimeout(() => {
       setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
@@ -144,7 +160,7 @@ export function AdminRecipeApprovalPage() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -163,7 +179,7 @@ export function AdminRecipeApprovalPage() {
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg mb-2 line-clamp-2">{recipe.title}</h3>
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
-        
+
         <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
@@ -175,13 +191,11 @@ export function AdminRecipeApprovalPage() {
               <span>{recipe.chef.firstName}</span>
             </div>
           </div>
-          <span className="text-xs">
-            {formatDate(recipe.createdAt)}
-          </span>
+          <span className="text-xs">{formatDate(recipe.createdAt)}</span>
         </div>
 
         <div className="flex flex-wrap gap-1 mb-4">
-          {recipe.dietType.slice(0, 2).map((diet) => (
+          {recipe.dietType.slice(0, 2).map(diet => (
             <span
               key={diet}
               className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
@@ -275,8 +289,11 @@ export function AdminRecipeApprovalPage() {
               <div>
                 <h4 className="font-medium text-gray-900">Diet Types</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {recipe.dietType.map((diet) => (
-                    <span key={diet} className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                  {recipe.dietType.map(diet => (
+                    <span
+                      key={diet}
+                      className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
+                    >
                       {diet}
                     </span>
                   ))}
@@ -289,24 +306,29 @@ export function AdminRecipeApprovalPage() {
                   <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-primary-600" />
                   </div>
-                  <span className="text-gray-600">{recipe.chef.firstName} {recipe.chef.lastName}</span>
+                  <span className="text-gray-600">
+                    {recipe.chef.firstName} {recipe.chef.lastName}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* TODO: Show ingredients and instructions */}
-          
+
           {/* Action Buttons */}
           <div className="mt-8 space-y-4">
             <div>
-              <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="rejectionReason"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Rejection Reason (if rejecting)
               </label>
               <Textarea
                 id="rejectionReason"
                 value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
+                onChange={e => setRejectionReason(e.target.value)}
                 placeholder="Please provide a reason for rejection..."
                 rows={3}
               />
@@ -324,10 +346,7 @@ export function AdminRecipeApprovalPage() {
                 <X className="h-4 w-4 mr-2" />
                 {isProcessing ? 'Rejecting...' : 'Reject'}
               </Button>
-              <Button
-                onClick={() => handleApprove(recipe.id)}
-                disabled={isProcessing}
-              >
+              <Button onClick={() => handleApprove(recipe.id)} disabled={isProcessing}>
                 <Check className="h-4 w-4 mr-2" />
                 {isProcessing ? 'Approving...' : 'Approve'}
               </Button>
@@ -344,9 +363,7 @@ export function AdminRecipeApprovalPage() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Recipe Approval</h1>
-          <p className="text-gray-600 mt-2">
-            Review and approve recipes submitted by chefs
-          </p>
+          <p className="text-gray-600 mt-2">Review and approve recipes submitted by chefs</p>
         </div>
 
         {/* Stats */}
@@ -391,10 +408,10 @@ export function AdminRecipeApprovalPage() {
         {/* Pending Recipes */}
         <div>
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Pending Recipes</h2>
-          
+
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="animate-pulse">
                   <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
                   <div className="space-y-2">
@@ -415,7 +432,7 @@ export function AdminRecipeApprovalPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recipes.map((recipe) => (
+                {recipes.map(recipe => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>

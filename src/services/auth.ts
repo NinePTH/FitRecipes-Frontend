@@ -1,10 +1,5 @@
 import { apiClient } from './api';
-import type { 
-  User, 
-  LoginCredentials, 
-  RegisterData, 
-  AuthResponse 
-} from '@/types';
+import type { User, LoginCredentials, RegisterData, AuthResponse } from '@/types';
 
 export class AuthService {
   private static readonly TOKEN_KEY = 'fitrecipes_token';
@@ -28,14 +23,14 @@ export class AuthService {
         token: 'mock-jwt-token',
         refreshToken: 'mock-refresh-token',
       };
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       this.setTokens(mockResponse.token, mockResponse.refreshToken);
       this.setUser(mockResponse.user);
       apiClient.setAuthToken(mockResponse.token);
-      
+
       return mockResponse;
     }
 
@@ -43,7 +38,7 @@ export class AuthService {
     this.setTokens(response.token, response.refreshToken);
     this.setUser(response.user);
     apiClient.setAuthToken(response.token);
-    
+
     return response;
   }
 
@@ -64,14 +59,14 @@ export class AuthService {
         token: 'mock-jwt-token',
         refreshToken: 'mock-refresh-token',
       };
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       this.setTokens(mockResponse.token, mockResponse.refreshToken);
       this.setUser(mockResponse.user);
       apiClient.setAuthToken(mockResponse.token);
-      
+
       return mockResponse;
     }
 
@@ -79,7 +74,7 @@ export class AuthService {
     this.setTokens(response.token, response.refreshToken);
     this.setUser(response.user);
     apiClient.setAuthToken(response.token);
-    
+
     return response;
   }
 
@@ -96,27 +91,27 @@ export class AuthService {
       if (!user) {
         throw new Error('No user data available');
       }
-      
+
       const mockResponse: AuthResponse = {
         user,
         token: 'new-mock-jwt-token',
         refreshToken: 'new-mock-refresh-token',
       };
-      
+
       this.setTokens(mockResponse.token, mockResponse.refreshToken);
       apiClient.setAuthToken(mockResponse.token);
-      
+
       return mockResponse;
     }
 
     const response = await apiClient.post<AuthResponse>('/auth/refresh', {
       refreshToken,
     });
-    
+
     this.setTokens(response.token, response.refreshToken);
     this.setUser(response.user);
     apiClient.setAuthToken(response.token);
-    
+
     return response;
   }
 

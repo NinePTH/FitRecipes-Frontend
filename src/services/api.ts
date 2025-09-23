@@ -29,12 +29,9 @@ export class ApiClient {
     delete this.config.headers['Authorization'];
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.config.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       ...options,
       headers: {
@@ -80,7 +77,7 @@ export class ApiClient {
         }
       });
     }
-    
+
     return this.request<T>(url.pathname + url.search);
   }
 
@@ -111,10 +108,14 @@ export class ApiClient {
     });
   }
 
-  async uploadFile<T>(endpoint: string, file: File, additionalData?: Record<string, unknown>): Promise<T> {
+  async uploadFile<T>(
+    endpoint: string,
+    file: File,
+    additionalData?: Record<string, unknown>
+  ): Promise<T> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     if (additionalData) {
       Object.keys(additionalData).forEach(key => {
         formData.append(key, String(additionalData[key]));

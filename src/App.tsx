@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthPage } from '@/pages/AuthPage';
 import { BrowseRecipesPage } from '@/pages/BrowseRecipesPage';
@@ -16,41 +15,45 @@ function App() {
       <div className="App">
         <Routes>
           {/* Public Routes */}
-          <Route 
-            path="/auth" 
-            element={!isAuthenticated ? <AuthPage /> : <Navigate to="/" replace />} 
+          <Route
+            path="/auth"
+            element={!isAuthenticated ? <AuthPage /> : <Navigate to="/" replace />}
           />
-          
+
           {/* Protected Routes */}
-          <Route 
-            path="/" 
-            element={isAuthenticated ? <BrowseRecipesPage /> : <Navigate to="/auth" replace />} 
+          <Route
+            path="/"
+            element={isAuthenticated ? <BrowseRecipesPage /> : <Navigate to="/auth" replace />}
           />
-          <Route 
-            path="/recipe/:id" 
-            element={isAuthenticated ? <RecipeDetailPage /> : <Navigate to="/auth" replace />} 
+          <Route
+            path="/recipe/:id"
+            element={isAuthenticated ? <RecipeDetailPage /> : <Navigate to="/auth" replace />}
           />
-          
+
           {/* Chef Only Routes */}
-          <Route 
-            path="/submit" 
+          <Route
+            path="/submit"
             element={
-              isAuthenticated && (userRole === 'chef' || userRole === 'admin') 
-                ? <RecipeSubmissionPage /> 
-                : <Navigate to="/" replace />
-            } 
+              isAuthenticated && (userRole === 'chef' || userRole === 'admin') ? (
+                <RecipeSubmissionPage />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
           />
-          
+
           {/* Admin Only Routes */}
-          <Route 
-            path="/admin" 
+          <Route
+            path="/admin"
             element={
-              isAuthenticated && userRole === 'admin' 
-                ? <AdminRecipeApprovalPage /> 
-                : <Navigate to="/" replace />
-            } 
+              isAuthenticated && userRole === 'admin' ? (
+                <AdminRecipeApprovalPage />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
           />
-          
+
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

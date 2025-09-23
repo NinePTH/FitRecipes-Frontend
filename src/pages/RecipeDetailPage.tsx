@@ -11,11 +11,12 @@ import type { Recipe } from '@/types';
 const mockRecipe: Recipe = {
   id: '1',
   title: 'Mediterranean Quinoa Bowl',
-  description: 'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
+  description:
+    'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
   images: [
     'https://via.placeholder.com/600x400',
     'https://via.placeholder.com/600x400/ff6b6b',
-    'https://via.placeholder.com/600x400/4ecdc4'
+    'https://via.placeholder.com/600x400/4ecdc4',
   ],
   ingredients: [
     { id: '1', name: 'Quinoa', quantity: 1, unit: 'cup' },
@@ -25,15 +26,32 @@ const mockRecipe: Recipe = {
     { id: '5', name: 'Feta cheese', quantity: 100, unit: 'g' },
     { id: '6', name: 'Olive oil', quantity: 3, unit: 'tbsp' },
     { id: '7', name: 'Lemon juice', quantity: 2, unit: 'tbsp' },
-    { id: '8', name: 'Fresh herbs (parsley, mint)', quantity: 0.25, unit: 'cup' }
+    { id: '8', name: 'Fresh herbs (parsley, mint)', quantity: 0.25, unit: 'cup' },
   ],
   instructions: [
-    { id: '1', stepNumber: 1, description: 'Rinse quinoa under cold water until water runs clear. Cook quinoa according to package instructions.' },
-    { id: '2', stepNumber: 2, description: 'While quinoa cooks, dice cucumber, tomatoes, and red onion into small pieces.' },
+    {
+      id: '1',
+      stepNumber: 1,
+      description:
+        'Rinse quinoa under cold water until water runs clear. Cook quinoa according to package instructions.',
+    },
+    {
+      id: '2',
+      stepNumber: 2,
+      description: 'While quinoa cooks, dice cucumber, tomatoes, and red onion into small pieces.',
+    },
     { id: '3', stepNumber: 3, description: 'Crumble feta cheese and chop fresh herbs.' },
-    { id: '4', stepNumber: 4, description: 'In a large bowl, combine cooked quinoa with vegetables and herbs.' },
-    { id: '5', stepNumber: 5, description: 'Drizzle with olive oil and lemon juice. Season with salt and pepper to taste.' },
-    { id: '6', stepNumber: 6, description: 'Top with crumbled feta cheese and serve immediately.' }
+    {
+      id: '4',
+      stepNumber: 4,
+      description: 'In a large bowl, combine cooked quinoa with vegetables and herbs.',
+    },
+    {
+      id: '5',
+      stepNumber: 5,
+      description: 'Drizzle with olive oil and lemon juice. Season with salt and pepper to taste.',
+    },
+    { id: '6', stepNumber: 6, description: 'Top with crumbled feta cheese and serve immediately.' },
   ],
   prepTime: 15,
   cookTime: 20,
@@ -49,7 +67,7 @@ const mockRecipe: Recipe = {
     carbs: 45,
     fat: 11,
     fiber: 5,
-    sodium: 380
+    sodium: 380,
   },
   allergies: ['dairy'],
   ratings: [],
@@ -59,9 +77,17 @@ const mockRecipe: Recipe = {
   totalComments: 5,
   status: 'approved',
   chefId: '1',
-  chef: { id: '1', email: 'chef@example.com', firstName: 'Maria', lastName: 'Rodriguez', role: 'chef', createdAt: '', updatedAt: '' },
+  chef: {
+    id: '1',
+    email: 'chef@example.com',
+    firstName: 'Maria',
+    lastName: 'Rodriguez',
+    role: 'chef',
+    createdAt: '',
+    updatedAt: '',
+  },
   createdAt: '2025-01-15T10:00:00Z',
-  updatedAt: '2025-01-15T10:00:00Z'
+  updatedAt: '2025-01-15T10:00:00Z',
 };
 
 export function RecipeDetailPage() {
@@ -102,7 +128,7 @@ export function RecipeDetailPage() {
     setIsSubmittingComment(true);
     // TODO: Submit comment to API
     console.log('Comment submitted:', comment);
-    
+
     setTimeout(() => {
       setComment('');
       setIsSubmittingComment(false);
@@ -152,7 +178,7 @@ export function RecipeDetailPage() {
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">{recipe.title}</h1>
           <p className="text-xl text-gray-600">{recipe.description}</p>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
@@ -165,10 +191,12 @@ export function RecipeDetailPage() {
               </div>
               <div className="flex items-center space-x-1">
                 <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span>{recipe.averageRating} ({recipe.totalRatings} reviews)</span>
+                <span>
+                  {recipe.averageRating} ({recipe.totalRatings} reviews)
+                </span>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm">
                 <Heart className="h-4 w-4 mr-1" />
@@ -201,7 +229,11 @@ export function RecipeDetailPage() {
                     selectedImageIndex === index ? 'border-primary-500' : 'border-gray-200'
                   }`}
                 >
-                  <img src={image} alt={`${recipe.title} ${index + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={image}
+                    alt={`${recipe.title} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -218,10 +250,15 @@ export function RecipeDetailPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {recipe.ingredients.map((ingredient) => (
-                    <li key={ingredient.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                  {recipe.ingredients.map(ingredient => (
+                    <li
+                      key={ingredient.id}
+                      className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+                    >
                       <span className="font-medium">{ingredient.name}</span>
-                      <span className="text-gray-600">{ingredient.quantity} {ingredient.unit}</span>
+                      <span className="text-gray-600">
+                        {ingredient.quantity} {ingredient.unit}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -235,7 +272,7 @@ export function RecipeDetailPage() {
               </CardHeader>
               <CardContent>
                 <ol className="space-y-4">
-                  {recipe.instructions.map((instruction) => (
+                  {recipe.instructions.map(instruction => (
                     <li key={instruction.id} className="flex space-x-4">
                       <span className="flex-shrink-0 w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-semibold">
                         {instruction.stepNumber}
@@ -275,8 +312,11 @@ export function RecipeDetailPage() {
                 <div>
                   <h4 className="font-medium text-gray-900">Diet Type</h4>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {recipe.dietType.map((diet) => (
-                      <span key={diet} className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                    {recipe.dietType.map(diet => (
+                      <span
+                        key={diet}
+                        className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
+                      >
                         {diet}
                       </span>
                     ))}
@@ -329,11 +369,14 @@ export function RecipeDetailPage() {
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
                     <span className="text-primary-600 font-semibold">
-                      {recipe.chef.firstName[0]}{recipe.chef.lastName[0]}
+                      {recipe.chef.firstName[0]}
+                      {recipe.chef.lastName[0]}
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium">{recipe.chef.firstName} {recipe.chef.lastName}</p>
+                    <p className="font-medium">
+                      {recipe.chef.firstName} {recipe.chef.lastName}
+                    </p>
                     <p className="text-sm text-gray-600">Chef</p>
                   </div>
                 </div>
@@ -351,7 +394,7 @@ export function RecipeDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                {[1, 2, 3, 4, 5].map((rating) => (
+                {[1, 2, 3, 4, 5].map(rating => (
                   <button
                     key={rating}
                     onClick={() => handleRating(rating)}
@@ -363,7 +406,9 @@ export function RecipeDetailPage() {
                   </button>
                 ))}
                 <span className="ml-2 text-sm text-gray-600">
-                  {userRating > 0 ? `You rated this ${userRating} star${userRating > 1 ? 's' : ''}` : 'Click to rate'}
+                  {userRating > 0
+                    ? `You rated this ${userRating} star${userRating > 1 ? 's' : ''}`
+                    : 'Click to rate'}
                 </span>
               </div>
             </CardContent>
@@ -382,7 +427,7 @@ export function RecipeDetailPage() {
                 <Textarea
                   placeholder="Share your thoughts about this recipe..."
                   value={comment}
-                  onChange={(e) => setComment(e.target.value)}
+                  onChange={e => setComment(e.target.value)}
                   rows={4}
                 />
                 <Button type="submit" disabled={isSubmittingComment || !comment.trim()}>

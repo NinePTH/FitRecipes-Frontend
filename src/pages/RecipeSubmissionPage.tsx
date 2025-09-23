@@ -11,7 +11,7 @@ import type { RecipeFormData, Ingredient, Instruction } from '@/types';
 export function RecipeSubmissionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
-  
+
   const [formData, setFormData] = useState<RecipeFormData>({
     title: '',
     description: '',
@@ -32,9 +32,9 @@ export function RecipeSubmissionPage() {
       carbs: 0,
       fat: 0,
       fiber: 0,
-      sodium: 0
+      sodium: 0,
     },
-    allergies: []
+    allergies: [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -42,14 +42,14 @@ export function RecipeSubmissionPage() {
   const handleInputChange = (field: keyof RecipeFormData, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
-        [field]: ''
+        [field]: '',
       }));
     }
   };
@@ -57,30 +57,37 @@ export function RecipeSubmissionPage() {
   const addIngredient = () => {
     setFormData(prev => ({
       ...prev,
-      ingredients: [...prev.ingredients, { name: '', quantity: 0, unit: '' }]
+      ingredients: [...prev.ingredients, { name: '', quantity: 0, unit: '' }],
     }));
   };
 
   const removeIngredient = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      ingredients: prev.ingredients.filter((_, i) => i !== index)
+      ingredients: prev.ingredients.filter((_, i) => i !== index),
     }));
   };
 
-  const updateIngredient = (index: number, field: keyof Omit<Ingredient, 'id'>, value: string | number) => {
+  const updateIngredient = (
+    index: number,
+    field: keyof Omit<Ingredient, 'id'>,
+    value: string | number
+  ) => {
     setFormData(prev => ({
       ...prev,
-      ingredients: prev.ingredients.map((ingredient, i) => 
+      ingredients: prev.ingredients.map((ingredient, i) =>
         i === index ? { ...ingredient, [field]: value } : ingredient
-      )
+      ),
     }));
   };
 
   const addInstruction = () => {
     setFormData(prev => ({
       ...prev,
-      instructions: [...prev.instructions, { stepNumber: prev.instructions.length + 1, description: '' }]
+      instructions: [
+        ...prev.instructions,
+        { stepNumber: prev.instructions.length + 1, description: '' },
+      ],
     }));
   };
 
@@ -89,16 +96,20 @@ export function RecipeSubmissionPage() {
       ...prev,
       instructions: prev.instructions
         .filter((_, i) => i !== index)
-        .map((instruction, i) => ({ ...instruction, stepNumber: i + 1 }))
+        .map((instruction, i) => ({ ...instruction, stepNumber: i + 1 })),
     }));
   };
 
-  const updateInstruction = (index: number, field: keyof Omit<Instruction, 'id'>, value: string | number) => {
+  const updateInstruction = (
+    index: number,
+    field: keyof Omit<Instruction, 'id'>,
+    value: string | number
+  ) => {
     setFormData(prev => ({
       ...prev,
-      instructions: prev.instructions.map((instruction, i) => 
+      instructions: prev.instructions.map((instruction, i) =>
         i === index ? { ...instruction, [field]: value } : instruction
-      )
+      ),
     }));
   };
 
@@ -107,8 +118,10 @@ export function RecipeSubmissionPage() {
 
     if (!formData.title.trim()) newErrors.title = 'Recipe name is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (formData.ingredients.some(ing => !ing.name.trim())) newErrors.ingredients = 'All ingredients must have names';
-    if (formData.instructions.some(inst => !inst.description.trim())) newErrors.instructions = 'All instructions must have descriptions';
+    if (formData.ingredients.some(ing => !ing.name.trim()))
+      newErrors.ingredients = 'All ingredients must have names';
+    if (formData.instructions.some(inst => !inst.description.trim()))
+      newErrors.instructions = 'All instructions must have descriptions';
     if (!formData.cuisineType.trim()) newErrors.cuisineType = 'Cuisine type is required';
     if (!formData.mainIngredient.trim()) newErrors.mainIngredient = 'Main ingredient is required';
     if (formData.prepTime <= 0) newErrors.prepTime = 'Prep time must be greater than 0';
@@ -121,16 +134,16 @@ export function RecipeSubmissionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     // TODO: Submit to API
     console.log('Submitting recipe:', formData);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
@@ -143,7 +156,7 @@ export function RecipeSubmissionPage() {
     const files = Array.from(e.target.files || []);
     setFormData(prev => ({
       ...prev,
-      images: [...prev.images, ...files]
+      images: [...prev.images, ...files],
     }));
   };
 
@@ -158,13 +171,15 @@ export function RecipeSubmissionPage() {
               Close Preview
             </Button>
           </div>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold">{formData.title || 'Recipe Title'}</h2>
-                  <p className="text-gray-600 mt-2">{formData.description || 'Recipe description...'}</p>
+                  <p className="text-gray-600 mt-2">
+                    {formData.description || 'Recipe description...'}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -174,7 +189,9 @@ export function RecipeSubmissionPage() {
                       {formData.ingredients.map((ingredient, index) => (
                         <li key={index} className="flex justify-between">
                           <span>{ingredient.name || 'Ingredient name'}</span>
-                          <span>{ingredient.quantity} {ingredient.unit}</span>
+                          <span>
+                            {ingredient.quantity} {ingredient.unit}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -206,20 +223,19 @@ export function RecipeSubmissionPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <Link to="/" className="inline-flex items-center text-primary-600 hover:text-primary-700">
+            <Link
+              to="/"
+              className="inline-flex items-center text-primary-600 hover:text-primary-700"
+            >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Back to Recipes
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">Submit New Recipe</h1>
             <p className="text-gray-600">Share your delicious creation with the community</p>
           </div>
-          
+
           <div className="flex space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPreviewMode(true)}
-            >
+            <Button type="button" variant="outline" onClick={() => setPreviewMode(true)}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
@@ -241,7 +257,7 @@ export function RecipeSubmissionPage() {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={e => handleInputChange('title', e.target.value)}
                   placeholder="Enter recipe name"
                   className={errors.title ? 'border-red-500' : ''}
                 />
@@ -249,18 +265,23 @@ export function RecipeSubmissionPage() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Description *
                 </label>
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={e => handleInputChange('description', e.target.value)}
                   placeholder="Describe your recipe..."
                   rows={4}
                   className={errors.description ? 'border-red-500' : ''}
                 />
-                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                {errors.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                )}
               </div>
 
               <div>
@@ -293,7 +314,10 @@ export function RecipeSubmissionPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label htmlFor="prepTime" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="prepTime"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Prep Time (min) *
                   </label>
                   <Input
@@ -301,14 +325,19 @@ export function RecipeSubmissionPage() {
                     type="number"
                     min="1"
                     value={formData.prepTime}
-                    onChange={(e) => handleInputChange('prepTime', parseInt(e.target.value) || 0)}
+                    onChange={e => handleInputChange('prepTime', parseInt(e.target.value) || 0)}
                     className={errors.prepTime ? 'border-red-500' : ''}
                   />
-                  {errors.prepTime && <p className="text-red-500 text-sm mt-1">{errors.prepTime}</p>}
+                  {errors.prepTime && (
+                    <p className="text-red-500 text-sm mt-1">{errors.prepTime}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor="cookTime" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="cookTime"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Cook Time (min) *
                   </label>
                   <Input
@@ -316,14 +345,19 @@ export function RecipeSubmissionPage() {
                     type="number"
                     min="1"
                     value={formData.cookTime}
-                    onChange={(e) => handleInputChange('cookTime', parseInt(e.target.value) || 0)}
+                    onChange={e => handleInputChange('cookTime', parseInt(e.target.value) || 0)}
                     className={errors.cookTime ? 'border-red-500' : ''}
                   />
-                  {errors.cookTime && <p className="text-red-500 text-sm mt-1">{errors.cookTime}</p>}
+                  {errors.cookTime && (
+                    <p className="text-red-500 text-sm mt-1">{errors.cookTime}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor="servings" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="servings"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Servings *
                   </label>
                   <Input
@@ -331,20 +365,27 @@ export function RecipeSubmissionPage() {
                     type="number"
                     min="1"
                     value={formData.servings}
-                    onChange={(e) => handleInputChange('servings', parseInt(e.target.value) || 0)}
+                    onChange={e => handleInputChange('servings', parseInt(e.target.value) || 0)}
                     className={errors.servings ? 'border-red-500' : ''}
                   />
-                  {errors.servings && <p className="text-red-500 text-sm mt-1">{errors.servings}</p>}
+                  {errors.servings && (
+                    <p className="text-red-500 text-sm mt-1">{errors.servings}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="difficulty"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Difficulty
                   </label>
                   <select
                     id="difficulty"
                     value={formData.difficulty}
-                    onChange={(e) => handleInputChange('difficulty', e.target.value as 'easy' | 'medium' | 'hard')}
+                    onChange={e =>
+                      handleInputChange('difficulty', e.target.value as 'easy' | 'medium' | 'hard')
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="easy">Easy</option>
@@ -378,7 +419,7 @@ export function RecipeSubmissionPage() {
                       <Input
                         placeholder="Ingredient name"
                         value={ingredient.name}
-                        onChange={(e) => updateIngredient(index, 'name', e.target.value)}
+                        onChange={e => updateIngredient(index, 'name', e.target.value)}
                       />
                     </div>
                     <div className="w-24">
@@ -387,14 +428,16 @@ export function RecipeSubmissionPage() {
                         step="0.1"
                         placeholder="Qty"
                         value={ingredient.quantity || ''}
-                        onChange={(e) => updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
+                        onChange={e =>
+                          updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)
+                        }
                       />
                     </div>
                     <div className="w-24">
                       <Input
                         placeholder="Unit"
                         value={ingredient.unit}
-                        onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
+                        onChange={e => updateIngredient(index, 'unit', e.target.value)}
                       />
                     </div>
                     {formData.ingredients.length > 1 && (
@@ -439,7 +482,7 @@ export function RecipeSubmissionPage() {
                       <Textarea
                         placeholder={`Step ${index + 1} instructions...`}
                         value={instruction.description}
-                        onChange={(e) => updateInstruction(index, 'description', e.target.value)}
+                        onChange={e => updateInstruction(index, 'description', e.target.value)}
                         rows={3}
                       />
                     </div>
@@ -456,7 +499,9 @@ export function RecipeSubmissionPage() {
                     )}
                   </div>
                 ))}
-                {errors.instructions && <p className="text-red-500 text-sm">{errors.instructions}</p>}
+                {errors.instructions && (
+                  <p className="text-red-500 text-sm">{errors.instructions}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -470,31 +515,41 @@ export function RecipeSubmissionPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="cuisineType"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Cuisine Type *
                   </label>
                   <Input
                     id="cuisineType"
                     value={formData.cuisineType}
-                    onChange={(e) => handleInputChange('cuisineType', e.target.value)}
+                    onChange={e => handleInputChange('cuisineType', e.target.value)}
                     placeholder="e.g., Italian, Mexican, Asian"
                     className={errors.cuisineType ? 'border-red-500' : ''}
                   />
-                  {errors.cuisineType && <p className="text-red-500 text-sm mt-1">{errors.cuisineType}</p>}
+                  {errors.cuisineType && (
+                    <p className="text-red-500 text-sm mt-1">{errors.cuisineType}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor="mainIngredient" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="mainIngredient"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Main Ingredient *
                   </label>
                   <Input
                     id="mainIngredient"
                     value={formData.mainIngredient}
-                    onChange={(e) => handleInputChange('mainIngredient', e.target.value)}
+                    onChange={e => handleInputChange('mainIngredient', e.target.value)}
                     placeholder="e.g., Chicken, Beef, Tofu"
                     className={errors.mainIngredient ? 'border-red-500' : ''}
                   />
-                  {errors.mainIngredient && <p className="text-red-500 text-sm mt-1">{errors.mainIngredient}</p>}
+                  {errors.mainIngredient && (
+                    <p className="text-red-500 text-sm mt-1">{errors.mainIngredient}</p>
+                  )}
                 </div>
               </div>
 

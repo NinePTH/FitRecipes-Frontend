@@ -32,9 +32,17 @@ const mockRecipes: Recipe[] = [
     totalComments: 5,
     status: 'approved',
     chefId: '1',
-    chef: { id: '1', email: 'chef@example.com', firstName: 'Maria', lastName: 'Rodriguez', role: 'chef', createdAt: '', updatedAt: '' },
+    chef: {
+      id: '1',
+      email: 'chef@example.com',
+      firstName: 'Maria',
+      lastName: 'Rodriguez',
+      role: 'chef',
+      createdAt: '',
+      updatedAt: '',
+    },
     createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-15T10:00:00Z'
+    updatedAt: '2025-01-15T10:00:00Z',
   },
   // Add more mock recipes as needed
 ];
@@ -75,7 +83,7 @@ export function BrowseRecipesPage() {
     // TODO: Implement infinite scroll
     console.log('Loading more recipes...');
     setIsFetchingNextPage(true);
-    
+
     setTimeout(() => {
       setIsFetchingNextPage(false);
       // Simulate no more pages after first load
@@ -100,7 +108,7 @@ export function BrowseRecipesPage() {
         <CardContent className="p-4">
           <h3 className="font-semibold text-lg mb-2 line-clamp-2">{recipe.title}</h3>
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
-          
+
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
@@ -113,7 +121,7 @@ export function BrowseRecipesPage() {
           </div>
 
           <div className="flex flex-wrap gap-1 mt-3">
-            {recipe.dietType.slice(0, 2).map((diet) => (
+            {recipe.dietType.slice(0, 2).map(diet => (
               <span
                 key={diet}
                 className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
@@ -152,16 +160,12 @@ export function BrowseRecipesPage() {
                 type="text"
                 placeholder="Search by ingredients, recipe name, or cuisine..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Button type="submit">Search</Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-            >
+            <Button type="button" variant="outline" onClick={() => setShowFilters(!showFilters)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -182,7 +186,7 @@ export function BrowseRecipesPage() {
               <span className="text-sm font-medium text-gray-700">Sort by:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                onChange={e => setSortBy(e.target.value as SortOption)}
                 className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="rating">Highest Rating</option>
@@ -191,9 +195,7 @@ export function BrowseRecipesPage() {
                 <option value="prep-time-desc">Prep Time (High to Low)</option>
               </select>
             </div>
-            <span className="text-sm text-gray-500">
-              {recipes.length} recipes found
-            </span>
+            <span className="text-sm text-gray-500">{recipes.length} recipes found</span>
           </div>
         </div>
 
@@ -207,7 +209,7 @@ export function BrowseRecipesPage() {
             </div>
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <div key={i} className="animate-pulse">
                     <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
                     <div className="space-y-2">
@@ -219,7 +221,7 @@ export function BrowseRecipesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {recipes.slice(0, 4).map((recipe) => (
+                {recipes.slice(0, 4).map(recipe => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
@@ -233,7 +235,7 @@ export function BrowseRecipesPage() {
               <h2 className="text-2xl font-bold text-gray-900">Trending Recipes</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recipes.map((recipe) => (
+              {recipes.map(recipe => (
                 <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
             </div>
@@ -246,7 +248,7 @@ export function BrowseRecipesPage() {
               <h2 className="text-2xl font-bold text-gray-900">New Recipes</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recipes.map((recipe) => (
+              {recipes.map(recipe => (
                 <RecipeCard key={recipe.id} recipe={recipe} />
               ))}
             </div>

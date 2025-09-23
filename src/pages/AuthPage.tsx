@@ -16,14 +16,14 @@ export function AuthPage() {
     password: '',
     firstName: '',
     lastName: '',
-    agreeToTerms: false
+    agreeToTerms: false,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -33,7 +33,7 @@ export function AuthPage() {
 
     // TODO: Implement actual authentication logic
     console.log('Form submitted:', { isLogin, formData });
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -67,10 +67,9 @@ export function AuthPage() {
               {isLogin ? 'Sign In' : 'Create Account'}
             </CardTitle>
             <CardDescription className="text-center">
-              {isLogin 
+              {isLogin
                 ? 'Enter your credentials to access your account'
-                : 'Fill in your information to get started'
-              }
+                : 'Fill in your information to get started'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -195,7 +194,7 @@ export function AuthPage() {
                 className="w-full"
                 disabled={isLoading || (!isLogin && !formData.agreeToTerms)}
               >
-                {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+                {isLoading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
               </Button>
 
               {/* Forgot password link for login */}
@@ -225,7 +224,7 @@ export function AuthPage() {
                       password: '',
                       firstName: '',
                       lastName: '',
-                      agreeToTerms: false
+                      agreeToTerms: false,
                     });
                   }}
                   className="ml-1 text-primary-600 hover:text-primary-700 font-medium underline"
