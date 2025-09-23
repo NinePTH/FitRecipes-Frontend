@@ -59,7 +59,24 @@ This provides additional Jest DOM matchers for better assertions.
 
 ## 🧪 Writing Tests
 
-### Component Test Example
+### Current Test Example (App.test.tsx)
+```typescript
+// src/App.test.tsx (Current implementation)
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import App from './App'
+
+describe('App', () => {
+  it('renders without crashing', () => {
+    render(<App />)
+    
+    // Should render the browse recipes page for authenticated users
+    expect(screen.getByText(/Discover Healthy Recipes/i)).toBeInTheDocument()
+  })
+})
+```
+
+### Component Test Example (Future)
 ```typescript
 // src/components/ui/Button.test.tsx (Future example)
 import { render, screen } from '@testing-library/react'
@@ -129,13 +146,14 @@ npm run test:coverage
 ```json
 {
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
+    "test": "vitest",
+    "test:ui": "vitest --ui", 
     "test:coverage": "vitest --coverage"
   }
 }
 ```
+
+**Note**: The main `test` script runs in watch mode by default. Use `npx vitest run` for single execution.
 
 ## 📊 Test Types to Implement
 
@@ -195,17 +213,25 @@ npm run test:coverage
 ## 🎯 Current Test Status
 
 ### ✅ **Implemented:**
-- Basic App component test
-- Test configuration and setup
-- Vitest + React Testing Library integration
+- App component test with Router integration
+- Test configuration and setup (Vitest + React Testing Library)
+- Coverage reporting with @vitest/coverage-v8
+- ESLint integration (coverage folder ignored)
+- Co-located test structure established
+
+### 📊 **Current Coverage:**
+- **Overall**: ~26.51% statement coverage
+- **Components**: Button, Input utilities at 100%
+- **Pages**: Placeholder pages with basic rendering coverage
+- **Services**: 0% (not tested yet, placeholder implementations)
 
 ### 📋 **To Implement:**
-- Component tests for UI library (Button, Input, etc.)
-- Page tests for all 5 main pages
-- Service layer tests (API, auth)
-- Hook tests (when custom hooks are added)
-- Form validation tests
-- Router and navigation tests
+- **Current Components**: Tests for Button, Input, Textarea, Card components
+- **Future Components**: Tests for Label, Select, Dialog, Toast, Badge, Avatar, and other shadcn/ui components as they're added
+- **Page Tests**: All 5 main pages with user interactions and form validation
+- **Service Tests**: API and auth services when connected to backend
+- **Hook Tests**: Custom hooks when implemented
+- **Integration Tests**: Router navigation, form submissions, user workflows
 
 ## 🔍 Test File Locations Summary
 

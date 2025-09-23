@@ -22,7 +22,8 @@ src/
 │   │   ├── button-variants.ts # ✅ Button styling variants
 │   │   ├── input.tsx          # ✅ Input component
 │   │   ├── textarea.tsx       # ✅ Textarea component
-│   │   └── card.tsx           # ✅ Card component
+│   │   ├── card.tsx           # ✅ Card component
+│   │   └── [more-components]  # 📋 Label, Select, Dialog, Toast, etc.
 │   └── Layout.tsx             # ✅ Main layout with navigation
 ├── pages/                     # ✅ All 5 main pages implemented (placeholder logic)
 │   ├── AuthPage.tsx           # ✅ Login/Register combined
@@ -118,28 +119,30 @@ npm run build        # Production build
 npm run preview      # Preview production build
 
 # Testing
-npm test             # Run tests once
-npm run test:watch   # Run tests in watch mode
+npm test             # Run tests in watch mode
+npx vitest run       # Run tests once
 npm run test:ui      # Run tests with UI
-npm run test:coverage # Run tests with coverage
+npm run test:coverage # Run tests with coverage report
 
 # Code Quality
 npm run lint         # ESLint check
+npm run lint:fix     # Fix ESLint issues automatically
 npm run format       # Prettier format
+npm run format:check # Check formatting without fixing
 ```
 
 ## 🎯 Implementation Status
 
 ### ✅ **Completed (Ready for Use)**
-- Project setup with Vite + React + TypeScript
-- Tailwind CSS configuration with custom theme
+- Project setup with Vite 6 + React 19 + TypeScript
+- Tailwind CSS v3 configuration with custom theme and plugins
 - All 5 main pages with placeholder logic and routing
-- UI component library (Button, Input, Textarea, Card)
-- Service layer for API calls and authentication
-- Comprehensive type definitions
-- Test setup with Vitest + React Testing Library
-- ESLint + Prettier configuration
-- GitHub Actions CI/CD pipeline
+- UI component library (Button, Input, Textarea, Card) with shadcn/ui patterns
+- Service layer for API calls and authentication (placeholder implementations)
+- Comprehensive type definitions for all entities and APIs
+- Test setup with Vitest + React Testing Library + coverage reporting
+- ESLint (with coverage folder ignored) + Prettier configuration
+- GitHub Actions CI/CD pipeline (fixed for standard Vite compatibility)
 - Vercel deployment configuration
 
 ### 📋 **Next Steps (Development Priorities)**
@@ -153,11 +156,9 @@ npm run format       # Prettier format
 8. **Error Handling**: Add global error boundaries and user feedback
 
 ### 🚧 **Features with Placeholder Code (Do NOT Implement Yet)**
-- Notifications system
-- Save Recipe functionality  
-- Reporting and analytics
-- Advanced search filters
-- User profile management
+- **UI Components**: Additional shadcn/ui components (Label, Select, Dialog, Dropdown Menu, Tabs, Accordion, Alert Dialog, Toast, Badge, Avatar, Popover, Tooltip, Sheet, Separator, Checkbox, Radio Group, Switch, Slider, Date Picker, Table, Progress, Breadcrumb, Pagination, Command)
+- **Features**: Notifications system, Save Recipe functionality, Reporting and analytics
+- **Advanced Features**: Advanced search filters, User profile management, Infinite scroll, Image upload
 
 ## 🛡️ Quality Standards
 
@@ -191,3 +192,23 @@ npm run format       # Prettier format
 - **Spacing**: Use Tailwind's spacing scale
 - **Typography**: Responsive text sizing with proper hierarchy
 - **Forms**: Consistent styling with proper validation states
+
+## 🛠️ Known Issues & Solutions
+
+### Build & CI/CD
+- **Issue**: Native binding errors with rolldown-vite in CI
+- **Solution**: Using standard Vite v6 for better CI compatibility
+- **Issue**: Missing coverage dependency
+- **Solution**: @vitest/coverage-v8 is installed and configured
+
+### Code Quality
+- **Issue**: ESLint warnings in coverage folder
+- **Solution**: Coverage folder is ignored in eslint.config.js
+- **Issue**: Prettier formatting inconsistencies
+- **Solution**: Run `npm run format` then `npm run format:check`
+
+### Testing
+- **Issue**: Router conflicts in tests (multiple Router instances)
+- **Solution**: App.tsx includes BrowserRouter, tests don't need to wrap it
+- **Issue**: Co-located test file organization
+- **Solution**: Tests are placed next to components following React best practices

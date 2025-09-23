@@ -4,14 +4,14 @@ A modern React + TypeScript frontend for the Healthy Recipes Web Application, bu
 
 ## 🚀 Features
 
-- **Modern Tech Stack**: React 19, TypeScript, Vite, Tailwind CSS
-- **Component Library**: Custom shadcn/ui components
-- **Routing**: React Router with protected routes
-- **Authentication**: JWT-based authentication with role-based access
+- **Modern Tech Stack**: React 19, TypeScript, Vite 6, Tailwind CSS v3
+- **Component Library**: Custom shadcn/ui-style components (Button, Input, Textarea, Card + more planned)
+- **Routing**: React Router v6 with protected routes
+- **Authentication**: JWT-based authentication with role-based access (placeholder)
 - **Responsive Design**: Mobile-first design with Tailwind CSS
-- **Testing**: Vitest + React Testing Library
+- **Testing**: Vitest + React Testing Library with coverage reports
 - **Code Quality**: ESLint, Prettier, TypeScript strict mode
-- **CI/CD**: GitHub Actions with automated testing and deployment
+- **CI/CD**: GitHub Actions with automated testing, linting, and deployment
 
 ## 📱 Pages & Features
 
@@ -23,12 +23,10 @@ A modern React + TypeScript frontend for the Healthy Recipes Web Application, bu
 - **Admin Approval Page**: Admin interface for recipe approval
 
 ### 🚧 Placeholder Features (Not Yet Implemented)
-- Notifications system
-- Save Recipe functionality  
-- Reporting features
-- Advanced filtering
-- Infinite scroll implementation
-- Image upload handling
+- **UI Components**: Label, Select, Dialog, Dropdown Menu, Tabs, Accordion, Alert Dialog, Toast, Badge, Avatar, Popover, Tooltip, Sheet, Separator
+- **Features**: Notifications system, Save Recipe functionality, Reporting features
+- **Advanced UI**: Infinite scroll implementation, Image upload handling, Advanced filtering
+- **Form Components**: Checkbox, Radio Group, Switch, Slider, Date Picker
 
 ## 📦 Installation & Setup
 
@@ -79,9 +77,10 @@ npm run format       # Format code with Prettier
 npm run format:check # Check code formatting
 
 # Testing
-npm run test         # Run tests
+npm test             # Run tests in watch mode
 npm run test:ui      # Run tests with UI
-npm run test:coverage # Run tests with coverage
+npm run test:coverage # Run tests with coverage report
+npx vitest run       # Run tests once
 ```
 
 ### Project Structure
@@ -123,6 +122,56 @@ The application implements role-based access control:
 - **Chef**: All customer permissions + submit recipes
 - **Admin**: All permissions + approve/reject recipes
 
-## 📄 License
+## �️ Troubleshooting
+
+### Common Issues
+
+1. **Build Errors in CI/CD**
+   - Issue: Native binding errors with Rolldown
+   - Solution: We use standard Vite (v6) instead of rolldown-vite for better CI compatibility
+
+2. **Test Coverage Missing**
+   - Issue: `@vitest/coverage-v8` dependency missing
+   - Solution: Run `npm install -D @vitest/coverage-v8`
+
+3. **Formatting Issues**
+   - Issue: Code style inconsistencies
+   - Solution: Run `npm run format` to auto-fix, then `npm run format:check` to verify
+
+4. **ESLint Warnings in Coverage Folder**
+   - Issue: ESLint scans generated coverage files
+   - Solution: Coverage folder is ignored in `eslint.config.js`
+
+### Development Tips
+
+- Use **co-located tests**: Place `.test.tsx` files next to components
+- Follow **absolute imports**: Use `@/` prefix for src imports
+- Check **TESTING.md** for comprehensive testing guidelines
+- Review **GitHub Copilot instructions** in `.github/copilot-instructions.md`
+
+## 📚 Documentation
+
+- **TESTING.md**: Comprehensive testing guide and best practices
+- **.github/copilot-instructions.md**: GitHub Copilot repository instructions
+- **CHANGELOG.md**: Project changes and technical decisions
+- **Tailwind Config**: Custom theme and component patterns in `tailwind.config.js`
+- **Type Definitions**: Complete type system in `src/types/index.ts`
+
+## 🎨 Planned shadcn/ui Components
+
+### ✅ Implemented
+- Button (with variants), Input, Textarea, Card
+
+### 📋 To Implement
+- **Form Components**: Label, Select, Checkbox, Radio Group, Switch
+- **Layout Components**: Separator, Sheet, Tabs, Accordion
+- **Feedback Components**: Toast, Alert Dialog, Dialog, Popover, Tooltip
+- **Data Display**: Badge, Avatar, Table, Progress
+- **Navigation**: Dropdown Menu, Breadcrumb, Pagination
+- **Input Components**: Date Picker, Slider, Command (search)
+
+*Note: Implement components as needed for specific features to avoid over-engineering.*
+
+## �📄 License
 
 This project is licensed under the MIT License.
