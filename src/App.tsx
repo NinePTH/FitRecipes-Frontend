@@ -9,6 +9,8 @@ import { AdminRecipeApprovalPage } from '@/pages/AdminRecipeApprovalPage';
 const isAuthenticated = true; // Mock authentication state
 const userRole: 'chef' | 'admin' | 'customer' = 'admin'; // Mock user role
 
+// 🚀 DEVELOP BRANCH - Testing preview deployment!
+
 function App() {
   return (
     <Router>
