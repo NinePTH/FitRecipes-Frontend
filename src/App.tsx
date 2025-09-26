@@ -9,9 +9,8 @@ import { AdminRecipeApprovalPage } from '@/pages/AdminRecipeApprovalPage';
 const isAuthenticated = true; // Mock authentication state
 const userRole: 'chef' | 'admin' | 'customer' = 'admin'; // Mock user role
 
-// 🚀 DEVELOP BRANCH - Testing preview deployment!
-// ❌ INTENTIONAL ERROR - Testing CI failure
-const brokenVariable: string = 123; // Type error: number assigned to string
+// 🚀 DEVELOP BRANCH - Testing complete!
+// ✅ Error fixed - CI should pass and deploy preview
 
 function App() {
   return (
