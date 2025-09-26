@@ -1,6 +1,4 @@
 {
-  "version": 2,
-  "name": "fitrecipes-frontend",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm ci",
@@ -41,9 +39,6 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
-  },
-  "buildEnv": {
     "NODE_ENV": "production"
   }
 }
