@@ -10,6 +10,8 @@ const isAuthenticated = true; // Mock authentication state
 const userRole: 'chef' | 'admin' | 'customer' = 'admin'; // Mock user role
 
 // 🚀 DEVELOP BRANCH - Testing preview deployment!
+// ❌ INTENTIONAL ERROR - Testing CI failure
+const brokenVariable: string = 123; // Type error: number assigned to string
 
 function App() {
   return (
