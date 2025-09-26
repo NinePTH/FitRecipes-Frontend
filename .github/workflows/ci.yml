@@ -93,7 +93,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        # github-comment: false
+        github-comment: false
         working-directory: ./
 
   build-production:
@@ -127,5 +127,6 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        github-comment: false
         vercel-args: '--prod'
         working-directory: ./
