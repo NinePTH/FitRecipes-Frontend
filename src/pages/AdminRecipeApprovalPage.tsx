@@ -12,7 +12,9 @@ const mockPendingRecipes: Recipe[] = [
     id: '1',
     title: 'Spicy Thai Green Curry',
     description: 'Authentic Thai green curry with fresh herbs and coconut milk.',
-    images: ['https://via.placeholder.com/300x200'],
+    images: [
+      'https://img-global.cpcdn.com/recipes/a6c3492e0161dd9f/680x781cq80/%E0%B8%A3%E0%B8%9B-%E0%B8%AB%E0%B8%A5%E0%B8%81-%E0%B8%82%E0%B8%AD%E0%B8%87-%E0%B8%AA%E0%B8%95%E0%B8%A3-%E0%B9%81%E0%B8%81%E0%B8%87%E0%B9%80%E0%B8%82%E0%B8%A2%E0%B8%A7%E0%B8%AB%E0%B8%A7%E0%B8%B2%E0%B8%99%E0%B9%84%E0%B8%81-%E0%B8%84%E0%B8%A5%E0%B8%99.jpg',
+    ],
     ingredients: [],
     instructions: [],
     prepTime: 20,
@@ -47,7 +49,9 @@ const mockPendingRecipes: Recipe[] = [
     id: '2',
     title: 'Mediterranean Chickpea Salad',
     description: 'Fresh and healthy chickpea salad with Mediterranean flavors.',
-    images: ['https://via.placeholder.com/300x200'],
+    images: [
+      'https://www.themediterraneandish.com/wp-content/uploads/2023/12/TMD-Chickpea-Salad-Leads-01-Angle-Horizontal.jpg',
+    ],
     ingredients: [],
     instructions: [],
     prepTime: 15,
