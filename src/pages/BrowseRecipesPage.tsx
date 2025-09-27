@@ -13,7 +13,9 @@ const mockRecipes: Recipe[] = [
     id: '1',
     title: 'Mediterranean Quinoa Bowl',
     description: 'A healthy and colorful bowl packed with protein and fresh vegetables.',
-    images: ['https://via.placeholder.com/300x200'],
+    images: [
+      'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
+    ],
     ingredients: [],
     instructions: [],
     prepTime: 15,
@@ -234,11 +236,25 @@ export function BrowseRecipesPage() {
               <TrendingUp className="h-6 w-6 text-primary-600" />
               <h2 className="text-2xl font-bold text-gray-900">Trending Recipes</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recipes.map(recipe => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {recipes.map(recipe => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* New Recipes */}
@@ -247,11 +263,25 @@ export function BrowseRecipesPage() {
               <Plus className="h-6 w-6 text-primary-600" />
               <h2 className="text-2xl font-bold text-gray-900">New Recipes</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recipes.map(recipe => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {recipes.map(recipe => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Infinite Scroll Load More */}

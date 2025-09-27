@@ -14,9 +14,9 @@ const mockRecipe: Recipe = {
   description:
     'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
   images: [
-    'https://via.placeholder.com/600x400',
-    'https://via.placeholder.com/600x400/ff6b6b',
-    'https://via.placeholder.com/600x400/4ecdc4',
+    'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
+    'https://www.cookedandloved.com/wp-content/uploads/2023/07/mediterranean-chicken-quinoa-bowl-social.jpg',
+    'https://choosingchia.com/jessh-jessh/uploads/2019/07/meditteranean-quinoa-salad-2.jpg',
   ],
   ingredients: [
     { id: '1', name: 'Quinoa', quantity: 1, unit: 'cup' },
