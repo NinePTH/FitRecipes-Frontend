@@ -13,7 +13,9 @@ const mockRecipes: Recipe[] = [
     id: '1',
     title: 'Mediterranean Quinoa Bowl',
     description: 'A healthy and colorful bowl packed with protein and fresh vegetables.',
-    images: ['https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg'],
+    images: [
+      'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
+    ],
     ingredients: [],
     instructions: [],
     prepTime: 15,
