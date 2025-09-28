@@ -193,30 +193,35 @@ export function BrowseRecipesPage() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Meal Type</h4>
                   <div className="space-y-2">
-                    {(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'] as const).map(mealType => (
-                      <label key={mealType} className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filters.mealType?.includes(mealType) || false}
-                          onChange={(e) => {
-                            const currentMealTypes = filters.mealType || [];
-                            if (e.target.checked) {
-                              setFilters({
-                                ...filters,
-                                mealType: [...currentMealTypes, mealType]
-                              });
-                            } else {
-                              setFilters({
-                                ...filters,
-                                mealType: currentMealTypes.filter(type => type !== mealType)
-                              });
-                            }
-                          }}
-                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                        />
-                        <span className="text-sm text-gray-700 capitalize">{mealType}</span>
-                      </label>
-                    ))}
+                    {(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'] as const).map(
+                      mealType => (
+                        <label
+                          key={mealType}
+                          className="flex items-center space-x-2 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={filters.mealType?.includes(mealType) || false}
+                            onChange={e => {
+                              const currentMealTypes = filters.mealType || [];
+                              if (e.target.checked) {
+                                setFilters({
+                                  ...filters,
+                                  mealType: [...currentMealTypes, mealType],
+                                });
+                              } else {
+                                setFilters({
+                                  ...filters,
+                                  mealType: currentMealTypes.filter(type => type !== mealType),
+                                });
+                              }
+                            }}
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          />
+                          <span className="text-sm text-gray-700 capitalize">{mealType}</span>
+                        </label>
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -224,28 +229,32 @@ export function BrowseRecipesPage() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Diet Type</h4>
                   <div className="space-y-2">
-                    {(['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'paleo'] as const).map(dietType => (
+                    {(
+                      ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'paleo'] as const
+                    ).map(dietType => (
                       <label key={dietType} className="flex items-center space-x-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={filters.dietType?.includes(dietType) || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const currentDietTypes = filters.dietType || [];
                             if (e.target.checked) {
                               setFilters({
                                 ...filters,
-                                dietType: [...currentDietTypes, dietType]
+                                dietType: [...currentDietTypes, dietType],
                               });
                             } else {
                               setFilters({
                                 ...filters,
-                                dietType: currentDietTypes.filter(type => type !== dietType)
+                                dietType: currentDietTypes.filter(type => type !== dietType),
                               });
                             }
                           }}
                           className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <span className="text-sm text-gray-700 capitalize">{dietType.replace('-', ' ')}</span>
+                        <span className="text-sm text-gray-700 capitalize">
+                          {dietType.replace('-', ' ')}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -256,21 +265,24 @@ export function BrowseRecipesPage() {
                   <h4 className="font-medium text-gray-900">Difficulty</h4>
                   <div className="space-y-2">
                     {(['easy', 'medium', 'hard'] as const).map(difficulty => (
-                      <label key={difficulty} className="flex items-center space-x-2 cursor-pointer">
+                      <label
+                        key={difficulty}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
                         <input
                           type="checkbox"
                           checked={filters.difficulty?.includes(difficulty) || false}
-                          onChange={(e) => {
+                          onChange={e => {
                             const currentDifficulties = filters.difficulty || [];
                             if (e.target.checked) {
                               setFilters({
                                 ...filters,
-                                difficulty: [...currentDifficulties, difficulty]
+                                difficulty: [...currentDifficulties, difficulty],
                               });
                             } else {
                               setFilters({
                                 ...filters,
-                                difficulty: currentDifficulties.filter(d => d !== difficulty)
+                                difficulty: currentDifficulties.filter(d => d !== difficulty),
                               });
                             }
                           }}
@@ -287,10 +299,12 @@ export function BrowseRecipesPage() {
                   <h4 className="font-medium text-gray-900">Cuisine Type</h4>
                   <select
                     value={filters.cuisineType || ''}
-                    onChange={(e) => setFilters({ 
-                      ...filters, 
-                      cuisineType: e.target.value || undefined 
-                    })}
+                    onChange={e =>
+                      setFilters({
+                        ...filters,
+                        cuisineType: e.target.value || undefined,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="">All Cuisines</option>
@@ -310,10 +324,12 @@ export function BrowseRecipesPage() {
                   <h4 className="font-medium text-gray-900">Main Ingredient</h4>
                   <select
                     value={filters.mainIngredient || ''}
-                    onChange={(e) => setFilters({ 
-                      ...filters, 
-                      mainIngredient: e.target.value || undefined 
-                    })}
+                    onChange={e =>
+                      setFilters({
+                        ...filters,
+                        mainIngredient: e.target.value || undefined,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="">All Ingredients</option>
@@ -377,21 +393,30 @@ export function BrowseRecipesPage() {
               </div>
 
               {/* Active Filters Display */}
-              {(filters.mealType?.length || filters.dietType?.length || filters.difficulty?.length || searchTerm || filters.mainIngredient || filters.cuisineType || filters.maxPrepTime) && (
+              {(filters.mealType?.length ||
+                filters.dietType?.length ||
+                filters.difficulty?.length ||
+                searchTerm ||
+                filters.mainIngredient ||
+                filters.cuisineType ||
+                filters.maxPrepTime) && (
                 <div className="pt-4 border-t">
                   <div className="flex items-center space-x-2 mb-3">
                     <span className="text-sm font-medium text-gray-700">Active filters:</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {filters.mealType?.map(type => (
-                      <span key={type} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                      <span
+                        key={type}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                      >
                         {type}
                         <button
                           onClick={() => {
                             const newMealTypes = filters.mealType?.filter(t => t !== type) || [];
                             setFilters({
                               ...filters,
-                              mealType: newMealTypes.length > 0 ? newMealTypes : undefined
+                              mealType: newMealTypes.length > 0 ? newMealTypes : undefined,
                             });
                           }}
                           className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-primary-200"
@@ -401,14 +426,17 @@ export function BrowseRecipesPage() {
                       </span>
                     ))}
                     {filters.dietType?.map(type => (
-                      <span key={type} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span
+                        key={type}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
                         {type.replace('-', ' ')}
                         <button
                           onClick={() => {
                             const newDietTypes = filters.dietType?.filter(t => t !== type) || [];
                             setFilters({
                               ...filters,
-                              dietType: newDietTypes.length > 0 ? newDietTypes : undefined
+                              dietType: newDietTypes.length > 0 ? newDietTypes : undefined,
                             });
                           }}
                           className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-green-200"
@@ -418,14 +446,18 @@ export function BrowseRecipesPage() {
                       </span>
                     ))}
                     {filters.difficulty?.map(difficulty => (
-                      <span key={difficulty} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      <span
+                        key={difficulty}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                      >
                         {difficulty}
                         <button
                           onClick={() => {
-                            const newDifficulties = filters.difficulty?.filter(d => d !== difficulty) || [];
+                            const newDifficulties =
+                              filters.difficulty?.filter(d => d !== difficulty) || [];
                             setFilters({
                               ...filters,
-                              difficulty: newDifficulties.length > 0 ? newDifficulties : undefined
+                              difficulty: newDifficulties.length > 0 ? newDifficulties : undefined,
                             });
                           }}
                           className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-orange-200"
@@ -488,7 +520,7 @@ export function BrowseRecipesPage() {
                           difficulty: undefined,
                           mainIngredient: undefined,
                           cuisineType: undefined,
-                          maxPrepTime: undefined
+                          maxPrepTime: undefined,
                         });
                         setSearchTerm('');
                       }}
