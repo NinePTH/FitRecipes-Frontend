@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Star, TrendingUp, Plus, X } from 'lucide-react';
+import { Search, Filter, Clock, Star, TrendingUp, X, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -612,7 +612,7 @@ export function BrowseRecipesPage() {
           {/* New Recipes */}
           <section>
             <div className="flex items-center space-x-2 mb-6">
-              <Plus className="h-6 w-6 text-primary-600" />
+              <Sparkles className="h-6 w-6 text-primary-600" />
               <h2 className="text-2xl font-bold text-gray-900">New Recipes</h2>
             </div>
             {loading ? (
