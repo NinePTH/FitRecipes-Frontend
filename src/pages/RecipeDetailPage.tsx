@@ -71,7 +71,88 @@ const mockRecipe: Recipe = {
   },
   allergies: ['dairy'],
   ratings: [],
-  comments: [],
+  comments: [
+    {
+      id: '1',
+      userId: '2',
+      user: {
+        id: '2',
+        email: 'user1@example.com',
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        role: 'user',
+        createdAt: '2025-01-10T09:00:00Z',
+        updatedAt: '2025-01-10T09:00:00Z',
+      },
+      content: 'This recipe is absolutely delicious! I made it for dinner last night and my family loved it. The quinoa was perfectly cooked and the Mediterranean flavors were spot on.',
+      createdAt: '2025-01-16T14:30:00Z',
+      updatedAt: '2025-01-16T14:30:00Z',
+    },
+    {
+      id: '2',
+      userId: '3',
+      user: {
+        id: '3',
+        email: 'chef2@example.com',
+        firstName: 'David',
+        lastName: 'Chen',
+        role: 'chef',
+        createdAt: '2025-01-12T11:00:00Z',
+        updatedAt: '2025-01-12T11:00:00Z',
+      },
+      content: 'Great healthy option! I added some roasted chickpeas for extra protein and it was fantastic. Thanks for sharing!',
+      createdAt: '2025-01-17T10:15:00Z',
+      updatedAt: '2025-01-17T10:15:00Z',
+    },
+    {
+      id: '3',
+      userId: '4',
+      user: {
+        id: '4',
+        email: 'user2@example.com',
+        firstName: 'Emma',
+        lastName: 'Williams',
+        role: 'user',
+        createdAt: '2025-01-14T16:00:00Z',
+        updatedAt: '2025-01-14T16:00:00Z',
+      },
+      content: 'Perfect for meal prep! I made a big batch on Sunday and had healthy lunches all week. The flavors actually get better after a day in the fridge.',
+      createdAt: '2025-01-18T09:45:00Z',
+      updatedAt: '2025-01-18T09:45:00Z',
+    },
+    {
+      id: '4',
+      userId: '5',
+      user: {
+        id: '5',
+        email: 'user3@example.com',
+        firstName: 'Michael',
+        lastName: 'Brown',
+        role: 'user',
+        createdAt: '2025-01-13T08:00:00Z',
+        updatedAt: '2025-01-13T08:00:00Z',
+      },
+      content: 'Easy to follow instructions and the result was amazing. I substituted goat cheese for feta and it worked perfectly!',
+      createdAt: '2025-01-19T12:20:00Z',
+      updatedAt: '2025-01-19T12:20:00Z',
+    },
+    {
+      id: '5',
+      userId: '6',
+      user: {
+        id: '6',
+        email: 'user4@example.com',
+        firstName: 'Lisa',
+        lastName: 'Davis',
+        role: 'user',
+        createdAt: '2025-01-11T13:30:00Z',
+        updatedAt: '2025-01-11T13:30:00Z',
+      },
+      content: 'This has become my go-to healthy lunch! So fresh and satisfying. The combination of textures is perfect.',
+      createdAt: '2025-01-20T16:10:00Z',
+      updatedAt: '2025-01-20T16:10:00Z',
+    },
+  ],
   averageRating: 4.5,
   totalRatings: 12,
   totalComments: 5,
@@ -126,13 +207,51 @@ export function RecipeDetailPage() {
     if (!comment.trim()) return;
 
     setIsSubmittingComment(true);
+    
     // TODO: Submit comment to API
     console.log('Comment submitted:', comment);
 
+    // Simulate adding comment to the list (replace with actual API call)
     setTimeout(() => {
+      if (recipe) {
+        const newComment = {
+          id: `temp-${Date.now()}`,
+          userId: 'current-user',
+          user: {
+            id: 'current-user',
+            email: 'currentuser@example.com',
+            firstName: 'Current',
+            lastName: 'User',
+            role: 'user' as const,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          content: comment,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        setRecipe({
+          ...recipe,
+          comments: [newComment, ...recipe.comments],
+          totalComments: recipe.totalComments + 1,
+        });
+      }
+      
       setComment('');
       setIsSubmittingComment(false);
     }, 1000);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   if (loading) {
@@ -178,6 +297,14 @@ export function RecipeDetailPage() {
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">{recipe.title}</h1>
           <p className="text-xl text-gray-600">{recipe.description}</p>
+          
+          {/* Main Ingredient Badge */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Main Ingredient:</span>
+            <span className="px-3 py-1 bg-primary-100 text-primary-800 text-sm font-medium rounded-full">
+              {recipe.mainIngredient}
+            </span>
+          </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6 text-sm text-gray-600">
@@ -212,21 +339,23 @@ export function RecipeDetailPage() {
 
         {/* Recipe Images */}
         <div className="space-y-4">
-          <div className="aspect-video rounded-lg overflow-hidden">
+          <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm">
             <img
               src={recipe.images[selectedImageIndex]}
               alt={recipe.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
             />
           </div>
           {recipe.images.length > 1 && (
-            <div className="flex space-x-2">
+            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
               {recipe.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                    selectedImageIndex === index ? 'border-primary-500' : 'border-gray-200'
+                  className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105 ${
+                    selectedImageIndex === index 
+                      ? 'border-primary-500 shadow-lg ring-2 ring-primary-200' 
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <img
@@ -308,6 +437,10 @@ export function RecipeDetailPage() {
                 <div>
                   <h4 className="font-medium text-gray-900">Cuisine</h4>
                   <p className="text-gray-600">{recipe.cuisineType}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Main Ingredient</h4>
+                  <p className="text-gray-600">{recipe.mainIngredient}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Diet Type</h4>
@@ -437,16 +570,56 @@ export function RecipeDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Comments Section - TODO: Implement actual comments */}
+          {/* Comments Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Comments ({recipe.totalComments})</CardTitle>
+              <CardTitle className="flex items-center space-x-2">
+                <MessageCircle className="h-5 w-5" />
+                <span>Comments ({recipe.totalComments})</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No comments yet. Be the first to share your thoughts!</p>
-              </div>
+              {recipe.comments.length > 0 ? (
+                <div className="space-y-6">
+                  {recipe.comments.map(comment => (
+                    <div key={comment.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0 hover:bg-gray-50 rounded-lg p-4 -m-4 transition-colors">
+                      <div className="flex items-start space-x-4">
+                        {/* User Avatar */}
+                        <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                          <span className="text-primary-600 font-semibold text-sm">
+                            {comment.user.firstName[0]}{comment.user.lastName[0]}
+                          </span>
+                        </div>
+                        
+                        {/* Comment Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <h4 className="text-sm font-semibold text-gray-900">
+                              {comment.user.firstName} {comment.user.lastName}
+                            </h4>
+                            {comment.user.role === 'chef' && (
+                              <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                                Chef
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500">
+                              {formatDate(comment.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 text-sm leading-relaxed">
+                            {comment.content}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No comments yet. Be the first to share your thoughts!</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

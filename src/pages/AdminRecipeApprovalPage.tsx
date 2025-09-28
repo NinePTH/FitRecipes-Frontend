@@ -251,11 +251,11 @@ export function AdminRecipeApprovalPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recipe Image */}
-            <div>
+            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
               <img
                 src={recipe.images[0] || 'https://via.placeholder.com/400x300'}
                 alt={recipe.title}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
 

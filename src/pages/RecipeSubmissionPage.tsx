@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Upload, Plus, X, Save, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/Layout';
-import type { RecipeFormData, Ingredient, Instruction, NutritionInfo } from '@/types';
+import type { RecipeFormData, Ingredient, Instruction, NutritionInfo, Recipe } from '@/types';
 
 export function RecipeSubmissionPage() {
+  const [searchParams] = useSearchParams();
+  const editRecipeId = searchParams.get('edit');
+  const isEditing = Boolean(editRecipeId);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<RecipeFormData>({
     title: '',
@@ -40,18 +46,121 @@ export function RecipeSubmissionPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Load draft from localStorage on component mount
+  // Load existing recipe for editing or draft from localStorage
   useEffect(() => {
-    const savedDraft = localStorage.getItem('recipeSubmissionDraft');
-    if (savedDraft) {
-      try {
-        const draft = JSON.parse(savedDraft);
-        setFormData(draft);
-      } catch (error) {
-        console.error('Error loading draft:', error);
+    const loadRecipeForEditing = async () => {
+      if (editRecipeId) {
+        setLoading(true);
+        try {
+          // TODO: Replace with actual API call to fetch recipe by ID
+          // Simulate API delay and fetch recipe data
+          setTimeout(() => {
+            // Mock data for the recipe being edited
+            const mockRecipeToEdit: Recipe = {
+              id: editRecipeId,
+              title: 'Classic Chocolate Chip Cookies',
+              description: 'Perfectly chewy cookies with premium chocolate chips.',
+              images: ['https://via.placeholder.com/400x300/f59e0b/ffffff?text=Chocolate+Cookies'],
+              ingredients: [
+                { id: '1', name: 'All-purpose flour', quantity: 2.25, unit: 'cups' },
+                { id: '2', name: 'Chocolate chips', quantity: 2, unit: 'cups' },
+              ],
+              instructions: [
+                { id: '1', stepNumber: 1, description: 'Preheat oven to 375°F (190°C).' },
+              ],
+              prepTime: 20,
+              cookTime: 12,
+              servings: 24,
+              difficulty: 'easy',
+              mealType: ['dessert'],
+              dietType: ['vegetarian'],
+              cuisineType: 'American',
+              mainIngredient: 'Flour',
+              nutrition: {
+                calories: 150,
+                protein: 2,
+                carbs: 22,
+                fat: 7,
+                fiber: 1,
+                sodium: 95,
+              },
+              allergies: ['gluten', 'dairy', 'eggs'],
+              ratings: [],
+              comments: [],
+              averageRating: 0,
+              totalRatings: 0,
+              totalComments: 0,
+              status: 'rejected',
+              rejectionReason: 'Recipe needs more detailed instructions and nutritional accuracy verification.',
+              chefId: '1',
+              chef: {
+                id: '1',
+                email: 'chef@example.com',
+                firstName: 'John',
+                lastName: 'Doe',
+                role: 'chef',
+                createdAt: '2025-01-10T09:00:00Z',
+                updatedAt: '2025-01-10T09:00:00Z',
+              },
+              createdAt: '2025-01-18T11:20:00Z',
+              updatedAt: '2025-01-21T16:45:00Z',
+            };
+
+            // Convert Recipe to RecipeFormData format
+            setFormData({
+              title: mockRecipeToEdit.title,
+              description: mockRecipeToEdit.description,
+              images: [], // For editing, we'll handle existing images separately
+              ingredients: mockRecipeToEdit.ingredients.map(ing => ({
+                name: ing.name,
+                quantity: ing.quantity,
+                unit: ing.unit,
+              })),
+              instructions: mockRecipeToEdit.instructions.map(inst => ({
+                stepNumber: inst.stepNumber,
+                description: inst.description,
+              })),
+              prepTime: mockRecipeToEdit.prepTime,
+              cookTime: mockRecipeToEdit.cookTime,
+              servings: mockRecipeToEdit.servings,
+              difficulty: mockRecipeToEdit.difficulty,
+              mealType: mockRecipeToEdit.mealType,
+              dietType: mockRecipeToEdit.dietType,
+              cuisineType: mockRecipeToEdit.cuisineType,
+              mainIngredient: mockRecipeToEdit.mainIngredient,
+              nutrition: mockRecipeToEdit.nutrition || {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                fiber: 0,
+                sodium: 0,
+              },
+              allergies: mockRecipeToEdit.allergies,
+            });
+            setExistingImages(mockRecipeToEdit.images);
+            setLoading(false);
+          }, 1000);
+        } catch (error) {
+          console.error('Error loading recipe for editing:', error);
+          setLoading(false);
+        }
+      } else {
+        // Load draft from localStorage for new recipe
+        const savedDraft = localStorage.getItem('recipeSubmissionDraft');
+        if (savedDraft) {
+          try {
+            const draft = JSON.parse(savedDraft);
+            setFormData(draft);
+          } catch (error) {
+            console.error('Error loading draft:', error);
+          }
+        }
       }
-    }
-  }, []);
+    };
+
+    loadRecipeForEditing();
+  }, [editRecipeId]);
 
   // Save draft to localStorage whenever form data changes
   useEffect(() => {
@@ -232,6 +341,27 @@ export function RecipeSubmissionPage() {
       images: [...prev.images, ...files],
     }));
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="animate-pulse space-y-8">
+            <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+            <div className="aspect-video bg-gray-300 rounded-lg"></div>
+            <div className="space-y-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="space-y-3">
+                  <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                  <div className="h-20 bg-gray-300 rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (previewMode) {
     return (
@@ -431,8 +561,15 @@ export function RecipeSubmissionPage() {
               <ChevronLeft className="h-4 w-4 mr-1" />
               Back to Recipes
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Submit New Recipe</h1>
-            <p className="text-gray-600">Share your delicious creation with the community</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {isEditing ? 'Edit Recipe' : 'Submit New Recipe'}
+            </h1>
+            <p className="text-gray-600">
+              {isEditing 
+                ? 'Update your recipe and resubmit for review' 
+                : 'Share your delicious creation with the community'
+              }
+            </p>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -495,9 +632,10 @@ export function RecipeSubmissionPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Recipe Images
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-lg p-6 text-center transition-colors">
                   <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2">Upload photos of your recipe</p>
+                  <p className="text-gray-600 mb-2 text-sm sm:text-base">Upload photos of your recipe</p>
+                  <p className="text-gray-500 text-xs mb-4">JPG, PNG, WebP up to 10MB each</p>
                   <input
                     type="file"
                     multiple
@@ -507,23 +645,51 @@ export function RecipeSubmissionPage() {
                     id="image-upload"
                   />
                   <label htmlFor="image-upload">
-                    <Button type="button" variant="outline" asChild>
+                    <Button type="button" variant="outline" asChild className="cursor-pointer">
                       <span>Choose Images</span>
                     </Button>
                   </label>
-                  {formData.images.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-sm text-gray-500 mb-2">
-                        {formData.images.length} image(s) selected
+                  {(existingImages.length > 0 || formData.images.length > 0) && (
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-4 font-medium">
+                        {existingImages.length + formData.images.length} image{existingImages.length + formData.images.length !== 1 ? 's' : ''} selected
                       </p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {/* Existing images from editing */}
+                        {existingImages.map((imageUrl, index) => (
+                          <div key={`existing-${index}`} className="relative group">
+                            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                              <img
+                                src={imageUrl}
+                                alt={`Existing ${index + 1}`}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setExistingImages(prev => prev.filter((_, i) => i !== index));
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                              title="Remove image"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                            <div className="absolute bottom-2 left-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded-md font-medium">
+                              Existing
+                            </div>
+                          </div>
+                        ))}
+                        {/* New uploaded images */}
                         {formData.images.map((file, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-20 object-cover rounded-lg"
-                            />
+                          <div key={`new-${index}`} className="relative group">
+                            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`Preview ${index + 1}`}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                              />
+                            </div>
                             <button
                               type="button"
                               onClick={() => {
@@ -532,10 +698,14 @@ export function RecipeSubmissionPage() {
                                   images: prev.images.filter((_, i) => i !== index),
                                 }));
                               }}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                              title="Remove image"
                             >
-                              <X className="h-3 w-3" />
+                              <X className="h-4 w-4" />
                             </button>
+                            <div className="absolute bottom-2 left-2 bg-green-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded-md font-medium">
+                              New
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -972,7 +1142,10 @@ export function RecipeSubmissionPage() {
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               <Save className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Submitting...' : 'Submit Recipe'}
+              {isSubmitting 
+                ? (isEditing ? 'Updating...' : 'Submitting...') 
+                : (isEditing ? 'Update Recipe' : 'Submit Recipe')
+              }
             </Button>
           </div>
         </form>
