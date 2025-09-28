@@ -58,7 +58,9 @@ export function Layout({ children }: LayoutProps) {
                   <Link
                     to="/submit-recipe"
                     className={`text-sm font-medium transition-colors ${
-                      isActive('/submit-recipe') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                      isActive('/submit-recipe')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
                     }`}
                   >
                     Submit Recipe
@@ -66,7 +68,9 @@ export function Layout({ children }: LayoutProps) {
                   <Link
                     to="/my-recipes"
                     className={`text-sm font-medium transition-colors ${
-                      isActive('/my-recipes') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                      isActive('/my-recipes')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
                     }`}
                   >
                     My Recipes
@@ -143,7 +147,9 @@ export function Layout({ children }: LayoutProps) {
                   <Link
                     to="/submit-recipe"
                     className={`block text-base font-medium transition-colors ${
-                      isActive('/submit-recipe') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                      isActive('/submit-recipe')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -152,7 +158,9 @@ export function Layout({ children }: LayoutProps) {
                   <Link
                     to="/my-recipes"
                     className={`block text-base font-medium transition-colors ${
-                      isActive('/my-recipes') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                      isActive('/my-recipes')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

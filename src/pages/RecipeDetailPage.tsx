@@ -84,7 +84,8 @@ const mockRecipe: Recipe = {
         createdAt: '2025-01-10T09:00:00Z',
         updatedAt: '2025-01-10T09:00:00Z',
       },
-      content: 'This recipe is absolutely delicious! I made it for dinner last night and my family loved it. The quinoa was perfectly cooked and the Mediterranean flavors were spot on.',
+      content:
+        'This recipe is absolutely delicious! I made it for dinner last night and my family loved it. The quinoa was perfectly cooked and the Mediterranean flavors were spot on.',
       createdAt: '2025-01-16T14:30:00Z',
       updatedAt: '2025-01-16T14:30:00Z',
     },
@@ -100,7 +101,8 @@ const mockRecipe: Recipe = {
         createdAt: '2025-01-12T11:00:00Z',
         updatedAt: '2025-01-12T11:00:00Z',
       },
-      content: 'Great healthy option! I added some roasted chickpeas for extra protein and it was fantastic. Thanks for sharing!',
+      content:
+        'Great healthy option! I added some roasted chickpeas for extra protein and it was fantastic. Thanks for sharing!',
       createdAt: '2025-01-17T10:15:00Z',
       updatedAt: '2025-01-17T10:15:00Z',
     },
@@ -116,7 +118,8 @@ const mockRecipe: Recipe = {
         createdAt: '2025-01-14T16:00:00Z',
         updatedAt: '2025-01-14T16:00:00Z',
       },
-      content: 'Perfect for meal prep! I made a big batch on Sunday and had healthy lunches all week. The flavors actually get better after a day in the fridge.',
+      content:
+        'Perfect for meal prep! I made a big batch on Sunday and had healthy lunches all week. The flavors actually get better after a day in the fridge.',
       createdAt: '2025-01-18T09:45:00Z',
       updatedAt: '2025-01-18T09:45:00Z',
     },
@@ -132,7 +135,8 @@ const mockRecipe: Recipe = {
         createdAt: '2025-01-13T08:00:00Z',
         updatedAt: '2025-01-13T08:00:00Z',
       },
-      content: 'Easy to follow instructions and the result was amazing. I substituted goat cheese for feta and it worked perfectly!',
+      content:
+        'Easy to follow instructions and the result was amazing. I substituted goat cheese for feta and it worked perfectly!',
       createdAt: '2025-01-19T12:20:00Z',
       updatedAt: '2025-01-19T12:20:00Z',
     },
@@ -148,7 +152,8 @@ const mockRecipe: Recipe = {
         createdAt: '2025-01-11T13:30:00Z',
         updatedAt: '2025-01-11T13:30:00Z',
       },
-      content: 'This has become my go-to healthy lunch! So fresh and satisfying. The combination of textures is perfect.',
+      content:
+        'This has become my go-to healthy lunch! So fresh and satisfying. The combination of textures is perfect.',
       createdAt: '2025-01-20T16:10:00Z',
       updatedAt: '2025-01-20T16:10:00Z',
     },
@@ -207,7 +212,7 @@ export function RecipeDetailPage() {
     if (!comment.trim()) return;
 
     setIsSubmittingComment(true);
-    
+
     // TODO: Submit comment to API
     console.log('Comment submitted:', comment);
 
@@ -237,7 +242,7 @@ export function RecipeDetailPage() {
           totalComments: recipe.totalComments + 1,
         });
       }
-      
+
       setComment('');
       setIsSubmittingComment(false);
     }, 1000);
@@ -297,7 +302,7 @@ export function RecipeDetailPage() {
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">{recipe.title}</h1>
           <p className="text-xl text-gray-600">{recipe.description}</p>
-          
+
           {/* Main Ingredient Badge */}
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500">Main Ingredient:</span>
@@ -353,8 +358,8 @@ export function RecipeDetailPage() {
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
                   className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105 ${
-                    selectedImageIndex === index 
-                      ? 'border-primary-500 shadow-lg ring-2 ring-primary-200' 
+                    selectedImageIndex === index
+                      ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -582,15 +587,19 @@ export function RecipeDetailPage() {
               {recipe.comments.length > 0 ? (
                 <div className="space-y-6">
                   {recipe.comments.map(comment => (
-                    <div key={comment.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0 hover:bg-gray-50 rounded-lg p-4 -m-4 transition-colors">
+                    <div
+                      key={comment.id}
+                      className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0 hover:bg-gray-50 rounded-lg p-4 -m-4 transition-colors"
+                    >
                       <div className="flex items-start space-x-4">
                         {/* User Avatar */}
                         <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                           <span className="text-primary-600 font-semibold text-sm">
-                            {comment.user.firstName[0]}{comment.user.lastName[0]}
+                            {comment.user.firstName[0]}
+                            {comment.user.lastName[0]}
                           </span>
                         </div>
-                        
+
                         {/* Comment Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-2">
@@ -606,9 +615,7 @@ export function RecipeDetailPage() {
                               {formatDate(comment.createdAt)}
                             </span>
                           </div>
-                          <p className="text-gray-700 text-sm leading-relaxed">
-                            {comment.content}
-                          </p>
+                          <p className="text-gray-700 text-sm leading-relaxed">{comment.content}</p>
                         </div>
                       </div>
                     </div>

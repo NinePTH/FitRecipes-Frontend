@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Clock, 
-  Users, 
-  Star, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  ChefHat, 
-  AlertCircle, 
+import {
+  Clock,
+  Users,
+  Star,
+  Eye,
+  Edit,
+  Trash2,
+  ChefHat,
+  AlertCircle,
   CheckCircle,
   XCircle,
-  Plus
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,7 +24,9 @@ const mockUserRecipes: Recipe[] = [
     id: '1',
     title: 'Mediterranean Quinoa Bowl',
     description: 'A healthy and colorful bowl packed with protein and fresh vegetables.',
-    images: ['https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg'],
+    images: [
+      'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
+    ],
     ingredients: [
       { id: '1', name: 'Quinoa', quantity: 1, unit: 'cup' },
       { id: '2', name: 'Cucumber', quantity: 1, unit: 'large' },
@@ -72,14 +74,14 @@ const mockUserRecipes: Recipe[] = [
     id: '2',
     title: 'Spicy Thai Basil Chicken',
     description: 'Authentic Thai stir-fry with aromatic basil and chilies.',
-    images: ['https://www.allrecipes.com/thmb/NimapCyPk8WQ1gcO-4J5Y6SQgLk=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/257938-spicy-thai-basil-chicken-chef-john-4x3-84457b900e2e4ec5823e8ace55df7b34.jpg'],
+    images: [
+      'https://www.allrecipes.com/thmb/NimapCyPk8WQ1gcO-4J5Y6SQgLk=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/257938-spicy-thai-basil-chicken-chef-john-4x3-84457b900e2e4ec5823e8ace55df7b34.jpg',
+    ],
     ingredients: [
       { id: '1', name: 'Chicken breast', quantity: 500, unit: 'g' },
       { id: '2', name: 'Thai basil', quantity: 1, unit: 'cup' },
     ],
-    instructions: [
-      { id: '1', stepNumber: 1, description: 'Heat oil in a wok over high heat.' },
-    ],
+    instructions: [{ id: '1', stepNumber: 1, description: 'Heat oil in a wok over high heat.' }],
     prepTime: 10,
     cookTime: 15,
     servings: 2,
@@ -120,14 +122,14 @@ const mockUserRecipes: Recipe[] = [
     id: '3',
     title: 'Classic Chocolate Chip Cookies',
     description: 'Perfectly chewy cookies with premium chocolate chips.',
-    images: ['https://food.fnr.sndimg.com/content/dam/images/food/fullset/2014/7/17/1/FN_Simple-Chocolate-Chip-Cookies_s4x3.jpg.rend.hgtvcom.1280.960.suffix/1438794106265.webp'],
+    images: [
+      'https://food.fnr.sndimg.com/content/dam/images/food/fullset/2014/7/17/1/FN_Simple-Chocolate-Chip-Cookies_s4x3.jpg.rend.hgtvcom.1280.960.suffix/1438794106265.webp',
+    ],
     ingredients: [
       { id: '1', name: 'All-purpose flour', quantity: 2.25, unit: 'cups' },
       { id: '2', name: 'Chocolate chips', quantity: 2, unit: 'cups' },
     ],
-    instructions: [
-      { id: '1', stepNumber: 1, description: 'Preheat oven to 375°F (190°C).' },
-    ],
+    instructions: [{ id: '1', stepNumber: 1, description: 'Preheat oven to 375°F (190°C).' }],
     prepTime: 20,
     cookTime: 12,
     servings: 24,
@@ -151,7 +153,8 @@ const mockUserRecipes: Recipe[] = [
     totalRatings: 0,
     totalComments: 0,
     status: 'rejected',
-    rejectionReason: 'Recipe needs more detailed instructions and nutritional accuracy verification.',
+    rejectionReason:
+      'Recipe needs more detailed instructions and nutritional accuracy verification.',
     chefId: '1',
     chef: {
       id: '1',
@@ -192,7 +195,7 @@ export function MyRecipesPage() {
   });
 
   const getStatusBadge = (status: Recipe['status']) => {
-    const baseClasses = "px-3 py-1 text-xs font-medium rounded-full flex items-center space-x-1";
+    const baseClasses = 'px-3 py-1 text-xs font-medium rounded-full flex items-center space-x-1';
     switch (status) {
       case 'approved':
         return (
@@ -221,7 +224,9 @@ export function MyRecipesPage() {
   };
 
   const handleDelete = async (recipeId: string) => {
-    if (window.confirm('Are you sure you want to delete this recipe? This action cannot be undone.')) {
+    if (
+      window.confirm('Are you sure you want to delete this recipe? This action cannot be undone.')
+    ) {
       // TODO: Implement actual delete API call
       setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
       console.log('Recipe deleted:', recipeId);
@@ -249,7 +254,10 @@ export function MyRecipesPage() {
           </div>
           <div className="space-y-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="flex flex-col md:flex-row bg-gray-200 rounded-lg overflow-hidden">
+              <div
+                key={i}
+                className="flex flex-col md:flex-row bg-gray-200 rounded-lg overflow-hidden"
+              >
                 <div className="md:w-72 h-56 md:h-48 bg-gray-300"></div>
                 <div className="flex-1 p-6 space-y-4">
                   <div className="h-6 bg-gray-300 rounded w-3/4"></div>
@@ -274,9 +282,7 @@ export function MyRecipesPage() {
               <ChefHat className="h-8 w-8 text-primary-600" />
               <span>My Recipes</span>
             </h1>
-            <p className="text-gray-600">
-              Manage and track your submitted recipes
-            </p>
+            <p className="text-gray-600">Manage and track your submitted recipes</p>
           </div>
           <Link to="/submit-recipe">
             <Button>
@@ -301,7 +307,7 @@ export function MyRecipesPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -317,7 +323,7 @@ export function MyRecipesPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -333,7 +339,7 @@ export function MyRecipesPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
@@ -380,16 +386,12 @@ export function MyRecipesPage() {
               <CardContent className="p-12 text-center">
                 <ChefHat className="h-16 w-16 mx-auto text-gray-300 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {filter === 'all' 
-                    ? "No recipes yet" 
-                    : `No ${filter} recipes`
-                  }
+                  {filter === 'all' ? 'No recipes yet' : `No ${filter} recipes`}
                 </h3>
                 <p className="text-gray-600 mb-6">
                   {filter === 'all'
-                    ? "Start sharing your culinary creations with the community!"
-                    : `You don't have any ${filter} recipes at the moment.`
-                  }
+                    ? 'Start sharing your culinary creations with the community!'
+                    : `You don't have any ${filter} recipes at the moment.`}
                 </p>
                 {filter === 'all' && (
                   <Link to="/submit-recipe">
@@ -412,26 +414,22 @@ export function MyRecipesPage() {
                         src={recipe.images[0]}
                         alt={recipe.title}
                         className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity"
-                        onError={(e) => {
+                        onError={e => {
                           console.log('Image failed to load:', recipe.images[0]);
                           e.currentTarget.style.display = 'none';
                         }}
                       />
                     </div>
-                    
+
                     {/* Recipe Details */}
                     <div className="p-6 flex-1 md:flex md:flex-col">
                       <div className="flex items-start justify-between mb-4">
                         <div className="space-y-2">
                           <div className="flex items-center space-x-3">
-                            <h3 className="text-xl font-semibold text-gray-900">
-                              {recipe.title}
-                            </h3>
+                            <h3 className="text-xl font-semibold text-gray-900">{recipe.title}</h3>
                             {getStatusBadge(recipe.status)}
                           </div>
-                          <p className="text-gray-600 line-clamp-2">
-                            {recipe.description}
-                          </p>
+                          <p className="text-gray-600 line-clamp-2">{recipe.description}</p>
                         </div>
                       </div>
 
@@ -470,7 +468,7 @@ export function MyRecipesPage() {
                               </Button>
                             </Link>
                           )}
-                          
+
                           {(recipe.status === 'pending' || recipe.status === 'rejected') && (
                             <Link to={`/submit-recipe?edit=${recipe.id}`}>
                               <Button variant="outline" size="sm">
@@ -479,10 +477,10 @@ export function MyRecipesPage() {
                               </Button>
                             </Link>
                           )}
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleDelete(recipe.id)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
@@ -499,9 +497,7 @@ export function MyRecipesPage() {
                             <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                             <div>
                               <p className="text-sm font-medium text-red-800">Rejection Reason:</p>
-                              <p className="text-sm text-red-700 mt-1">
-                                {recipe.rejectionReason}
-                              </p>
+                              <p className="text-sm text-red-700 mt-1">{recipe.rejectionReason}</p>
                             </div>
                           </div>
                         </div>

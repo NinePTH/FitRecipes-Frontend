@@ -12,7 +12,7 @@ export function RecipeSubmissionPage() {
   const [searchParams] = useSearchParams();
   const editRecipeId = searchParams.get('edit');
   const isEditing = Boolean(editRecipeId);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
@@ -91,7 +91,8 @@ export function RecipeSubmissionPage() {
               totalRatings: 0,
               totalComments: 0,
               status: 'rejected',
-              rejectionReason: 'Recipe needs more detailed instructions and nutritional accuracy verification.',
+              rejectionReason:
+                'Recipe needs more detailed instructions and nutritional accuracy verification.',
               chefId: '1',
               chef: {
                 id: '1',
@@ -565,10 +566,9 @@ export function RecipeSubmissionPage() {
               {isEditing ? 'Edit Recipe' : 'Submit New Recipe'}
             </h1>
             <p className="text-gray-600">
-              {isEditing 
-                ? 'Update your recipe and resubmit for review' 
-                : 'Share your delicious creation with the community'
-              }
+              {isEditing
+                ? 'Update your recipe and resubmit for review'
+                : 'Share your delicious creation with the community'}
             </p>
           </div>
 
@@ -634,7 +634,9 @@ export function RecipeSubmissionPage() {
                 </label>
                 <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-lg p-6 text-center transition-colors">
                   <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2 text-sm sm:text-base">Upload photos of your recipe</p>
+                  <p className="text-gray-600 mb-2 text-sm sm:text-base">
+                    Upload photos of your recipe
+                  </p>
                   <p className="text-gray-500 text-xs mb-4">JPG, PNG, WebP up to 10MB each</p>
                   <input
                     type="file"
@@ -652,7 +654,8 @@ export function RecipeSubmissionPage() {
                   {(existingImages.length > 0 || formData.images.length > 0) && (
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-600 mb-4 font-medium">
-                        {existingImages.length + formData.images.length} image{existingImages.length + formData.images.length !== 1 ? 's' : ''} selected
+                        {existingImages.length + formData.images.length} image
+                        {existingImages.length + formData.images.length !== 1 ? 's' : ''} selected
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {/* Existing images from editing */}
@@ -1142,10 +1145,13 @@ export function RecipeSubmissionPage() {
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               <Save className="h-4 w-4 mr-2" />
-              {isSubmitting 
-                ? (isEditing ? 'Updating...' : 'Submitting...') 
-                : (isEditing ? 'Update Recipe' : 'Submit Recipe')
-              }
+              {isSubmitting
+                ? isEditing
+                  ? 'Updating...'
+                  : 'Submitting...'
+                : isEditing
+                  ? 'Update Recipe'
+                  : 'Submit Recipe'}
             </Button>
           </div>
         </form>
