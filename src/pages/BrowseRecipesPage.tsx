@@ -23,7 +23,7 @@ const mockRecipes: Recipe[] = [
     servings: 2,
     difficulty: 'easy',
     mealType: ['lunch', 'dinner'],
-    dietType: ['vegetarian', 'gluten-free'],
+    dietType: ['vegetarian', 'gluten-free', 'gluten-free'],
     cuisineType: 'Mediterranean',
     mainIngredient: 'Quinoa',
     allergies: [],
