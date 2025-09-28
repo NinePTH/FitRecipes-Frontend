@@ -4,6 +4,7 @@ import { BrowseRecipesPage } from '@/pages/BrowseRecipesPage';
 import { RecipeDetailPage } from '@/pages/RecipeDetailPage';
 import { RecipeSubmissionPage } from '@/pages/RecipeSubmissionPage';
 import { AdminRecipeApprovalPage } from '@/pages/AdminRecipeApprovalPage';
+import { MyRecipesPage } from '@/pages/MyRecipesPage';
 
 // TODO: Implement authentication context and protected routes
 const isAuthenticated = true; // Mock authentication state
@@ -35,10 +36,22 @@ function App() {
 
           {/* Recipe Submission Routes - Chef and Admin Access */}
           <Route
-            path="/submit"
+            path="/submit-recipe"
             element={
               isAuthenticated && (userRole === 'chef' || userRole === 'admin') ? (
                 <RecipeSubmissionPage />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+
+          {/* My Recipes Routes - Chef and Admin Access */}
+          <Route
+            path="/my-recipes"
+            element={
+              isAuthenticated && (userRole === 'chef' || userRole === 'admin') ? (
+                <MyRecipesPage />
               ) : (
                 <Navigate to="/" replace />
               )

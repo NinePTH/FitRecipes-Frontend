@@ -54,14 +54,28 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               {(mockUser.role === 'chef' || mockUser.role === 'admin') && (
-                <Link
-                  to="/submit"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/submit') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
-                  }`}
-                >
-                  Submit Recipe
-                </Link>
+                <>
+                  <Link
+                    to="/submit-recipe"
+                    className={`text-sm font-medium transition-colors ${
+                      isActive('/submit-recipe')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    Submit Recipe
+                  </Link>
+                  <Link
+                    to="/my-recipes"
+                    className={`text-sm font-medium transition-colors ${
+                      isActive('/my-recipes')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    My Recipes
+                  </Link>
+                </>
               )}
 
               {mockUser.role === 'admin' && (
@@ -129,15 +143,30 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               {(mockUser.role === 'chef' || mockUser.role === 'admin') && (
-                <Link
-                  to="/submit"
-                  className={`block text-base font-medium transition-colors ${
-                    isActive('/submit') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Submit Recipe
-                </Link>
+                <>
+                  <Link
+                    to="/submit-recipe"
+                    className={`block text-base font-medium transition-colors ${
+                      isActive('/submit-recipe')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Submit Recipe
+                  </Link>
+                  <Link
+                    to="/my-recipes"
+                    className={`block text-base font-medium transition-colors ${
+                      isActive('/my-recipes')
+                        ? 'text-primary-600'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    My Recipes
+                  </Link>
+                </>
               )}
 
               {mockUser.role === 'admin' && (
