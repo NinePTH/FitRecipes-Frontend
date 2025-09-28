@@ -7,7 +7,7 @@ import { AdminRecipeApprovalPage } from '@/pages/AdminRecipeApprovalPage';
 
 // TODO: Implement authentication context and protected routes
 const isAuthenticated = true; // Mock authentication state
-const userRole: 'chef' | 'admin' | 'customer' = 'admin'; // Mock user role
+const userRole: 'chef' | 'admin' | 'user' = 'admin'; // Mock user role
 
 // 🚀 DEVELOP BRANCH - Testing complete!
 // ✅ Error fixed - CI should pass and deploy preview
@@ -33,7 +33,7 @@ function App() {
             element={isAuthenticated ? <RecipeDetailPage /> : <Navigate to="/auth" replace />}
           />
 
-          {/* Chef Only Routes */}
+          {/* Recipe Submission Routes - Chef and Admin Access */}
           <Route
             path="/submit"
             element={

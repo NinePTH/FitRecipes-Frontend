@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Upload, Plus, X, Save, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/Layout';
-import type { RecipeFormData, Ingredient, Instruction } from '@/types';
+import type { RecipeFormData, Ingredient, Instruction, NutritionInfo } from '@/types';
 
 export function RecipeSubmissionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
 
   const [formData, setFormData] = useState<RecipeFormData>({
     title: '',
@@ -39,6 +40,30 @@ export function RecipeSubmissionPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Load draft from localStorage on component mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('recipeSubmissionDraft');
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        setFormData(draft);
+      } catch (error) {
+        console.error('Error loading draft:', error);
+      }
+    }
+  }, []);
+
+  // Save draft to localStorage whenever form data changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('recipeSubmissionDraft', JSON.stringify(formData));
+      setIsDraftSaved(true);
+      setTimeout(() => setIsDraftSaved(false), 2000); // Hide indicator after 2 seconds
+    }, 1000); // Save after 1 second of inactivity
+
+    return () => clearTimeout(timer);
+  }, [formData]);
+
   const handleInputChange = (field: keyof RecipeFormData, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
@@ -52,6 +77,16 @@ export function RecipeSubmissionPage() {
         [field]: '',
       }));
     }
+  };
+
+  const updateNutrition = (field: keyof NutritionInfo, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      nutrition: {
+        ...prev.nutrition,
+        [field]: value,
+      },
+    }));
   };
 
   const addIngredient = () => {
@@ -141,15 +176,53 @@ export function RecipeSubmissionPage() {
 
     setIsSubmitting(true);
 
-    // TODO: Submit to API
-    console.log('Submitting recipe:', formData);
+    try {
+      // TODO: Submit to API
+      console.log('Submitting recipe:', formData);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      // TODO: Handle success/error responses
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Simulate success
+      alert('Recipe submitted successfully! It will be reviewed by our team.');
+
+      // Clear saved draft
+      localStorage.removeItem('recipeSubmissionDraft');
+
+      // Reset form after successful submission
+      setFormData({
+        title: '',
+        description: '',
+        images: [],
+        ingredients: [{ name: '', quantity: 0, unit: '' }],
+        instructions: [{ stepNumber: 1, description: '' }],
+        prepTime: 0,
+        cookTime: 0,
+        servings: 1,
+        difficulty: 'easy',
+        mealType: [],
+        dietType: [],
+        cuisineType: '',
+        mainIngredient: '',
+        nutrition: {
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+          fiber: 0,
+          sodium: 0,
+        },
+        allergies: [],
+      });
+
       // TODO: Redirect to recipe list or show success message
-    }, 2000);
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error submitting recipe:', error);
+      alert('Failed to submit recipe. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,6 +282,134 @@ export function RecipeSubmissionPage() {
                     </ol>
                   </div>
                 </div>
+
+                {/* Recipe Details */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-t border-b">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Prep Time</p>
+                    <p className="font-semibold">{formData.prepTime}m</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Cook Time</p>
+                    <p className="font-semibold">{formData.cookTime}m</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Servings</p>
+                    <p className="font-semibold">{formData.servings}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Difficulty</p>
+                    <p className="font-semibold capitalize">{formData.difficulty}</p>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-3">
+                  {formData.mealType.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Meal Types</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.mealType.map(type => (
+                          <span
+                            key={type}
+                            className="px-3 py-1 bg-primary-100 text-primary-800 text-sm rounded-full capitalize"
+                          >
+                            {type}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.dietType.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Diet Types</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.dietType.map(type => (
+                          <span
+                            key={type}
+                            className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full capitalize"
+                          >
+                            {type.replace('-', ' ')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.allergies.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Allergens</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.allergies.map(allergy => (
+                          <span
+                            key={allergy}
+                            className="px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full"
+                          >
+                            {allergy}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Nutrition Info */}
+                {formData.nutrition && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3">Nutrition Per Serving</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {formData.nutrition.calories && (
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-primary-600">
+                            {formData.nutrition.calories}
+                          </p>
+                          <p className="text-sm text-gray-600">Calories</p>
+                        </div>
+                      )}
+                      {formData.nutrition.protein && (
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-primary-600">
+                            {formData.nutrition.protein}g
+                          </p>
+                          <p className="text-sm text-gray-600">Protein</p>
+                        </div>
+                      )}
+                      {formData.nutrition.carbs && (
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-primary-600">
+                            {formData.nutrition.carbs}g
+                          </p>
+                          <p className="text-sm text-gray-600">Carbs</p>
+                        </div>
+                      )}
+                      {formData.nutrition.fat && (
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-primary-600">
+                            {formData.nutrition.fat}g
+                          </p>
+                          <p className="text-sm text-gray-600">Fat</p>
+                        </div>
+                      )}
+                      {formData.nutrition.fiber && (
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-primary-600">
+                            {formData.nutrition.fiber}g
+                          </p>
+                          <p className="text-sm text-gray-600">Fiber</p>
+                        </div>
+                      )}
+                      {formData.nutrition.sodium && (
+                        <div className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-2xl font-bold text-primary-600">
+                            {formData.nutrition.sodium}mg
+                          </p>
+                          <p className="text-sm text-gray-600">Sodium</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -234,7 +435,13 @@ export function RecipeSubmissionPage() {
             <p className="text-gray-600">Share your delicious creation with the community</p>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex items-center space-x-4">
+            {isDraftSaved && (
+              <span className="text-sm text-green-600 flex items-center">
+                <Save className="h-4 w-4 mr-1" />
+                Draft saved
+              </span>
+            )}
             <Button type="button" variant="outline" onClick={() => setPreviewMode(true)}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
@@ -305,9 +512,34 @@ export function RecipeSubmissionPage() {
                     </Button>
                   </label>
                   {formData.images.length > 0 && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      {formData.images.length} image(s) selected
-                    </p>
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-500 mb-2">
+                        {formData.images.length} image(s) selected
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {formData.images.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-20 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  images: prev.images.filter((_, i) => i !== index),
+                                }));
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -553,10 +785,183 @@ export function RecipeSubmissionPage() {
                 </div>
               </div>
 
-              {/* TODO: Add meal type checkboxes */}
-              {/* TODO: Add diet type checkboxes */}
-              {/* TODO: Add allergy information */}
-              {/* TODO: Add nutrition information form */}
+              {/* Meal Types */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Meal Types</label>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                  {(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'] as const).map(type => (
+                    <label key={type} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.mealType.includes(type)}
+                        onChange={e => {
+                          const newMealTypes = e.target.checked
+                            ? [...formData.mealType, type]
+                            : formData.mealType.filter(m => m !== type);
+                          handleInputChange('mealType', newMealTypes);
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700 capitalize">{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Diet Types */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Diet Types</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {(
+                    ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'paleo'] as const
+                  ).map(type => (
+                    <label key={type} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.dietType.includes(type)}
+                        onChange={e => {
+                          const newDietTypes = e.target.checked
+                            ? [...formData.dietType, type]
+                            : formData.dietType.filter(d => d !== type);
+                          handleInputChange('dietType', newDietTypes);
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700 capitalize">
+                        {type.replace('-', ' ')}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Allergies */}
+              <div>
+                <label htmlFor="allergies" className="block text-sm font-medium text-gray-700 mb-2">
+                  Common Allergens (Optional)
+                </label>
+                <Input
+                  id="allergies"
+                  value={formData.allergies.join(', ')}
+                  onChange={e =>
+                    handleInputChange(
+                      'allergies',
+                      e.target.value
+                        .split(',')
+                        .map(a => a.trim())
+                        .filter(Boolean)
+                    )
+                  }
+                  placeholder="e.g., nuts, dairy, eggs, gluten (separate with commas)"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Help people with allergies identify ingredients to avoid
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Nutrition Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Nutrition Information (Optional)</CardTitle>
+              <CardDescription>Add nutritional data per serving</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <label
+                    htmlFor="calories"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Calories
+                  </label>
+                  <Input
+                    id="calories"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.nutrition?.calories || ''}
+                    onChange={e => updateNutrition('calories', parseInt(e.target.value) || 0)}
+                    placeholder="e.g., 350"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="protein" className="block text-sm font-medium text-gray-700 mb-2">
+                    Protein (g)
+                  </label>
+                  <Input
+                    id="protein"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.nutrition?.protein || ''}
+                    onChange={e => updateNutrition('protein', parseFloat(e.target.value) || 0)}
+                    placeholder="e.g., 25.5"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="carbs" className="block text-sm font-medium text-gray-700 mb-2">
+                    Carbs (g)
+                  </label>
+                  <Input
+                    id="carbs"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.nutrition?.carbs || ''}
+                    onChange={e => updateNutrition('carbs', parseFloat(e.target.value) || 0)}
+                    placeholder="e.g., 45.2"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="fat" className="block text-sm font-medium text-gray-700 mb-2">
+                    Fat (g)
+                  </label>
+                  <Input
+                    id="fat"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.nutrition?.fat || ''}
+                    onChange={e => updateNutrition('fat', parseFloat(e.target.value) || 0)}
+                    placeholder="e.g., 12.8"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="fiber" className="block text-sm font-medium text-gray-700 mb-2">
+                    Fiber (g)
+                  </label>
+                  <Input
+                    id="fiber"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={formData.nutrition?.fiber || ''}
+                    onChange={e => updateNutrition('fiber', parseFloat(e.target.value) || 0)}
+                    placeholder="e.g., 8.5"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="sodium" className="block text-sm font-medium text-gray-700 mb-2">
+                    Sodium (mg)
+                  </label>
+                  <Input
+                    id="sodium"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.nutrition?.sodium || ''}
+                    onChange={e => updateNutrition('sodium', parseInt(e.target.value) || 0)}
+                    placeholder="e.g., 420"
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
 

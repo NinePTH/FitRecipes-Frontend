@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Star, TrendingUp, Plus } from 'lucide-react';
+import { Search, Filter, Clock, Star, TrendingUp, X, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +53,7 @@ export function BrowseRecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters] = useState<RecipeFilters>({});
+  const [filters, setFilters] = useState<RecipeFilters>({});
   const [sortBy, setSortBy] = useState<SortOption>('rating');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -173,12 +173,364 @@ export function BrowseRecipesPage() {
             </Button>
           </form>
 
-          {/* TODO: Implement expandable filter panel */}
+          {/* Filter Panel */}
           {showFilters && (
-            <div className="border-t pt-4 mt-4">
-              <p className="text-sm text-gray-500">
-                Filter options will be implemented here (Meal Type, Diet Type, Difficulty, etc.)
-              </p>
+            <div className="border-t pt-6 mt-4 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Filter Recipes</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFilters({})}
+                  className="text-primary-600 hover:text-primary-700"
+                >
+                  Clear All
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Meal Type Filter */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Meal Type</h4>
+                  <div className="space-y-2">
+                    {(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'] as const).map(
+                      mealType => (
+                        <label
+                          key={mealType}
+                          className="flex items-center space-x-2 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={filters.mealType?.includes(mealType) || false}
+                            onChange={e => {
+                              const currentMealTypes = filters.mealType || [];
+                              if (e.target.checked) {
+                                setFilters({
+                                  ...filters,
+                                  mealType: [...currentMealTypes, mealType],
+                                });
+                              } else {
+                                setFilters({
+                                  ...filters,
+                                  mealType: currentMealTypes.filter(type => type !== mealType),
+                                });
+                              }
+                            }}
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          />
+                          <span className="text-sm text-gray-700 capitalize">{mealType}</span>
+                        </label>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Diet Type Filter */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Diet Type</h4>
+                  <div className="space-y-2">
+                    {(
+                      ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'paleo'] as const
+                    ).map(dietType => (
+                      <label key={dietType} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filters.dietType?.includes(dietType) || false}
+                          onChange={e => {
+                            const currentDietTypes = filters.dietType || [];
+                            if (e.target.checked) {
+                              setFilters({
+                                ...filters,
+                                dietType: [...currentDietTypes, dietType],
+                              });
+                            } else {
+                              setFilters({
+                                ...filters,
+                                dietType: currentDietTypes.filter(type => type !== dietType),
+                              });
+                            }
+                          }}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-700 capitalize">
+                          {dietType.replace('-', ' ')}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Difficulty Filter */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Difficulty</h4>
+                  <div className="space-y-2">
+                    {(['easy', 'medium', 'hard'] as const).map(difficulty => (
+                      <label
+                        key={difficulty}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filters.difficulty?.includes(difficulty) || false}
+                          onChange={e => {
+                            const currentDifficulties = filters.difficulty || [];
+                            if (e.target.checked) {
+                              setFilters({
+                                ...filters,
+                                difficulty: [...currentDifficulties, difficulty],
+                              });
+                            } else {
+                              setFilters({
+                                ...filters,
+                                difficulty: currentDifficulties.filter(d => d !== difficulty),
+                              });
+                            }
+                          }}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-gray-700 capitalize">{difficulty}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cuisine Type Filter */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Cuisine Type</h4>
+                  <select
+                    value={filters.cuisineType || ''}
+                    onChange={e =>
+                      setFilters({
+                        ...filters,
+                        cuisineType: e.target.value || undefined,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">All Cuisines</option>
+                    <option value="Mediterranean">Mediterranean</option>
+                    <option value="Asian">Asian</option>
+                    <option value="Mexican">Mexican</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Indian">Indian</option>
+                    <option value="American">American</option>
+                    <option value="French">French</option>
+                    <option value="Thai">Thai</option>
+                  </select>
+                </div>
+
+                {/* Main Ingredient Filter */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Main Ingredient</h4>
+                  <select
+                    value={filters.mainIngredient || ''}
+                    onChange={e =>
+                      setFilters({
+                        ...filters,
+                        mainIngredient: e.target.value || undefined,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">All Ingredients</option>
+                    <option value="Chicken">Chicken</option>
+                    <option value="Beef">Beef</option>
+                    <option value="Fish">Fish</option>
+                    <option value="Vegetables">Vegetables</option>
+                    <option value="Quinoa">Quinoa</option>
+                    <option value="Rice">Rice</option>
+                    <option value="Pasta">Pasta</option>
+                    <option value="Tofu">Tofu</option>
+                  </select>
+                </div>
+
+                {/* Preparation Time Filter */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Preparation Time</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="prepTime"
+                        checked={filters.maxPrepTime === 15}
+                        onChange={() => setFilters({ ...filters, maxPrepTime: 15 })}
+                        className="border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">Under 15 minutes</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="prepTime"
+                        checked={filters.maxPrepTime === 30}
+                        onChange={() => setFilters({ ...filters, maxPrepTime: 30 })}
+                        className="border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">Under 30 minutes</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="prepTime"
+                        checked={filters.maxPrepTime === 60}
+                        onChange={() => setFilters({ ...filters, maxPrepTime: 60 })}
+                        className="border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">Under 1 hour</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="prepTime"
+                        checked={filters.maxPrepTime === undefined}
+                        onChange={() => setFilters({ ...filters, maxPrepTime: undefined })}
+                        className="border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">Any time</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Filters Display */}
+              {(filters.mealType?.length ||
+                filters.dietType?.length ||
+                filters.difficulty?.length ||
+                searchTerm ||
+                filters.mainIngredient ||
+                filters.cuisineType ||
+                filters.maxPrepTime) && (
+                <div className="pt-4 border-t">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className="text-sm font-medium text-gray-700">Active filters:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {filters.mealType?.map(type => (
+                      <span
+                        key={type}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                      >
+                        {type}
+                        <button
+                          onClick={() => {
+                            const newMealTypes = filters.mealType?.filter(t => t !== type) || [];
+                            setFilters({
+                              ...filters,
+                              mealType: newMealTypes.length > 0 ? newMealTypes : undefined,
+                            });
+                          }}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-primary-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                    {filters.dietType?.map(type => (
+                      <span
+                        key={type}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        {type.replace('-', ' ')}
+                        <button
+                          onClick={() => {
+                            const newDietTypes = filters.dietType?.filter(t => t !== type) || [];
+                            setFilters({
+                              ...filters,
+                              dietType: newDietTypes.length > 0 ? newDietTypes : undefined,
+                            });
+                          }}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-green-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                    {filters.difficulty?.map(difficulty => (
+                      <span
+                        key={difficulty}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                      >
+                        {difficulty}
+                        <button
+                          onClick={() => {
+                            const newDifficulties =
+                              filters.difficulty?.filter(d => d !== difficulty) || [];
+                            setFilters({
+                              ...filters,
+                              difficulty: newDifficulties.length > 0 ? newDifficulties : undefined,
+                            });
+                          }}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-orange-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                    {filters.cuisineType && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {filters.cuisineType}
+                        <button
+                          onClick={() => setFilters({ ...filters, cuisineType: undefined })}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-purple-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    )}
+                    {filters.mainIngredient && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {filters.mainIngredient}
+                        <button
+                          onClick={() => setFilters({ ...filters, mainIngredient: undefined })}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-blue-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    )}
+                    {filters.maxPrepTime && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Under {filters.maxPrepTime}m
+                        <button
+                          onClick={() => setFilters({ ...filters, maxPrepTime: undefined })}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-gray-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    )}
+                    {searchTerm && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        Search: "{searchTerm}"
+                        <button
+                          onClick={() => setSearchTerm('')}
+                          className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-purple-200"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setFilters({
+                          mealType: undefined,
+                          dietType: undefined,
+                          difficulty: undefined,
+                          mainIngredient: undefined,
+                          cuisineType: undefined,
+                          maxPrepTime: undefined,
+                        });
+                        setSearchTerm('');
+                      }}
+                      className="text-sm text-red-600 hover:text-red-800 font-medium"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -260,7 +612,7 @@ export function BrowseRecipesPage() {
           {/* New Recipes */}
           <section>
             <div className="flex items-center space-x-2 mb-6">
-              <Plus className="h-6 w-6 text-primary-600" />
+              <Sparkles className="h-6 w-6 text-primary-600" />
               <h2 className="text-2xl font-bold text-gray-900">New Recipes</h2>
             </div>
             {loading ? (
