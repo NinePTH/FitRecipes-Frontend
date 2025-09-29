@@ -337,12 +337,12 @@ export function RecipeSubmissionPage() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+
     // Validate file types and sizes
     const validFiles = files.filter(file => {
       const isValidType = file.type.startsWith('image/');
       const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
-      
+
       if (!isValidType) {
         alert(`${file.name} is not a valid image file.`);
         return false;
@@ -359,11 +359,14 @@ export function RecipeSubmissionPage() {
         ...prev,
         images: [...prev.images, ...validFiles],
       }));
-      
+
       // Clear the input so the same file can be selected again if needed
       e.target.value = '';
-      
-      console.log(`Added ${validFiles.length} image(s):`, validFiles.map(f => f.name));
+
+      console.log(
+        `Added ${validFiles.length} image(s):`,
+        validFiles.map(f => f.name)
+      );
     }
   };
 
@@ -656,7 +659,7 @@ export function RecipeSubmissionPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Recipe Images
                 </label>
-                <div 
+                <div
                   className="border-2 border-dashed border-gray-300 hover:border-primary-400 rounded-lg p-6 text-center transition-colors cursor-pointer group"
                   onClick={() => document.getElementById('image-upload')?.click()}
                 >

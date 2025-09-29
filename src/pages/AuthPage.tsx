@@ -23,13 +23,13 @@ export function AuthPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Clear error/success messages when user starts typing
     if (error || success) {
       setError(null);
       setSuccess(null);
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -49,16 +49,22 @@ export function AuthPage() {
           // Simulate invalid credentials
           if (isLogin) {
             if (formData.email === 'invalid@example.com' || formData.password === 'wrong') {
-              reject(new Error('Invalid email or password. Please check your credentials and try again.'));
+              reject(
+                new Error('Invalid email or password. Please check your credentials and try again.')
+              );
             } else if (formData.email === 'blocked@example.com') {
-              reject(new Error('Your account has been temporarily locked. Please try again later.'));
+              reject(
+                new Error('Your account has been temporarily locked. Please try again later.')
+              );
             } else {
               resolve('Login successful');
             }
           } else {
             // Registration validation
             if (formData.email === 'existing@example.com') {
-              reject(new Error('An account with this email already exists. Please sign in instead.'));
+              reject(
+                new Error('An account with this email already exists. Please sign in instead.')
+              );
             } else if (formData.password.length < 6) {
               reject(new Error('Password must be at least 6 characters long.'));
             } else if (!formData.agreeToTerms) {
@@ -71,14 +77,18 @@ export function AuthPage() {
       });
 
       // Success handling
-      setSuccess(isLogin ? 'Login successful! Redirecting...' : 'Account created successfully! Please sign in.');
-      
+      setSuccess(
+        isLogin
+          ? 'Login successful! Redirecting...'
+          : 'Account created successfully! Please sign in.'
+      );
+
       // TODO: Redirect to appropriate page or handle authentication state
       console.log('Authentication successful:', { isLogin, formData });
-      
     } catch (err) {
       // Error handling
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      const errorMessage =
+        err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
       setError(errorMessage);
       console.error('Authentication error:', err);
     } finally {
@@ -125,7 +135,11 @@ export function AuthPage() {
                   <div className="flex items-start space-x-2">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                     <div>
@@ -141,8 +155,16 @@ export function AuthPage() {
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-start space-x-2">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg
+                        className="h-5 w-5 text-green-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                     <div>

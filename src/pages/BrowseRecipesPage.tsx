@@ -4,7 +4,13 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Layout } from '@/components/Layout';
 import type { Recipe, RecipeFilters, SortOption } from '@/types';
@@ -14,7 +20,8 @@ const mockRecipes: Recipe[] = [
   {
     id: '1',
     title: 'Mediterranean Quinoa Bowl',
-    description: 'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
+    description:
+      'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
     images: [
       'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
     ],
@@ -53,9 +60,32 @@ const mockRecipes: Recipe[] = [
 
 // Search suggestions mock data
 const mockSuggestions = {
-  ingredients: ['chicken', 'salmon', 'quinoa', 'avocado', 'spinach', 'sweet potato', 'broccoli', 'tofu'],
-  cuisines: ['Mediterranean', 'Thai', 'Indian', 'Mexican', 'Italian', 'Japanese', 'Korean', 'Greek'],
-  recipes: ['Mediterranean Quinoa Bowl', 'Spicy Thai Basil Chicken', 'Indian Butter Chicken', 'Greek Salad']
+  ingredients: [
+    'chicken',
+    'salmon',
+    'quinoa',
+    'avocado',
+    'spinach',
+    'sweet potato',
+    'broccoli',
+    'tofu',
+  ],
+  cuisines: [
+    'Mediterranean',
+    'Thai',
+    'Indian',
+    'Mexican',
+    'Italian',
+    'Japanese',
+    'Korean',
+    'Greek',
+  ],
+  recipes: [
+    'Mediterranean Quinoa Bowl',
+    'Spicy Thai Basil Chicken',
+    'Indian Butter Chicken',
+    'Greek Salad',
+  ],
 };
 
 export function BrowseRecipesPage() {
@@ -96,19 +126,20 @@ export function BrowseRecipesPage() {
     e.preventDefault();
     setShowSuggestions(false);
     setLoading(true);
-    
+
     // Simulate search API call
     console.log('Searching for:', searchTerm);
-    
+
     // TODO: Replace with actual API call
     setTimeout(() => {
       // Filter mock recipes based on search term
       if (searchTerm.trim()) {
-        const filteredRecipes = mockRecipes.filter(recipe => 
-          recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          recipe.cuisineType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          recipe.mainIngredient.toLowerCase().includes(searchTerm.toLowerCase())
+        const filteredRecipes = mockRecipes.filter(
+          recipe =>
+            recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            recipe.cuisineType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            recipe.mainIngredient.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setRecipes(filteredRecipes);
       } else {
@@ -120,21 +151,21 @@ export function BrowseRecipesPage() {
 
   const handleSearchInputChange = (value: string) => {
     setSearchTerm(value);
-    
+
     if (value.trim().length > 0) {
       // Filter suggestions based on input
       const filteredSuggestions = {
-        ingredients: mockSuggestions.ingredients.filter(item => 
-          item.toLowerCase().includes(value.toLowerCase())
-        ).slice(0, 4),
-        cuisines: mockSuggestions.cuisines.filter(item => 
-          item.toLowerCase().includes(value.toLowerCase())
-        ).slice(0, 3),
-        recipes: mockSuggestions.recipes.filter(item => 
-          item.toLowerCase().includes(value.toLowerCase())
-        ).slice(0, 3)
+        ingredients: mockSuggestions.ingredients
+          .filter(item => item.toLowerCase().includes(value.toLowerCase()))
+          .slice(0, 4),
+        cuisines: mockSuggestions.cuisines
+          .filter(item => item.toLowerCase().includes(value.toLowerCase()))
+          .slice(0, 3),
+        recipes: mockSuggestions.recipes
+          .filter(item => item.toLowerCase().includes(value.toLowerCase()))
+          .slice(0, 3),
       };
-      
+
       setSuggestions(filteredSuggestions);
       setShowSuggestions(true);
     } else {
@@ -243,9 +274,9 @@ export function BrowseRecipesPage() {
                 <PopoverContent className="w-full p-0" align="start">
                   <Command>
                     <CommandList className="max-h-[300px]">
-                      {(suggestions.ingredients.length === 0 && 
-                        suggestions.cuisines.length === 0 && 
-                        suggestions.recipes.length === 0) ? (
+                      {suggestions.ingredients.length === 0 &&
+                      suggestions.cuisines.length === 0 &&
+                      suggestions.recipes.length === 0 ? (
                         <CommandEmpty>No suggestions found.</CommandEmpty>
                       ) : (
                         <>
@@ -255,7 +286,7 @@ export function BrowseRecipesPage() {
                                 <Sparkles className="h-3 w-3 mr-1" />
                                 Ingredients
                               </div>
-                              {suggestions.ingredients.map((ingredient) => (
+                              {suggestions.ingredients.map(ingredient => (
                                 <CommandItem
                                   key={ingredient}
                                   onSelect={() => handleSuggestionSelect(ingredient)}
@@ -266,14 +297,14 @@ export function BrowseRecipesPage() {
                               ))}
                             </CommandGroup>
                           )}
-                          
+
                           {suggestions.cuisines.length > 0 && (
                             <CommandGroup>
                               <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
                                 <TrendingUp className="h-3 w-3 mr-1" />
                                 Cuisines
                               </div>
-                              {suggestions.cuisines.map((cuisine) => (
+                              {suggestions.cuisines.map(cuisine => (
                                 <CommandItem
                                   key={cuisine}
                                   onSelect={() => handleSuggestionSelect(cuisine)}
@@ -284,14 +315,14 @@ export function BrowseRecipesPage() {
                               ))}
                             </CommandGroup>
                           )}
-                          
+
                           {suggestions.recipes.length > 0 && (
                             <CommandGroup>
                               <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
                                 <ChefHat className="h-3 w-3 mr-1" />
                                 Recipes
                               </div>
-                              {suggestions.recipes.map((recipe) => (
+                              {suggestions.recipes.map(recipe => (
                                 <CommandItem
                                   key={recipe}
                                   onSelect={() => handleSuggestionSelect(recipe)}
@@ -688,7 +719,7 @@ export function BrowseRecipesPage() {
                       Search Results for "{searchTerm}"
                     </h3>
                     <p className="text-sm text-blue-700">
-                      Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''} 
+                      Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
                       {recipes.length === 0 ? ' - try adjusting your search or filters' : ''}
                     </p>
                   </div>
@@ -747,7 +778,7 @@ export function BrowseRecipesPage() {
                 </>
               )}
             </div>
-            
+
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map(i => (
