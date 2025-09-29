@@ -337,10 +337,34 @@ export function RecipeSubmissionPage() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...files],
-    }));
+    
+    // Validate file types and sizes
+    const validFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/');
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+      
+      if (!isValidType) {
+        alert(`${file.name} is not a valid image file.`);
+        return false;
+      }
+      if (!isValidSize) {
+        alert(`${file.name} is too large. Maximum size is 10MB.`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...validFiles],
+      }));
+      
+      // Clear the input so the same file can be selected again if needed
+      e.target.value = '';
+      
+      console.log(`Added ${validFiles.length} image(s):`, validFiles.map(f => f.name));
+    }
   };
 
   if (loading) {
@@ -632,10 +656,13 @@ export function RecipeSubmissionPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Recipe Images
                 </label>
-                <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-lg p-6 text-center transition-colors">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2 text-sm sm:text-base">
-                    Upload photos of your recipe
+                <div 
+                  className="border-2 border-dashed border-gray-300 hover:border-primary-400 rounded-lg p-6 text-center transition-colors cursor-pointer group"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  <Upload className="h-12 w-12 text-gray-400 group-hover:text-primary-500 mx-auto mb-4 transition-colors" />
+                  <p className="text-gray-600 group-hover:text-gray-700 mb-2 text-sm sm:text-base transition-colors">
+                    Click to upload photos of your recipe
                   </p>
                   <p className="text-gray-500 text-xs mb-4">JPG, PNG, WebP up to 10MB each</p>
                   <input
@@ -646,9 +673,10 @@ export function RecipeSubmissionPage() {
                     className="hidden"
                     id="image-upload"
                   />
-                  <label htmlFor="image-upload">
-                    <Button type="button" variant="outline" asChild className="cursor-pointer">
-                      <span>Choose Images</span>
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <Button type="button" variant="outline" className="pointer-events-none">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Choose Images
                     </Button>
                   </label>
                   {(existingImages.length > 0 || formData.images.length > 0) && (

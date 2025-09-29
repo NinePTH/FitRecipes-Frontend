@@ -58,7 +58,7 @@ const mockRecipe: Recipe = {
   servings: 4,
   difficulty: 'easy',
   mealType: ['lunch', 'dinner'],
-  dietType: ['vegetarian', 'gluten-free'],
+  dietType: ['vegetarian', 'gluten-free', 'gluten-free', 'gluten-free'],
   cuisineType: 'Mediterranean',
   mainIngredient: 'Quinoa',
   nutrition: {

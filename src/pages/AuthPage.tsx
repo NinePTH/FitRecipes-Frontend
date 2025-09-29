@@ -9,6 +9,8 @@ export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -21,6 +23,13 @@ export function AuthPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+    
+    // Clear error/success messages when user starts typing
+    if (error || success) {
+      setError(null);
+      setSuccess(null);
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -30,15 +39,51 @@ export function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    setSuccess(null);
 
-    // TODO: Implement actual authentication logic
-    console.log('Form submitted:', { isLogin, formData });
+    try {
+      // Simulate API call with validation
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simulate invalid credentials
+          if (isLogin) {
+            if (formData.email === 'invalid@example.com' || formData.password === 'wrong') {
+              reject(new Error('Invalid email or password. Please check your credentials and try again.'));
+            } else if (formData.email === 'blocked@example.com') {
+              reject(new Error('Your account has been temporarily locked. Please try again later.'));
+            } else {
+              resolve('Login successful');
+            }
+          } else {
+            // Registration validation
+            if (formData.email === 'existing@example.com') {
+              reject(new Error('An account with this email already exists. Please sign in instead.'));
+            } else if (formData.password.length < 6) {
+              reject(new Error('Password must be at least 6 characters long.'));
+            } else if (!formData.agreeToTerms) {
+              reject(new Error('You must agree to the Terms and Conditions to create an account.'));
+            } else {
+              resolve('Registration successful');
+            }
+          }
+        }, 1500);
+      });
 
-    // Simulate API call
-    setTimeout(() => {
+      // Success handling
+      setSuccess(isLogin ? 'Login successful! Redirecting...' : 'Account created successfully! Please sign in.');
+      
+      // TODO: Redirect to appropriate page or handle authentication state
+      console.log('Authentication successful:', { isLogin, formData });
+      
+    } catch (err) {
+      // Error handling
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
+      console.error('Authentication error:', err);
+    } finally {
       setIsLoading(false);
-      // TODO: Handle success/error responses
-    }, 2000);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -73,8 +118,42 @@ export function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name fields for registration */}
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-red-800">Authentication Failed</p>
+                      <p className="text-sm text-red-700 mt-1">{error}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-green-800">Success</p>
+                      <p className="text-sm text-green-700 mt-1">{success}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Registration fields */}
               {!isLogin && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -219,6 +298,8 @@ export function AuthPage() {
                   type="button"
                   onClick={() => {
                     setIsLogin(!isLogin);
+                    setError(null);
+                    setSuccess(null);
                     setFormData({
                       email: '',
                       password: '',
@@ -237,8 +318,6 @@ export function AuthPage() {
         </Card>
 
         {/* TODO: Add social login options */}
-        {/* TODO: Add error message display */}
-        {/* TODO: Add success message display */}
       </div>
     </div>
   );
