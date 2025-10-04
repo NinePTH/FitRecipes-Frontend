@@ -91,10 +91,10 @@ export async function logout(): Promise<void> {
 export async function getCurrentUser(): Promise<User> {
   try {
     const response = await api.get<User | { user: User }>('/api/v1/auth/me');
-    
+
     // Handle wrapped response: {user: {...}} or direct user object
     const userData = 'user' in response ? response.user : response;
-    
+
     setUser(userData);
     return userData;
   } catch (error) {

@@ -88,9 +88,7 @@ export function ResetPasswordPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
-            <CardDescription className="text-center">
-              Enter your new password below
-            </CardDescription>
+            <CardDescription className="text-center">Enter your new password below</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-6" onSubmit={handleSubmit}>
@@ -210,11 +208,7 @@ export function ResetPasswordPage() {
               </div>
 
               {/* Submit button */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || !!success || !token}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading || !!success || !token}>
                 {isLoading ? 'Resetting...' : 'Reset Password'}
               </Button>
             </form>

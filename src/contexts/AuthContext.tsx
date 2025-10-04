@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       authService.init();
-      
+
       if (authService.isAuthenticated()) {
         try {
           // Fetch fresh user data from backend
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           authService.init(); // This will clear token if invalid
         }
       }
-      
+
       setIsLoading(false);
     };
 

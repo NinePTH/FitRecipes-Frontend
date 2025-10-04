@@ -28,7 +28,7 @@ export function GoogleCallbackPage() {
       if (errorParam) {
         // Handle OAuth errors from backend
         let displayMessage = 'Google authentication failed.';
-        
+
         switch (errorParam) {
           case 'missing_code':
             displayMessage = 'Authorization code missing. Please try again.';
@@ -45,13 +45,13 @@ export function GoogleCallbackPage() {
           default:
             displayMessage = errorMessage || 'Authentication failed.';
         }
-        
+
         setError(displayMessage);
-        
+
         // Redirect to auth page with error
         setTimeout(() => {
-          navigate(`/auth?error=${errorParam}&message=${encodeURIComponent(displayMessage)}`, { 
-            replace: true 
+          navigate(`/auth?error=${errorParam}&message=${encodeURIComponent(displayMessage)}`, {
+            replace: true,
           });
         }, 2000);
         return;
@@ -122,11 +122,7 @@ export function GoogleCallbackPage() {
         {error ? (
           <div className="bg-white rounded-lg shadow-lg p-8 space-y-4">
             <div className="flex justify-center">
-              <svg
-                className="h-16 w-16 text-red-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+              <svg className="h-16 w-16 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
