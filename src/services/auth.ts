@@ -1,197 +1,299 @@
-import { apiClient } from './api';
-import type { User, LoginCredentials, RegisterData, AuthResponse } from '@/types';
+import * as api from './api';
+import type { ApiError } from './api';
+import type {
+  User,
+  LoginCredentials,
+  RegisterData,
+  AuthResponse,
+  ForgotPasswordData,
+  ResetPasswordData,
+  GoogleOAuthResponse,
+  GoogleOAuthCallbackData,
+} from '@/types';
 
-export class AuthService {
-  private static readonly TOKEN_KEY = 'fitrecipes_token';
-  private static readonly REFRESH_TOKEN_KEY = 'fitrecipes_refresh_token';
-  private static readonly USER_KEY = 'fitrecipes_user';
+const TOKEN_KEY = 'fitrecipes_token';
+const USER_KEY = 'fitrecipes_user';
 
-  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // TODO: Replace with actual API call
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
-      // Mock implementation
-      const mockResponse: AuthResponse = {
-        user: {
-          id: '1',
-          email: credentials.email,
-          firstName: 'John',
-          lastName: 'Doe',
-          role: 'user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        token: 'mock-jwt-token',
-        refreshToken: 'mock-refresh-token',
-      };
+function isApiError(error: unknown): error is ApiError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as ApiError).name === 'ApiError'
+  );
+}
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      this.setTokens(mockResponse.token, mockResponse.refreshToken);
-      this.setUser(mockResponse.user);
-      apiClient.setAuthToken(mockResponse.token);
-
-      return mockResponse;
+/**
+ * Register a new user
+ * Backend will send email verification
+ */
+export async function register(data: RegisterData): Promise<{ message: string }> {
+  try {
+    const response = await api.post<{ message: string }>('/api/v1/auth/register', data);
+    return response;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
     }
+    throw new Error('Registration failed. Please try again.');
+  }
+}
 
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    this.setTokens(response.token, response.refreshToken);
-    this.setUser(response.user);
-    apiClient.setAuthToken(response.token);
+/**
+ * Login with email and password
+ * Handles account lockout after 5 failed attempts
+ */
+export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
+  try {
+    const response = await api.post<AuthResponse>('/api/v1/auth/login', credentials);
+
+    // Store token and user data
+    setToken(response.token);
+    setUser(response.user);
+    api.setAuthToken(response.token);
 
     return response;
-  }
-
-  static async register(data: RegisterData): Promise<AuthResponse> {
-    // TODO: Replace with actual API call
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
-      // Mock implementation
-      const mockResponse: AuthResponse = {
-        user: {
-          id: '1',
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          role: 'user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        token: 'mock-jwt-token',
-        refreshToken: 'mock-refresh-token',
-      };
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      this.setTokens(mockResponse.token, mockResponse.refreshToken);
-      this.setUser(mockResponse.user);
-      apiClient.setAuthToken(mockResponse.token);
-
-      return mockResponse;
-    }
-
-    const response = await apiClient.post<AuthResponse>('/auth/register', data);
-    this.setTokens(response.token, response.refreshToken);
-    this.setUser(response.user);
-    apiClient.setAuthToken(response.token);
-
-    return response;
-  }
-
-  static async refreshToken(): Promise<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-
-    // TODO: Replace with actual API call
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
-      // Mock implementation - just return current user data
-      const user = this.getUser();
-      if (!user) {
-        throw new Error('No user data available');
+  } catch (error) {
+    if (isApiError(error)) {
+      // Check for specific error messages from backend
+      if (error.message.includes('locked')) {
+        throw new Error(error.message);
       }
-
-      const mockResponse: AuthResponse = {
-        user,
-        token: 'new-mock-jwt-token',
-        refreshToken: 'new-mock-refresh-token',
-      };
-
-      this.setTokens(mockResponse.token, mockResponse.refreshToken);
-      apiClient.setAuthToken(mockResponse.token);
-
-      return mockResponse;
+      if (error.message.includes('Google')) {
+        throw new Error(error.message);
+      }
+      throw new Error(error.message);
     }
+    throw new Error('Login failed. Please try again.');
+  }
+}
 
-    const response = await apiClient.post<AuthResponse>('/auth/refresh', {
-      refreshToken,
+/**
+ * Logout the current user
+ * Calls backend to invalidate session
+ */
+export async function logout(): Promise<void> {
+  try {
+    await api.post('/api/v1/auth/logout');
+  } catch (error) {
+    console.error('Logout API call failed:', error);
+  } finally {
+    // Always clear local data
+    clearToken();
+    clearUser();
+    api.removeAuthToken();
+  }
+}
+
+/**
+ * Get current authenticated user profile
+ */
+export async function getCurrentUser(): Promise<User> {
+  try {
+    const response = await api.get<User | { user: User }>('/api/v1/auth/me');
+    
+    // Handle wrapped response: {user: {...}} or direct user object
+    const userData = 'user' in response ? response.user : response;
+    
+    setUser(userData);
+    return userData;
+  } catch (error) {
+    // If token is invalid, clear auth data
+    clearToken();
+    clearUser();
+    api.removeAuthToken();
+
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to get user profile.');
+  }
+}
+
+/**
+ * Send password reset email
+ */
+export async function forgotPassword(data: ForgotPasswordData): Promise<{ message: string }> {
+  try {
+    const response = await api.post<{ message: string }>('/api/v1/auth/forgot-password', data);
+    return response;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to send password reset email. Please try again.');
+  }
+}
+
+/**
+ * Reset password with token from email
+ */
+export async function resetPassword(data: ResetPasswordData): Promise<{ message: string }> {
+  try {
+    const response = await api.post<{ message: string }>('/api/v1/auth/reset-password', data);
+    return response;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to reset password. Please try again.');
+  }
+}
+
+/**
+ * Initiate Google OAuth flow
+ * Returns authorization URL to redirect user to
+ */
+export async function initiateGoogleOAuth(): Promise<string> {
+  try {
+    const response = await api.get<GoogleOAuthResponse>('/api/v1/auth/google');
+    return response.authUrl;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to initiate Google login. Please try again.');
+  }
+}
+
+/**
+ * Handle Google OAuth callback
+ * Called after user authorizes with Google
+ */
+export async function handleGoogleCallback(data: GoogleOAuthCallbackData): Promise<AuthResponse> {
+  try {
+    const response = await api.get<AuthResponse>('/api/v1/auth/google/callback', {
+      code: data.code,
+      state: data.state,
     });
 
-    this.setTokens(response.token, response.refreshToken);
-    this.setUser(response.user);
-    apiClient.setAuthToken(response.token);
+    // Store token and user data
+    setToken(response.token);
+    setUser(response.user);
+    api.setAuthToken(response.token);
 
     return response;
-  }
-
-  static async logout(): Promise<void> {
-    // TODO: Call API to invalidate token
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'true') {
-      try {
-        await apiClient.post('/auth/logout');
-      } catch (error) {
-        console.error('Logout API call failed:', error);
-      }
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
     }
-
-    this.clearTokens();
-    this.clearUser();
-    apiClient.removeAuthToken();
+    throw new Error('Google login failed. Please try again.');
   }
+}
 
-  static async resetPassword(email: string): Promise<void> {
-    // TODO: Replace with actual API call
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Password reset email sent to:', email);
-      return;
+/**
+ * Google OAuth for mobile apps
+ */
+export async function googleMobileAuth(idToken: string): Promise<AuthResponse> {
+  try {
+    const response = await api.post<AuthResponse>('/api/v1/auth/google/mobile', {
+      idToken,
+    });
+
+    // Store token and user data
+    setToken(response.token);
+    setUser(response.user);
+    api.setAuthToken(response.token);
+
+    return response;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
     }
+    throw new Error('Google login failed. Please try again.');
+  }
+}
 
-    await apiClient.post('/auth/reset-password', { email });
+/**
+ * Get stored JWT token
+ */
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+/**
+ * Get stored user data
+ */
+export function getUser(): User | null {
+  const userData = localStorage.getItem(USER_KEY);
+  return userData ? JSON.parse(userData) : null;
+}
+
+/**
+ * Check if user is authenticated
+ */
+export function isAuthenticated(): boolean {
+  return !!getToken() && !!getUser();
+}
+
+/**
+ * Check if user has specific role
+ */
+export function hasRole(role: User['role']): boolean {
+  const user = getUser();
+  return user?.role === role;
+}
+
+/**
+ * Check if user has any of the specified roles
+ */
+export function hasAnyRole(roles: User['role'][]): boolean {
+  const user = getUser();
+  return user ? roles.includes(user.role) : false;
+}
+
+/**
+ * Store JWT token
+ */
+function setToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+/**
+ * Clear stored token
+ */
+function clearToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+/**
+ * Store user data
+ */
+function setUser(user: User): void {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+/**
+ * Clear stored user data
+ */
+function clearUser(): void {
+  localStorage.removeItem(USER_KEY);
+}
+
+/**
+ * Initialize auth on app startup
+ * Restores auth token if available
+ */
+export function init(): void {
+  const token = getToken();
+  if (token) {
+    api.setAuthToken(token);
+  }
+}
+
+/**
+ * Verify token is still valid by checking with backend
+ * Call this on app startup or after page refresh
+ */
+export async function verifyAuth(): Promise<boolean> {
+  if (!isAuthenticated()) {
+    return false;
   }
 
-  static getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  static getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
-  }
-
-  static getUser(): User | null {
-    const userData = localStorage.getItem(this.USER_KEY);
-    return userData ? JSON.parse(userData) : null;
-  }
-
-  static isAuthenticated(): boolean {
-    return !!this.getToken();
-  }
-
-  static hasRole(role: User['role']): boolean {
-    const user = this.getUser();
-    return user?.role === role;
-  }
-
-  static hasAnyRole(roles: User['role'][]): boolean {
-    const user = this.getUser();
-    return user ? roles.includes(user.role) : false;
-  }
-
-  private static setTokens(token: string, refreshToken: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-  }
-
-  private static clearTokens(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-  }
-
-  private static setUser(user: User): void {
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-  }
-
-  private static clearUser(): void {
-    localStorage.removeItem(this.USER_KEY);
-  }
-
-  // Initialize auth on app startup
-  static init(): void {
-    const token = this.getToken();
-    if (token) {
-      apiClient.setAuthToken(token);
-    }
+  try {
+    await getCurrentUser();
+    return true;
+  } catch {
+    return false;
   }
 }

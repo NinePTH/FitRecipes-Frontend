@@ -1,34 +1,33 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChefHat, User, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-// TODO: Replace with actual user state from authentication context
-// For development: Change role to test different navigation options
-// - 'user': Only sees "Browse Recipes"
-// - 'chef': Sees "Browse Recipes" + "Submit Recipe"
-// - 'admin': Sees "Browse Recipes" + "Submit Recipe" + "Recipe Approval"
-const mockUser = {
-  id: '1',
-  name: 'John Doe',
-  role: 'admin' as 'chef' | 'admin' | 'user', // Changed to admin to test both Submit Recipe and Recipe Approval
-  avatar: null,
-};
-
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    // TODO: Implement logout functionality
-    console.log('Logout clicked');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth', { replace: true });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,7 +52,7 @@ export function Layout({ children }: LayoutProps) {
                 Browse Recipes
               </Link>
 
-              {(mockUser.role === 'chef' || mockUser.role === 'admin') && (
+              {(user.role === 'CHEF' || user.role === 'ADMIN') && (
                 <>
                   <Link
                     to="/submit-recipe"
@@ -78,7 +77,7 @@ export function Layout({ children }: LayoutProps) {
                 </>
               )}
 
-              {mockUser.role === 'admin' && (
+              {user.role === 'ADMIN' && (
                 <Link
                   to="/admin"
                   className={`text-sm font-medium transition-colors ${
@@ -102,17 +101,25 @@ export function Layout({ children }: LayoutProps) {
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
 
-              {/* User Avatar & Dropdown - TODO: Implement dropdown */}
+              {/* User Avatar & Info */}
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary-600" />
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-5 w-5 text-primary-600" />
+                  )}
                 </div>
                 <span className="hidden md:block text-sm font-medium text-gray-900">
-                  {mockUser.name}
+                  {user.firstName} {user.lastName}
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -142,7 +149,7 @@ export function Layout({ children }: LayoutProps) {
                 Browse Recipes
               </Link>
 
-              {(mockUser.role === 'chef' || mockUser.role === 'admin') && (
+              {(user.role === 'CHEF' || user.role === 'ADMIN') && (
                 <>
                   <Link
                     to="/submit-recipe"
@@ -169,7 +176,7 @@ export function Layout({ children }: LayoutProps) {
                 </>
               )}
 
-              {mockUser.role === 'admin' && (
+              {user.role === 'ADMIN' && (
                 <Link
                   to="/admin"
                   className={`block text-base font-medium transition-colors ${
@@ -184,9 +191,19 @@ export function Layout({ children }: LayoutProps) {
               <div className="pt-4 border-t">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary-600" />
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-primary-600" />
+                    )}
                   </div>
-                  <span className="text-base font-medium text-gray-900">{mockUser.name}</span>
+                  <span className="text-base font-medium text-gray-900">
+                    {user.firstName} {user.lastName}
+                  </span>
                 </div>
                 <Button
                   variant="ghost"

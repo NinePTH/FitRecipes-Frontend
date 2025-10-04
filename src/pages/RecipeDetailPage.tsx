@@ -80,7 +80,7 @@ const mockRecipe: Recipe = {
         email: 'user1@example.com',
         firstName: 'Sarah',
         lastName: 'Johnson',
-        role: 'user',
+        role: 'USER',
         createdAt: '2025-01-10T09:00:00Z',
         updatedAt: '2025-01-10T09:00:00Z',
       },
@@ -97,7 +97,7 @@ const mockRecipe: Recipe = {
         email: 'chef2@example.com',
         firstName: 'David',
         lastName: 'Chen',
-        role: 'chef',
+        role: 'CHEF',
         createdAt: '2025-01-12T11:00:00Z',
         updatedAt: '2025-01-12T11:00:00Z',
       },
@@ -114,7 +114,7 @@ const mockRecipe: Recipe = {
         email: 'user2@example.com',
         firstName: 'Emma',
         lastName: 'Williams',
-        role: 'user',
+        role: 'USER',
         createdAt: '2025-01-14T16:00:00Z',
         updatedAt: '2025-01-14T16:00:00Z',
       },
@@ -131,7 +131,7 @@ const mockRecipe: Recipe = {
         email: 'user3@example.com',
         firstName: 'Michael',
         lastName: 'Brown',
-        role: 'user',
+        role: 'USER',
         createdAt: '2025-01-13T08:00:00Z',
         updatedAt: '2025-01-13T08:00:00Z',
       },
@@ -148,7 +148,7 @@ const mockRecipe: Recipe = {
         email: 'user4@example.com',
         firstName: 'Lisa',
         lastName: 'Davis',
-        role: 'user',
+        role: 'USER',
         createdAt: '2025-01-11T13:30:00Z',
         updatedAt: '2025-01-11T13:30:00Z',
       },
@@ -168,7 +168,7 @@ const mockRecipe: Recipe = {
     email: 'chef@example.com',
     firstName: 'Maria',
     lastName: 'Rodriguez',
-    role: 'chef',
+    role: 'CHEF',
     createdAt: '',
     updatedAt: '',
   },
@@ -227,7 +227,7 @@ export function RecipeDetailPage() {
             email: 'currentuser@example.com',
             firstName: 'Current',
             lastName: 'User',
-            role: 'user' as const,
+            role: 'USER' as const,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           },
@@ -606,7 +606,7 @@ export function RecipeDetailPage() {
                             <h4 className="text-sm font-semibold text-gray-900">
                               {comment.user.firstName} {comment.user.lastName}
                             </h4>
-                            {comment.user.role === 'chef' && (
+                            {comment.user.role === 'CHEF' && (
                               <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
                                 Chef
                               </span>

@@ -48,7 +48,7 @@ const mockRecipes: Recipe[] = [
       email: 'chef@example.com',
       firstName: 'Maria',
       lastName: 'Rodriguez',
-      role: 'chef',
+      role: 'CHEF',
       createdAt: '',
       updatedAt: '',
     },

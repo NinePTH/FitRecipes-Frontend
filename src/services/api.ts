@@ -1,137 +1,171 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+import type { BackendResponse } from '@/types';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
 
-export interface ApiConfig {
+interface ApiConfig {
   baseURL: string;
   timeout: number;
   headers: Record<string, string>;
 }
 
-export class ApiClient {
-  private config: ApiConfig;
+export interface ApiError {
+  name: string;
+  message: string;
+  statusCode?: number;
+  errors?: Array<{ code: string; message: string; path?: string[] }>;
+}
 
-  constructor(config?: Partial<ApiConfig>) {
-    this.config = {
-      baseURL: API_BASE_URL,
-      timeout: API_TIMEOUT,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...config,
-    };
-  }
+function createApiError(
+  message: string,
+  statusCode?: number,
+  errors?: Array<{ code: string; message: string; path?: string[] }>
+): ApiError {
+  return {
+    name: 'ApiError',
+    message,
+    statusCode,
+    errors,
+  };
+}
 
-  setAuthToken(token: string) {
-    this.config.headers['Authorization'] = `Bearer ${token}`;
-  }
+// Global config
+const config: ApiConfig = {
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+};
 
-  removeAuthToken() {
-    delete this.config.headers['Authorization'];
-  }
+export function setAuthToken(token: string): void {
+  config.headers['Authorization'] = `Bearer ${token}`;
+}
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.config.baseURL}${endpoint}`;
+export function removeAuthToken(): void {
+  delete config.headers['Authorization'];
+}
 
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        ...this.config.headers,
-        ...options.headers,
-      },
-    };
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = `${config.baseURL}${endpoint}`;
 
-    // Add timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
-    config.signal = controller.signal;
+  const fetchConfig: RequestInit = {
+    ...options,
+    headers: {
+      ...config.headers,
+      ...options.headers,
+    },
+  };
 
-    try {
-      const response = await fetch(url, config);
-      clearTimeout(timeoutId);
+  // Add timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+  fetchConfig.signal = controller.signal;
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  try {
+    const response = await fetch(url, fetchConfig);
+    clearTimeout(timeoutId);
 
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      } else {
-        return response.text() as unknown as T;
-      }
-    } catch (error) {
-      clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request timeout');
-      }
+    const contentType = response.headers.get('content-type');
+    let data: BackendResponse<T>;
+
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      // If response is not JSON, handle as error
+      throw createApiError(`Unexpected response type: ${contentType}`, response.status);
+    }
+
+    // Handle backend error response
+    if (data.status === 'error' || !response.ok) {
+      throw createApiError(
+        data.message || `HTTP error! status: ${response.status}`,
+        response.status,
+        data.errors
+      );
+    }
+
+    // Return the data field from successful response
+    return data.data as T;
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ApiError') {
       throw error;
     }
-  }
 
-  async get<T>(endpoint: string, params?: Record<string, unknown>): Promise<T> {
-    const url = new URL(endpoint, this.config.baseURL);
-    if (params) {
-      Object.keys(params).forEach(key => {
-        if (params[key] !== undefined && params[key] !== null) {
-          url.searchParams.append(key, String(params[key]));
-        }
-      });
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw createApiError('Request timeout');
     }
 
-    return this.request<T>(url.pathname + url.search);
-  }
-
-  async post<T>(endpoint: string, data?: unknown): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  async put<T>(endpoint: string, data?: unknown): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  async patch<T>(endpoint: string, data?: unknown): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'DELETE',
-    });
-  }
-
-  async uploadFile<T>(
-    endpoint: string,
-    file: File,
-    additionalData?: Record<string, unknown>
-  ): Promise<T> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    if (additionalData) {
-      Object.keys(additionalData).forEach(key => {
-        formData.append(key, String(additionalData[key]));
-      });
+    if (error instanceof Error) {
+      throw createApiError(error.message);
     }
 
-    const headers = { ...this.config.headers };
-    delete headers['Content-Type']; // Let browser set it for FormData
-
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      body: formData,
-      headers,
-    });
+    throw createApiError('An unexpected error occurred');
   }
 }
 
-// Global API client instance
-export const apiClient = new ApiClient();
+export async function get<T>(endpoint: string, params?: Record<string, unknown>): Promise<T> {
+  const url = new URL(endpoint, config.baseURL);
+  if (params) {
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        url.searchParams.append(key, String(params[key]));
+      }
+    });
+  }
+
+  return request<T>(url.pathname + url.search);
+}
+
+export async function post<T>(endpoint: string, data?: unknown): Promise<T> {
+  return request<T>(endpoint, {
+    method: 'POST',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+}
+
+export async function put<T>(endpoint: string, data?: unknown): Promise<T> {
+  return request<T>(endpoint, {
+    method: 'PUT',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+}
+
+export async function patch<T>(endpoint: string, data?: unknown): Promise<T> {
+  return request<T>(endpoint, {
+    method: 'PATCH',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+}
+
+export async function deleteRequest<T>(endpoint: string): Promise<T> {
+  return request<T>(endpoint, {
+    method: 'DELETE',
+  });
+}
+
+export async function uploadFile<T>(
+  endpoint: string,
+  file: File,
+  additionalData?: Record<string, unknown>
+): Promise<T> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (additionalData) {
+    Object.keys(additionalData).forEach(key => {
+      formData.append(key, String(additionalData[key]));
+    });
+  }
+
+  const headers = { ...config.headers };
+  delete headers['Content-Type']; // Let browser set it for FormData
+
+  return request<T>(endpoint, {
+    method: 'POST',
+    body: formData,
+    headers,
+  });
+}

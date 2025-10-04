@@ -4,16 +4,31 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'user' | 'chef' | 'admin';
+  role: 'USER' | 'CHEF' | 'ADMIN';
   avatar?: string;
+  isEmailVerified?: boolean;
+  isOAuthUser?: boolean;
+  failedLoginAttempts?: number;
+  lockoutUntil?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// Backend API Response Format
+export interface BackendResponse<T = unknown> {
+  status: 'success' | 'error';
+  data: T | null;
+  message: string;
+  errors?: Array<{
+    code: string;
+    message: string;
+    path?: string[];
+  }>;
 }
 
 export interface AuthResponse {
   user: User;
   token: string;
-  refreshToken: string;
 }
 
 export interface LoginCredentials {
@@ -27,6 +42,25 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   agreeToTerms: boolean;
+}
+
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  token: string;
+  newPassword: string;
+}
+
+export interface GoogleOAuthResponse {
+  authUrl: string;
+  state: string;
+}
+
+export interface GoogleOAuthCallbackData {
+  code: string;
+  state: string;
 }
 
 // Recipe Types
