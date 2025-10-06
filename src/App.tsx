@@ -5,6 +5,8 @@ import { AuthPage } from '@/pages/AuthPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { GoogleCallbackPage } from '@/pages/GoogleCallbackPage';
+import VerifyEmailPage from '@/pages/VerifyEmailPage';
+import ResendVerificationPage from '@/pages/ResendVerificationPage';
 import { BrowseRecipesPage } from '@/pages/BrowseRecipesPage';
 import { RecipeDetailPage } from '@/pages/RecipeDetailPage';
 import { RecipeSubmissionPage } from '@/pages/RecipeSubmissionPage';
@@ -22,6 +24,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth/callback" element={<GoogleCallbackPage />} />
+            <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+            <Route path="/resend-verification" element={<ResendVerificationPage />} />
 
             {/* Protected Routes - All authenticated users */}
             <Route

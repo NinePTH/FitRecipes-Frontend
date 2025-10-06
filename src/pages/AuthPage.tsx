@@ -104,7 +104,7 @@ export function AuthPage() {
         });
 
         setSuccess(
-          'Registration successful! Please check your email to verify your account before signing in.'
+          'Registration successful! We\'ve sent a verification link to your email. Please verify your account before signing in.'
         );
 
         // Clear form and switch to login after registration
@@ -118,7 +118,7 @@ export function AuthPage() {
             agreeToTerms: false,
           });
           setSuccess(null);
-        }, 3000);
+        }, 5000); // Extended timeout to give user time to read
       }
     } catch (err) {
       const errorMessage =
@@ -214,9 +214,20 @@ export function AuthPage() {
                         />
                       </svg>
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-medium text-green-800">Success</p>
                       <p className="text-sm text-green-700 mt-1">{success}</p>
+                      {!isLogin && (
+                        <p className="text-sm text-green-700 mt-2">
+                          Didn't receive the email?{' '}
+                          <Link
+                            to="/resend-verification"
+                            className="font-medium underline hover:text-green-900"
+                          >
+                            Resend verification link
+                          </Link>
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -356,12 +367,18 @@ export function AuthPage() {
 
               {/* Forgot password link for login */}
               {isLogin && (
-                <div className="text-center">
+                <div className="text-center space-y-2">
                   <Link
                     to="/forgot-password"
-                    className="text-sm text-primary-600 hover:text-primary-700 underline"
+                    className="text-sm text-primary-600 hover:text-primary-700 underline block"
                   >
                     Forgot your password?
+                  </Link>
+                  <Link
+                    to="/resend-verification"
+                    className="text-sm text-primary-600 hover:text-primary-700 underline block"
+                  >
+                    Didn't receive verification email?
                   </Link>
                 </div>
               )}

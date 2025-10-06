@@ -20,6 +20,7 @@ export function ForgotPasswordPage() {
 
     try {
       const response = await authService.forgotPassword({ email });
+      console.log('Forgot password response:', response);
       setSuccess(response.message || 'Password reset email sent! Please check your inbox.');
       setEmail(''); // Clear email field on success
     } catch (err) {

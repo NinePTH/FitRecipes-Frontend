@@ -98,6 +98,61 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       throw createApiError('Request timeout');
     }
 
+    throw createApiError('Network error');
+  }
+}
+
+async function requestWithMessage<T>(endpoint: string, options: RequestInit = {}): Promise<{ data: T; message: string }> {
+  const url = `${config.baseURL}${endpoint}`;
+
+  const fetchConfig: RequestInit = {
+    ...options,
+    headers: {
+      ...config.headers,
+      ...options.headers,
+    },
+  };
+
+  // Add timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+  fetchConfig.signal = controller.signal;
+
+  try {
+    const response = await fetch(url, fetchConfig);
+    clearTimeout(timeoutId);
+
+    const contentType = response.headers.get('content-type');
+    let backendResponse: BackendResponse<T>;
+
+    if (contentType && contentType.includes('application/json')) {
+      backendResponse = await response.json();
+    } else {
+      throw createApiError(`Unexpected response type: ${contentType}`, response.status);
+    }
+
+    // Handle backend error response
+    if (backendResponse.status === 'error' || !response.ok) {
+      throw createApiError(
+        backendResponse.message || `HTTP error! status: ${response.status}`,
+        response.status,
+        backendResponse.errors
+      );
+    }
+
+    // Return both data and message
+    return { data: backendResponse.data as T, message: backendResponse.message };
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ApiError') {
+      throw error;
+    }
+
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw createApiError('Request timeout');
+    }
+
     if (error instanceof Error) {
       throw createApiError(error.message);
     }
@@ -121,6 +176,13 @@ export async function get<T>(endpoint: string, params?: Record<string, unknown>)
 
 export async function post<T>(endpoint: string, data?: unknown): Promise<T> {
   return request<T>(endpoint, {
+    method: 'POST',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+}
+
+export async function postWithMessage<T>(endpoint: string, data?: unknown): Promise<{ data: T; message: string }> {
+  return requestWithMessage<T>(endpoint, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
   });

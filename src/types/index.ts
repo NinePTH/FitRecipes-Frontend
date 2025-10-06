@@ -63,6 +63,10 @@ export interface GoogleOAuthCallbackData {
   state: string;
 }
 
+export interface ResendVerificationData {
+  email: string;
+}
+
 // Recipe Types
 export interface Recipe {
   id: string;

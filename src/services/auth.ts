@@ -115,8 +115,8 @@ export async function getCurrentUser(): Promise<User> {
  */
 export async function forgotPassword(data: ForgotPasswordData): Promise<{ message: string }> {
   try {
-    const response = await api.post<{ message: string }>('/api/v1/auth/forgot-password', data);
-    return response;
+    const response = await api.postWithMessage<null>('/api/v1/auth/forgot-password', data);
+    return { message: response.message };
   } catch (error) {
     if (isApiError(error)) {
       throw new Error(error.message);
@@ -130,8 +130,8 @@ export async function forgotPassword(data: ForgotPasswordData): Promise<{ messag
  */
 export async function resetPassword(data: ResetPasswordData): Promise<{ message: string }> {
   try {
-    const response = await api.post<{ message: string }>('/api/v1/auth/reset-password', data);
-    return response;
+    const response = await api.postWithMessage<null>('/api/v1/auth/reset-password', data);
+    return { message: response.message };
   } catch (error) {
     if (isApiError(error)) {
       throw new Error(error.message);
@@ -201,6 +201,43 @@ export async function googleMobileAuth(idToken: string): Promise<AuthResponse> {
       throw new Error(error.message);
     }
     throw new Error('Google login failed. Please try again.');
+  }
+}
+
+/**
+ * Verify email with token from email link
+ * Token is extracted from URL: /verify-email/:token
+ */
+export async function verifyEmail(token: string): Promise<string> {
+  try {
+    const response = await api.get<{ message: string }>(
+      `/api/v1/auth/verify-email/${token}`
+    );
+    console.log(response);
+    return response.message;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Email verification failed. Please try again or request a new verification link.');
+  }
+}
+
+/**
+ * Resend email verification link
+ * Sends new verification email to the provided address
+ */
+export async function resendVerification(email: string): Promise<string> {
+  try {
+    const { message } = await api.postWithMessage<null>('/api/v1/auth/resend-verification', {
+      email,
+    });
+    return message;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to resend verification email. Please try again.');
   }
 }
 
