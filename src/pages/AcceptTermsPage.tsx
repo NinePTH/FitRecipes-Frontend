@@ -35,10 +35,10 @@ export function AcceptTermsPage() {
     try {
       const message = await authService.acceptTerms();
       console.log('✅ Terms accepted:', message);
-      
+
       // Refresh user data to update termsAccepted field
       await refreshUser();
-      
+
       // Redirect to intended page or home
       const intendedPath = (location.state as { from?: string })?.from || '/';
       navigate(intendedPath, { replace: true });
@@ -59,12 +59,12 @@ export function AcceptTermsPage() {
     try {
       const message = await authService.declineTerms();
       console.log('✅ Terms declined:', message);
-      
+
       // Redirect to auth page (user is already logged out by declineTerms)
       navigate('/auth', { replace: true });
     } catch (err) {
       console.error('Decline terms error:', err);
-      
+
       // Still redirect to auth page even if API fails (user is logged out anyway)
       navigate('/auth', { replace: true });
     }
@@ -127,9 +127,7 @@ export function AcceptTermsPage() {
                   <li>Your personal data will be handled according to our Privacy Policy</li>
                 </ul>
 
-                <h4 className="text-base font-semibold text-gray-900 mt-6 mb-2">
-                  Privacy Policy
-                </h4>
+                <h4 className="text-base font-semibold text-gray-900 mt-6 mb-2">Privacy Policy</h4>
                 <p>
                   We collect and process your personal information to provide you with our services.
                   This includes:
@@ -154,7 +152,7 @@ export function AcceptTermsPage() {
                 name="agreeToTerms"
                 type="checkbox"
                 checked={agreeToTerms}
-                onChange={(e) => {
+                onChange={e => {
                   setAgreeToTerms(e.target.checked);
                   if (error) setError(null);
                 }}
@@ -163,11 +161,17 @@ export function AcceptTermsPage() {
               />
               <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
                 I have read and agree to the{' '}
-                <a href="/accept-terms" className="text-primary-600 hover:text-primary-700 underline">
+                <a
+                  href="/accept-terms"
+                  className="text-primary-600 hover:text-primary-700 underline"
+                >
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="/accept-terms" className="text-primary-600 hover:text-primary-700 underline">
+                <a
+                  href="/accept-terms"
+                  className="text-primary-600 hover:text-primary-700 underline"
+                >
                   Privacy Policy
                 </a>
               </label>

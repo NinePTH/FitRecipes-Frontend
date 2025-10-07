@@ -13,7 +13,7 @@ export default function ResendVerificationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !email.includes('@')) {
       setStatus('error');
       setMessage('Please enter a valid email address');
@@ -41,9 +41,7 @@ export default function ResendVerificationPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Resend Verification Email
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Resend Verification Email</h1>
           <p className="text-gray-600">
             Enter your email address to receive a new verification link
           </p>
@@ -60,7 +58,7 @@ export default function ResendVerificationPage() {
               type="email"
               placeholder="your@email.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
               disabled={isLoading}
               className="w-full"
@@ -114,11 +112,7 @@ export default function ResendVerificationPage() {
           )}
 
           {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? 'Sending...' : 'Send Verification Email'}
           </Button>
         </form>

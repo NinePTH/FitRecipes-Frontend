@@ -104,7 +104,7 @@ export function AuthPage() {
         });
 
         setSuccess(
-          'Registration successful! We\'ve sent a verification link to your email. Please verify your account before signing in.'
+          "Registration successful! We've sent a verification link to your email. Please verify your account before signing in."
         );
 
         // Clear form and switch to login after registration

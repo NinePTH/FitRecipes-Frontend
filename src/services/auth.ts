@@ -51,7 +51,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
     // Extract user and token from response
     const authData: AuthResponse = {
       user: response.user,
-      token: response.token
+      token: response.token,
     };
 
     // Store token and user data (now includes termsAccepted and isOAuthUser)
@@ -190,7 +190,7 @@ export async function handleGoogleCallback(data: GoogleOAuthCallbackData): Promi
     // Extract user and token from response
     const authData: AuthResponse = {
       user: response.user,
-      token: response.token
+      token: response.token,
     };
 
     // Store token and user data (now includes termsAccepted and isOAuthUser)
@@ -220,7 +220,7 @@ export async function googleMobileAuth(idToken: string): Promise<AuthResponse> {
     // Extract user and token from response
     const authData: AuthResponse = {
       user: response.user,
-      token: response.token
+      token: response.token,
     };
 
     // Store token and user data (now includes termsAccepted and isOAuthUser)
@@ -243,16 +243,16 @@ export async function googleMobileAuth(idToken: string): Promise<AuthResponse> {
  */
 export async function verifyEmail(token: string): Promise<string> {
   try {
-    const response = await api.get<{ message: string }>(
-      `/api/v1/auth/verify-email/${token}`
-    );
+    const response = await api.get<{ message: string }>(`/api/v1/auth/verify-email/${token}`);
     console.log(response);
     return response.message;
   } catch (error) {
     if (isApiError(error)) {
       throw new Error(error.message);
     }
-    throw new Error('Email verification failed. Please try again or request a new verification link.');
+    throw new Error(
+      'Email verification failed. Please try again or request a new verification link.'
+    );
   }
 }
 
@@ -281,14 +281,14 @@ export async function resendVerification(email: string): Promise<string> {
 export async function acceptTerms(): Promise<string> {
   try {
     const { message } = await api.postWithMessage<null>('/api/v1/auth/terms/accept', {});
-    
+
     // Update stored user data to reflect accepted terms
     const user = getUser();
     if (user) {
       user.termsAccepted = true;
       setUser(user);
     }
-    
+
     return message;
   } catch (error) {
     if (isApiError(error)) {
@@ -305,19 +305,19 @@ export async function acceptTerms(): Promise<string> {
 export async function declineTerms(): Promise<string> {
   try {
     const { message } = await api.postWithMessage<null>('/api/v1/auth/terms/decline', {});
-    
+
     // Clear local data after declining
     clearToken();
     clearUser();
     api.removeAuthToken();
-    
+
     return message;
   } catch (error) {
     // Even if API fails, still clear local data
     clearToken();
     clearUser();
     api.removeAuthToken();
-    
+
     if (isApiError(error)) {
       throw new Error(error.message);
     }

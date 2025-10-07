@@ -102,7 +102,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 }
 
-async function requestWithMessage<T>(endpoint: string, options: RequestInit = {}): Promise<{ data: T; message: string }> {
+async function requestWithMessage<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<{ data: T; message: string }> {
   const url = `${config.baseURL}${endpoint}`;
 
   const fetchConfig: RequestInit = {
@@ -181,7 +184,10 @@ export async function post<T>(endpoint: string, data?: unknown): Promise<T> {
   });
 }
 
-export async function postWithMessage<T>(endpoint: string, data?: unknown): Promise<{ data: T; message: string }> {
+export async function postWithMessage<T>(
+  endpoint: string,
+  data?: unknown
+): Promise<{ data: T; message: string }> {
   return requestWithMessage<T>(endpoint, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,

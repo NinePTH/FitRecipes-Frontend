@@ -55,7 +55,7 @@ export default function VerifyEmailPage() {
     }
 
     const id = setInterval(() => {
-      setSecondsLeft((s) => (s !== null ? s - 1 : s));
+      setSecondsLeft(s => (s !== null ? s - 1 : s));
     }, 1000);
 
     return () => clearInterval(id);
@@ -71,12 +71,8 @@ export default function VerifyEmailPage() {
               <div className="mb-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Verifying Your Email
-              </h1>
-              <p className="text-gray-600">
-                Please wait while we verify your email address...
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Verifying Your Email</h1>
+              <p className="text-gray-600">Please wait while we verify your email address...</p>
             </>
           )}
 
@@ -109,10 +105,7 @@ export default function VerifyEmailPage() {
               <p className="text-sm text-gray-500 mb-4">
                 Redirecting to login page in {secondsLeft} seconds...
               </p>
-              <Button
-                onClick={() => navigate('/auth')}
-                className="w-full"
-              >
+              <Button onClick={() => navigate('/auth')} className="w-full">
                 Go to Login
               </Button>
             </>
@@ -138,29 +131,16 @@ export default function VerifyEmailPage() {
                   </svg>
                 </div>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Verification Failed
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h1>
               <p className="text-red-600 mb-6">
                 {message || 'Email verification failed. The link may be invalid or expired.'}
               </p>
               <div className="space-y-3">
-                <Button
-                  asChild
-                  className="w-full"
-                >
-                  <Link to="/resend-verification">
-                    Request New Verification Link
-                  </Link>
+                <Button asChild className="w-full">
+                  <Link to="/resend-verification">Request New Verification Link</Link>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Link to="/auth">
-                    Back to Login
-                  </Link>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/auth">Back to Login</Link>
                 </Button>
               </div>
             </>

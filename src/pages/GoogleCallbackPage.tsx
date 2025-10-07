@@ -22,7 +22,7 @@ export function GoogleCallbackPage() {
       const role = searchParams.get('role') as User['role'] | null;
       const termsAcceptedParam = searchParams.get('termsAccepted');
       const isOAuthUserParam = searchParams.get('isOAuthUser');
-      
+
       // Parse boolean fields from URL parameters
       const termsAccepted = termsAcceptedParam === 'true';
       const isOAuthUser = isOAuthUserParam === 'true';
