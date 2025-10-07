@@ -1,10 +1,13 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AuthPage } from '@/pages/AuthPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { GoogleCallbackPage } from '@/pages/GoogleCallbackPage';
+import { AcceptTermsPage } from '@/pages/AcceptTermsPage';
+import { TermsViewPage } from '@/pages/TermsViewPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 import VerifyEmailPage from '@/pages/VerifyEmailPage';
 import ResendVerificationPage from '@/pages/ResendVerificationPage';
 import { BrowseRecipesPage } from '@/pages/BrowseRecipesPage';
@@ -24,6 +27,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth/callback" element={<GoogleCallbackPage />} />
+            <Route path="/accept-terms" element={<AcceptTermsPage />} />
+            <Route path="/terms" element={<TermsViewPage />} />
             <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
             <Route path="/resend-verification" element={<ResendVerificationPage />} />
 
@@ -73,8 +78,8 @@ function App() {
               }
             />
 
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch all - 404 Not Found */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </AuthProvider>

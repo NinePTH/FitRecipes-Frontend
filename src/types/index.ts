@@ -8,6 +8,7 @@ export interface User {
   avatar?: string;
   isEmailVerified?: boolean;
   isOAuthUser?: boolean;
+  termsAccepted?: boolean;
   failedLoginAttempts?: number;
   lockoutUntil?: string | null;
   createdAt: string;

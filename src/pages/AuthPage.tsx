@@ -344,14 +344,15 @@ export function AuthPage() {
                     disabled={isLoading}
                   />
                   <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
-                    I agree to the{' '}
-                    <a href="#" className="text-primary-600 hover:text-primary-700 underline">
-                      Terms of Service
-                    </a>{' '}
-                    and{' '}
-                    <a href="#" className="text-primary-600 hover:text-primary-700 underline">
-                      Privacy Policy
-                    </a>
+                    I have read and agree to the{' '}
+                    <Link
+                      to="/terms"
+                      className="text-primary-600 hover:text-primary-700 underline"
+                      // target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Terms of Service and Privacy Policy
+                    </Link>
                   </label>
                 </div>
               )}

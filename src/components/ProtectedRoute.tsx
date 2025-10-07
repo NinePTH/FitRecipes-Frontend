@@ -29,6 +29,11 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 
+  // Check if OAuth user has accepted terms
+  if (user?.isOAuthUser && !user.termsAccepted) {
+    return <Navigate to="/accept-terms" state={{ from: location.pathname }} replace />;
+  }
+
   // Check role-based access if required roles are specified
   if (requiredRoles && requiredRoles.length > 0) {
     const hasRequiredRole = user && requiredRoles.includes(user.role);

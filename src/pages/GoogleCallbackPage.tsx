@@ -20,6 +20,12 @@ export function GoogleCallbackPage() {
       const firstName = searchParams.get('firstName');
       const lastName = searchParams.get('lastName');
       const role = searchParams.get('role') as User['role'] | null;
+      const termsAcceptedParam = searchParams.get('termsAccepted');
+      const isOAuthUserParam = searchParams.get('isOAuthUser');
+      
+      // Parse boolean fields from URL parameters
+      const termsAccepted = termsAcceptedParam === 'true';
+      const isOAuthUser = isOAuthUserParam === 'true';
 
       // Check if this is an error redirect from backend
       const errorParam = searchParams.get('error');
@@ -77,8 +83,9 @@ export function GoogleCallbackPage() {
           firstName: firstName,
           lastName: lastName || '',
           role: role,
-          isOAuthUser: true,
-          isEmailVerified: true, // OAuth users are pre-verified
+          isOAuthUser: isOAuthUser,
+          isEmailVerified: true,
+          termsAccepted: termsAccepted,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -86,17 +93,20 @@ export function GoogleCallbackPage() {
         // Store user data
         localStorage.setItem(USER_KEY, JSON.stringify(user));
 
-        console.log('✅ Google OAuth successful:', user);
+        // Check if user has accepted terms
+        if (!termsAccepted) {
+          setTimeout(() => {
+            navigate('/accept-terms', { replace: true });
+          }, 1000);
+          return;
+        }
 
-        // Get intended destination or default to home
-        const intendedPath = sessionStorage.getItem('oauth_redirect') || '/browse';
+        // User has already accepted terms
+        const intendedPath = sessionStorage.getItem('oauth_redirect') || '/';
         sessionStorage.removeItem('oauth_redirect');
 
-        // Redirect to destination
         setTimeout(() => {
           navigate(intendedPath, { replace: true });
-          // Force page reload to update auth context
-          window.location.reload();
         }, 1000);
       } catch (err) {
         console.error('Failed to process OAuth callback:', err);

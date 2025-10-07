@@ -47,12 +47,19 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
   try {
     const response = await api.post<AuthResponse>('/api/v1/auth/login', credentials);
 
-    // Store token and user data
-    setToken(response.token);
-    setUser(response.user);
-    api.setAuthToken(response.token);
+    // Backend now returns nested structure: { user: {...}, token: "..." }
+    // Extract user and token from response
+    const authData: AuthResponse = {
+      user: response.user,
+      token: response.token
+    };
 
-    return response;
+    // Store token and user data (now includes termsAccepted and isOAuthUser)
+    setToken(authData.token);
+    setUser(authData.user);
+    api.setAuthToken(authData.token);
+
+    return authData;
   } catch (error) {
     if (isApiError(error)) {
       // Check for specific error messages from backend
@@ -94,6 +101,18 @@ export async function getCurrentUser(): Promise<User> {
 
     // Handle wrapped response: {user: {...}} or direct user object
     const userData = 'user' in response ? response.user : response;
+
+    // Preserve OAuth-specific fields from localStorage if backend doesn't provide them
+    const existingUser = getUser();
+    if (existingUser) {
+      // If backend doesn't return termsAccepted/isOAuthUser, keep existing values
+      if (userData.termsAccepted === undefined && existingUser.termsAccepted !== undefined) {
+        userData.termsAccepted = existingUser.termsAccepted;
+      }
+      if (userData.isOAuthUser === undefined && existingUser.isOAuthUser !== undefined) {
+        userData.isOAuthUser = existingUser.isOAuthUser;
+      }
+    }
 
     setUser(userData);
     return userData;
@@ -167,12 +186,19 @@ export async function handleGoogleCallback(data: GoogleOAuthCallbackData): Promi
       state: data.state,
     });
 
-    // Store token and user data
-    setToken(response.token);
-    setUser(response.user);
-    api.setAuthToken(response.token);
+    // Backend now returns nested structure: { user: {...}, token: "..." }
+    // Extract user and token from response
+    const authData: AuthResponse = {
+      user: response.user,
+      token: response.token
+    };
 
-    return response;
+    // Store token and user data (now includes termsAccepted and isOAuthUser)
+    setToken(authData.token);
+    setUser(authData.user);
+    api.setAuthToken(authData.token);
+
+    return authData;
   } catch (error) {
     if (isApiError(error)) {
       throw new Error(error.message);
@@ -190,12 +216,19 @@ export async function googleMobileAuth(idToken: string): Promise<AuthResponse> {
       idToken,
     });
 
-    // Store token and user data
-    setToken(response.token);
-    setUser(response.user);
-    api.setAuthToken(response.token);
+    // Backend now returns nested structure: { user: {...}, token: "..." }
+    // Extract user and token from response
+    const authData: AuthResponse = {
+      user: response.user,
+      token: response.token
+    };
 
-    return response;
+    // Store token and user data (now includes termsAccepted and isOAuthUser)
+    setToken(authData.token);
+    setUser(authData.user);
+    api.setAuthToken(authData.token);
+
+    return authData;
   } catch (error) {
     if (isApiError(error)) {
       throw new Error(error.message);
@@ -238,6 +271,57 @@ export async function resendVerification(email: string): Promise<string> {
       throw new Error(error.message);
     }
     throw new Error('Failed to resend verification email. Please try again.');
+  }
+}
+
+/**
+ * Accept Terms of Service
+ * Updates user's termsAccepted status to true
+ */
+export async function acceptTerms(): Promise<string> {
+  try {
+    const { message } = await api.postWithMessage<null>('/api/v1/auth/terms/accept', {});
+    
+    // Update stored user data to reflect accepted terms
+    const user = getUser();
+    if (user) {
+      user.termsAccepted = true;
+      setUser(user);
+    }
+    
+    return message;
+  } catch (error) {
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to accept terms. Please try again.');
+  }
+}
+
+/**
+ * Decline Terms of Service
+ * Logs out the user and invalidates their session
+ */
+export async function declineTerms(): Promise<string> {
+  try {
+    const { message } = await api.postWithMessage<null>('/api/v1/auth/terms/decline', {});
+    
+    // Clear local data after declining
+    clearToken();
+    clearUser();
+    api.removeAuthToken();
+    
+    return message;
+  } catch (error) {
+    // Even if API fails, still clear local data
+    clearToken();
+    clearUser();
+    api.removeAuthToken();
+    
+    if (isApiError(error)) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to decline terms. You have been logged out.');
   }
 }
 
