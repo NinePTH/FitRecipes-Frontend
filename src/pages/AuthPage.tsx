@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { ChefHat, Eye, EyeOff, Mail, Lock, User, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import * as authService from '@/services/auth';
 
 export function AuthPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { login: contextLogin } = useAuth();
+  const from = (location.state as { from?: string })?.from || '/';
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +28,38 @@ export function AuthPage() {
     lastName: '',
     agreeToTerms: false,
   });
+
+  // Check for OAuth errors in URL parameters
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    const oauthMessage = searchParams.get('message');
+
+    if (oauthError) {
+      let displayMessage = 'Google authentication failed.';
+
+      switch (oauthError) {
+        case 'missing_code':
+          displayMessage = 'Authorization code missing. Please try again.';
+          break;
+        case 'oauth_failed':
+          displayMessage = oauthMessage || 'Google authentication failed. Please try again.';
+          break;
+        case 'oauth_not_implemented':
+          displayMessage = 'OAuth service is currently unavailable.';
+          break;
+        case 'invalid_callback':
+          displayMessage = 'Invalid authentication response.';
+          break;
+        default:
+          displayMessage = oauthMessage || 'Authentication failed.';
+      }
+
+      setError(displayMessage);
+
+      // Clear error from URL after displaying
+      window.history.replaceState({}, '', '/auth');
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -43,50 +83,44 @@ export function AuthPage() {
     setSuccess(null);
 
     try {
-      // Simulate API call with validation
-      await new Promise((resolve, reject) => {
+      if (isLogin) {
+        // Login flow - use AuthContext login to update global state
+        await contextLogin(formData.email, formData.password);
+
+        setSuccess(`Welcome back!`);
+
+        // Redirect after successful login
         setTimeout(() => {
-          // Simulate invalid credentials
-          if (isLogin) {
-            if (formData.email === 'invalid@example.com' || formData.password === 'wrong') {
-              reject(
-                new Error('Invalid email or password. Please check your credentials and try again.')
-              );
-            } else if (formData.email === 'blocked@example.com') {
-              reject(
-                new Error('Your account has been temporarily locked. Please try again later.')
-              );
-            } else {
-              resolve('Login successful');
-            }
-          } else {
-            // Registration validation
-            if (formData.email === 'existing@example.com') {
-              reject(
-                new Error('An account with this email already exists. Please sign in instead.')
-              );
-            } else if (formData.password.length < 6) {
-              reject(new Error('Password must be at least 6 characters long.'));
-            } else if (!formData.agreeToTerms) {
-              reject(new Error('You must agree to the Terms and Conditions to create an account.'));
-            } else {
-              resolve('Registration successful');
-            }
-          }
-        }, 1500);
-      });
+          navigate(from, { replace: true });
+        }, 1000);
+      } else {
+        // Registration flow
+        await authService.register({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          agreeToTerms: formData.agreeToTerms,
+        });
 
-      // Success handling
-      setSuccess(
-        isLogin
-          ? 'Login successful! Redirecting...'
-          : 'Account created successfully! Please sign in.'
-      );
+        setSuccess(
+          "Registration successful! We've sent a verification link to your email. Please verify your account before signing in."
+        );
 
-      // TODO: Redirect to appropriate page or handle authentication state
-      console.log('Authentication successful:', { isLogin, formData });
+        // Clear form and switch to login after registration
+        setTimeout(() => {
+          setIsLogin(true);
+          setFormData({
+            email: formData.email, // Keep email for convenience
+            password: '',
+            firstName: '',
+            lastName: '',
+            agreeToTerms: false,
+          });
+          setSuccess(null);
+        }, 5000); // Extended timeout to give user time to read
+      }
     } catch (err) {
-      // Error handling
       const errorMessage =
         err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
       setError(errorMessage);
@@ -96,9 +130,22 @@ export function AuthPage() {
     }
   };
 
-  const handleForgotPassword = () => {
-    // TODO: Implement password reset flow
-    console.log('Forgot password clicked');
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Get Google OAuth authorization URL
+      const authUrl = await authService.initiateGoogleOAuth();
+
+      // Redirect to Google for authentication
+      window.location.href = authUrl;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to initiate Google login. Please try again.';
+      setError(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -167,9 +214,20 @@ export function AuthPage() {
                         />
                       </svg>
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-medium text-green-800">Success</p>
                       <p className="text-sm text-green-700 mt-1">{success}</p>
+                      {!isLogin && (
+                        <p className="text-sm text-green-700 mt-2">
+                          Didn't receive the email?{' '}
+                          <Link
+                            to="/resend-verification"
+                            className="font-medium underline hover:text-green-900"
+                          >
+                            Resend verification link
+                          </Link>
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -193,6 +251,7 @@ export function AuthPage() {
                         value={formData.firstName}
                         onChange={handleInputChange}
                         className="pl-10"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -211,6 +270,7 @@ export function AuthPage() {
                         value={formData.lastName}
                         onChange={handleInputChange}
                         className="pl-10"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -233,6 +293,7 @@ export function AuthPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     className="pl-10"
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -253,15 +314,20 @@ export function AuthPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     className="pl-10 pr-10"
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {!isLogin && (
+                  <p className="text-xs text-gray-500">Password must be at least 8 characters</p>
+                )}
               </div>
 
               {/* Terms and conditions for registration */}
@@ -275,16 +341,18 @@ export function AuthPage() {
                     checked={formData.agreeToTerms}
                     onChange={handleInputChange}
                     className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    disabled={isLoading}
                   />
                   <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
-                    I agree to the{' '}
-                    <a href="#" className="text-primary-600 hover:text-primary-700 underline">
-                      Terms of Service
-                    </a>{' '}
-                    and{' '}
-                    <a href="#" className="text-primary-600 hover:text-primary-700 underline">
-                      Privacy Policy
-                    </a>
+                    I have read and agree to the{' '}
+                    <Link
+                      to="/terms"
+                      className="text-primary-600 hover:text-primary-700 underline"
+                      // target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Terms of Service and Privacy Policy
+                    </Link>
                   </label>
                 </div>
               )}
@@ -300,17 +368,61 @@ export function AuthPage() {
 
               {/* Forgot password link for login */}
               {isLogin && (
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="text-sm text-primary-600 hover:text-primary-700 underline"
+                <div className="text-center space-y-2">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-primary-600 hover:text-primary-700 underline block"
                   >
                     Forgot your password?
-                  </button>
+                  </Link>
+                  <Link
+                    to="/resend-verification"
+                    className="text-sm text-primary-600 hover:text-primary-700 underline block"
+                  >
+                    Didn't receive verification email?
+                  </Link>
                 </div>
               )}
             </form>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google OAuth Button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              Sign in with Google
+            </Button>
 
             {/* Toggle between login and register */}
             <div className="mt-6 text-center">
@@ -331,6 +443,7 @@ export function AuthPage() {
                     });
                   }}
                   className="ml-1 text-primary-600 hover:text-primary-700 font-medium underline"
+                  disabled={isLoading}
                 >
                   {isLogin ? 'Sign up' : 'Sign in'}
                 </button>
@@ -338,8 +451,6 @@ export function AuthPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* TODO: Add social login options */}
       </div>
     </div>
   );

@@ -7,6 +7,6 @@ describe('App', () => {
     render(<App />);
 
     // Should render the browse recipes page for authenticated users
-    expect(screen.getByText(/Discover Healthy Recipes/i)).toBeInTheDocument();
+    expect(screen.getByText(/FitRecipes/i)).toBeInTheDocument();
   });
 });

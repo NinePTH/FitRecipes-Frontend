@@ -99,7 +99,7 @@ export function RecipeSubmissionPage() {
                 email: 'chef@example.com',
                 firstName: 'John',
                 lastName: 'Doe',
-                role: 'chef',
+                role: 'CHEF',
                 createdAt: '2025-01-10T09:00:00Z',
                 updatedAt: '2025-01-10T09:00:00Z',
               },
