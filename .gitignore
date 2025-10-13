@@ -27,3 +27,7 @@ coverage/
 *.sw?
 
 .vercel
+
+# E2E
+playwright-report
+test-results
