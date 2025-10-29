@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/Layout';
-import type { RecipeFormData, Ingredient, Instruction, NutritionInfo, Recipe } from '@/types';
+import { submitRecipe, uploadRecipeImage } from '@/services/recipe';
+import type { ApiError } from '@/services/api';
+import type { RecipeFormData, Instruction, NutritionInfo, Recipe } from '@/types';
 
 export function RecipeSubmissionPage() {
   const [searchParams] = useSearchParams();
@@ -18,6 +20,8 @@ export function RecipeSubmissionPage() {
   const [isDraftSaved, setIsDraftSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [allergiesInput, setAllergiesInput] = useState(''); // Raw string input for allergies
+  const [imageUploadStatus, setImageUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
 
   const [formData, setFormData] = useState<RecipeFormData>({
     title: '',
@@ -62,21 +66,18 @@ export function RecipeSubmissionPage() {
               description: 'Perfectly chewy cookies with premium chocolate chips.',
               images: ['https://via.placeholder.com/400x300/f59e0b/ffffff?text=Chocolate+Cookies'],
               ingredients: [
-                { id: '1', name: 'All-purpose flour', quantity: 2.25, unit: 'cups' },
-                { id: '2', name: 'Chocolate chips', quantity: 2, unit: 'cups' },
+                { id: '1', name: 'All-purpose flour', amount: '2.25', unit: 'cups' },
+                { id: '2', name: 'Chocolate chips', amount: '2', unit: 'cups' },
               ],
-              instructions: [
-                { id: '1', stepNumber: 1, description: 'Preheat oven to 375°F (190°C).' },
-              ],
+              instructions: ['Preheat oven to 375°F (190°C).'],
               prepTime: 20,
-              cookTime: 12,
+              cookingTime: 12,
               servings: 24,
-              difficulty: 'easy',
-              mealType: ['dessert'],
-              dietType: ['vegetarian'],
+              difficulty: 'EASY',
+              mealType: ['DESSERT'],
               cuisineType: 'American',
               mainIngredient: 'Flour',
-              nutrition: {
+              nutritionInfo: {
                 calories: 150,
                 protein: 2,
                 carbs: 22,
@@ -90,11 +91,11 @@ export function RecipeSubmissionPage() {
               averageRating: 0,
               totalRatings: 0,
               totalComments: 0,
-              status: 'rejected',
+              status: 'REJECTED',
               rejectionReason:
                 'Recipe needs more detailed instructions and nutritional accuracy verification.',
-              chefId: '1',
-              chef: {
+              authorId: '1',
+              author: {
                 id: '1',
                 email: 'chef@example.com',
                 firstName: 'John',
@@ -114,22 +115,24 @@ export function RecipeSubmissionPage() {
               images: [], // For editing, we'll handle existing images separately
               ingredients: mockRecipeToEdit.ingredients.map(ing => ({
                 name: ing.name,
-                quantity: ing.quantity,
+                quantity: parseFloat(ing.amount), // Convert amount (string) to quantity (number)
                 unit: ing.unit,
               })),
-              instructions: mockRecipeToEdit.instructions.map(inst => ({
-                stepNumber: inst.stepNumber,
-                description: inst.description,
+              instructions: mockRecipeToEdit.instructions.map((desc, index) => ({
+                stepNumber: index + 1,
+                description: desc,
               })),
               prepTime: mockRecipeToEdit.prepTime,
-              cookTime: mockRecipeToEdit.cookTime,
+              cookTime: mockRecipeToEdit.cookingTime, // Backend uses 'cookingTime', UI uses 'cookTime'
               servings: mockRecipeToEdit.servings,
-              difficulty: mockRecipeToEdit.difficulty,
-              mealType: mockRecipeToEdit.mealType,
-              dietType: mockRecipeToEdit.dietType,
-              cuisineType: mockRecipeToEdit.cuisineType,
+              difficulty: mockRecipeToEdit.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard',
+              mealType: mockRecipeToEdit.mealType.map(meal =>
+                meal.toLowerCase()
+              ) as Array<'breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert'>,
+              dietType: [], // dietType extracted from dietaryInfo if needed
+              cuisineType: mockRecipeToEdit.cuisineType || '',
               mainIngredient: mockRecipeToEdit.mainIngredient,
-              nutrition: mockRecipeToEdit.nutrition || {
+              nutrition: mockRecipeToEdit.nutritionInfo || {
                 calories: 0,
                 protein: 0,
                 carbs: 0,
@@ -137,8 +140,9 @@ export function RecipeSubmissionPage() {
                 fiber: 0,
                 sodium: 0,
               },
-              allergies: mockRecipeToEdit.allergies,
+              allergies: mockRecipeToEdit.allergies || [],
             });
+            setAllergiesInput(mockRecipeToEdit.allergies?.join(', ') || '');
             setExistingImages(mockRecipeToEdit.images);
             setLoading(false);
           }, 1000);
@@ -152,7 +156,12 @@ export function RecipeSubmissionPage() {
         if (savedDraft) {
           try {
             const draft = JSON.parse(savedDraft);
-            setFormData(draft);
+            // Filter out images since File objects can't be serialized
+            // They become empty objects {} in JSON
+            setFormData({
+              ...draft,
+              images: [], // Always start with empty images array
+            });
           } catch (error) {
             console.error('Error loading draft:', error);
           }
@@ -166,7 +175,10 @@ export function RecipeSubmissionPage() {
   // Save draft to localStorage whenever form data changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      localStorage.setItem('recipeSubmissionDraft', JSON.stringify(formData));
+      // Exclude images from draft since File objects can't be serialized
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { images, ...draftData } = formData;
+      localStorage.setItem('recipeSubmissionDraft', JSON.stringify(draftData));
       setIsDraftSaved(true);
       setTimeout(() => setIsDraftSaved(false), 2000); // Hide indicator after 2 seconds
     }, 1000); // Save after 1 second of inactivity
@@ -215,7 +227,7 @@ export function RecipeSubmissionPage() {
 
   const updateIngredient = (
     index: number,
-    field: keyof Omit<Ingredient, 'id'>,
+    field: 'name' | 'quantity' | 'unit', // UI uses 'quantity' not 'amount'
     value: string | number
   ) => {
     setFormData(prev => ({
@@ -261,17 +273,76 @@ export function RecipeSubmissionPage() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.title.trim()) newErrors.title = 'Recipe name is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (formData.ingredients.some(ing => !ing.name.trim()))
-      newErrors.ingredients = 'All ingredients must have names';
-    if (formData.instructions.some(inst => !inst.description.trim()))
-      newErrors.instructions = 'All instructions must have descriptions';
-    if (!formData.cuisineType.trim()) newErrors.cuisineType = 'Cuisine type is required';
-    if (!formData.mainIngredient.trim()) newErrors.mainIngredient = 'Main ingredient is required';
-    if (formData.prepTime <= 0) newErrors.prepTime = 'Prep time must be greater than 0';
-    if (formData.cookTime <= 0) newErrors.cookTime = 'Cook time must be greater than 0';
-    if (formData.servings <= 0) newErrors.servings = 'Servings must be greater than 0';
+    // Title: 3-200 characters (backend requirement)
+    if (!formData.title.trim()) {
+      newErrors.title = 'Recipe name is required';
+    } else if (formData.title.length < 3) {
+      newErrors.title = 'Recipe name must be at least 3 characters';
+    } else if (formData.title.length > 200) {
+      newErrors.title = 'Recipe name must be less than 200 characters';
+    }
+
+    // Description: 10-1000 characters (backend requirement)
+    if (!formData.description.trim()) {
+      newErrors.description = 'Description is required';
+    } else if (formData.description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters';
+    } else if (formData.description.length > 1000) {
+      newErrors.description = 'Description must be less than 1000 characters';
+    }
+
+    // Main Ingredient: 2-50 characters (backend requirement)
+    if (!formData.mainIngredient.trim()) {
+      newErrors.mainIngredient = 'Main ingredient is required';
+    } else if (formData.mainIngredient.length < 2) {
+      newErrors.mainIngredient = 'Main ingredient must be at least 2 characters';
+    } else if (formData.mainIngredient.length > 50) {
+      newErrors.mainIngredient = 'Main ingredient must be less than 50 characters';
+    }
+
+    // Ingredients: at least 1, all must have name, quantity > 0, unit
+    if (formData.ingredients.length === 0) {
+      newErrors.ingredients = 'At least one ingredient is required';
+    } else if (
+      formData.ingredients.some(
+        ing => !ing.name.trim() || ing.quantity <= 0 || !ing.unit.trim()
+      )
+    ) {
+      newErrors.ingredients = 'All ingredients must have name, quantity (> 0), and unit';
+    }
+
+    // Instructions: at least 1, all must have description
+    if (formData.instructions.length === 0) {
+      newErrors.instructions = 'At least one instruction step is required';
+    } else if (formData.instructions.some(inst => !inst.description.trim())) {
+      newErrors.instructions = 'All instruction steps must have descriptions';
+    }
+
+    // Prep Time: 1-300 minutes (backend requirement, optional but if provided must be valid)
+    if (formData.prepTime < 0) {
+      newErrors.prepTime = 'Prep time cannot be negative';
+    } else if (formData.prepTime > 300) {
+      newErrors.prepTime = 'Prep time must be less than 300 minutes';
+    }
+
+    // Cook Time: 1-600 minutes (backend requirement, required)
+    if (formData.cookTime <= 0) {
+      newErrors.cookTime = 'Cook time is required and must be greater than 0';
+    } else if (formData.cookTime > 600) {
+      newErrors.cookTime = 'Cook time must be less than 600 minutes';
+    }
+
+    // Servings: 1-20 (backend requirement)
+    if (formData.servings <= 0) {
+      newErrors.servings = 'Servings must be greater than 0';
+    } else if (formData.servings > 20) {
+      newErrors.servings = 'Servings must be less than 20';
+    }
+
+    // Cuisine type (optional but if provided should not be empty)
+    if (formData.cuisineType && !formData.cuisineType.trim()) {
+      newErrors.cuisineType = 'Please provide a cuisine type or leave it empty';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -281,23 +352,54 @@ export function RecipeSubmissionPage() {
     e.preventDefault();
 
     if (!validateForm()) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     setIsSubmitting(true);
+    setImageUploadStatus('idle');
 
     try {
-      // TODO: Submit to API
-      console.log('Submitting recipe:', formData);
+      console.log('Submitting recipe with form data:', formData);
+      
+      // STEP 1: Upload images first if there are any
+      let imageUrl: string | undefined;
+      
+      if (formData.images.length > 0) {
+        setImageUploadStatus('uploading');
+        console.log('Uploading image...');
+        
+        try {
+          // Upload first image (backend supports single image)
+          const firstImage = formData.images[0];
+          imageUrl = await uploadRecipeImage(firstImage);
+          
+          setImageUploadStatus('success');
+          console.log('Image uploaded successfully:', imageUrl);
+        } catch (uploadError) {
+          setImageUploadStatus('error');
+          console.error('Image upload failed:', uploadError);
+          throw new Error('Failed to upload image. Please try again.');
+        }
+      }
+      
+      // STEP 2: Submit recipe to backend API with image URL
+      const createdRecipe = await submitRecipe({
+        ...formData,
+        imageUrl, // Include uploaded image URL
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simulate success
-      alert('Recipe submitted successfully! It will be reviewed by our team.');
+      console.log('Recipe submitted successfully:', createdRecipe);
 
       // Clear saved draft
       localStorage.removeItem('recipeSubmissionDraft');
+
+      // Show success message
+      alert(
+        `Recipe "${createdRecipe.title}" submitted successfully!\n\n` +
+          `Status: ${createdRecipe.status}\n` +
+          `Your recipe is now pending admin review. You'll be notified once it's approved.`
+      );
 
       // Reset form after successful submission
       setFormData({
@@ -324,12 +426,29 @@ export function RecipeSubmissionPage() {
         },
         allergies: [],
       });
+      setAllergiesInput('');
+      setImageUploadStatus('idle');
 
-      // TODO: Redirect to recipe list or show success message
+      // Redirect to home or my recipes page
       window.location.href = '/';
     } catch (error) {
       console.error('Error submitting recipe:', error);
-      alert('Failed to submit recipe. Please try again.');
+
+      let errorMessage = 'Failed to submit recipe. Please try again.';
+
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as ApiError).message;
+
+        // Show validation errors if present
+        if ('errors' in error && Array.isArray((error as ApiError).errors)) {
+          const validationErrors = (error as ApiError).errors
+            ?.map(err => `• ${err.message}`)
+            .join('\n');
+          errorMessage += '\n\nValidation errors:\n' + validationErrors;
+        }
+      }
+
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -715,33 +834,41 @@ export function RecipeSubmissionPage() {
                           </div>
                         ))}
                         {/* New uploaded images */}
-                        {formData.images.map((file, index) => (
-                          <div key={`new-${index}`} className="relative group">
-                            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                              <img
-                                src={URL.createObjectURL(file)}
-                                alt={`Preview ${index + 1}`}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                              />
+                        {formData.images.map((file, index) => {
+                          // Type guard: ensure file is actually a File object
+                          if (!(file instanceof File)) {
+                            console.warn('Invalid file object in formData.images:', file);
+                            return null;
+                          }
+                          
+                          return (
+                            <div key={`new-${index}`} className="relative group">
+                              <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    images: prev.images.filter((_, i) => i !== index),
+                                  }));
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                                title="Remove image"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                              <div className="absolute bottom-2 left-2 bg-green-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded-md font-medium">
+                                New
+                              </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  images: prev.images.filter((_, i) => i !== index),
-                                }));
-                              }}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
-                              title="Remove image"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                            <div className="absolute bottom-2 left-2 bg-green-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded-md font-medium">
-                              New
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1046,16 +1173,19 @@ export function RecipeSubmissionPage() {
                 </label>
                 <Input
                   id="allergies"
-                  value={formData.allergies.join(', ')}
-                  onChange={e =>
-                    handleInputChange(
-                      'allergies',
-                      e.target.value
-                        .split(',')
-                        .map(a => a.trim())
-                        .filter(Boolean)
-                    )
-                  }
+                  value={allergiesInput}
+                  onChange={e => {
+                    // Store raw input for natural typing
+                    setAllergiesInput(e.target.value);
+                  }}
+                  onBlur={e => {
+                    // Update formData array on blur (when user finishes typing)
+                    const allergiesArray = e.target.value
+                      .split(',')
+                      .map(a => a.trim())
+                      .filter(Boolean);
+                    handleInputChange('allergies', allergiesArray);
+                  }}
                   placeholder="e.g., nuts, dairy, eggs, gluten (separate with commas)"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -1177,14 +1307,28 @@ export function RecipeSubmissionPage() {
             <Button type="submit" disabled={isSubmitting}>
               <Save className="h-4 w-4 mr-2" />
               {isSubmitting
-                ? isEditing
-                  ? 'Updating...'
-                  : 'Submitting...'
+                ? imageUploadStatus === 'uploading'
+                  ? 'Uploading image...'
+                  : isEditing
+                    ? 'Updating...'
+                    : 'Submitting...'
                 : isEditing
                   ? 'Update Recipe'
                   : 'Submit Recipe'}
             </Button>
           </div>
+          
+          {/* Upload Status Indicator */}
+          {imageUploadStatus === 'uploading' && (
+            <div className="text-center text-blue-600 mt-4">
+              <p>⏳ Uploading image... Please wait.</p>
+            </div>
+          )}
+          {imageUploadStatus === 'error' && (
+            <div className="text-center text-red-600 mt-4">
+              <p>❌ Failed to upload image. Please try again.</p>
+            </div>
+          )}
         </form>
 
         {/* TODO: Add draft saving functionality */}
