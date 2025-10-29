@@ -1,205 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Clock, Users, Star, Heart, Share2, MessageCircle, ChevronLeft } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Clock, Users, Star, Heart, Share2, MessageCircle, ChevronLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Layout } from '@/components/Layout';
+import { getRecipeById } from '@/services/recipe';
 import type { Recipe } from '@/types';
-
-// Mock data - TODO: Replace with API call
-const mockRecipe: Recipe = {
-  id: '1',
-  title: 'Mediterranean Quinoa Bowl',
-  description:
-    'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
-  images: [
-    'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
-    'https://www.cookedandloved.com/wp-content/uploads/2023/07/mediterranean-chicken-quinoa-bowl-social.jpg',
-    'https://choosingchia.com/jessh-jessh/uploads/2019/07/meditteranean-quinoa-salad-2.jpg',
-  ],
-  ingredients: [
-    { id: '1', name: 'Quinoa', quantity: 1, unit: 'cup' },
-    { id: '2', name: 'Cucumber', quantity: 1, unit: 'large' },
-    { id: '3', name: 'Tomatoes', quantity: 2, unit: 'medium' },
-    { id: '4', name: 'Red onion', quantity: 0.5, unit: 'small' },
-    { id: '5', name: 'Feta cheese', quantity: 100, unit: 'g' },
-    { id: '6', name: 'Olive oil', quantity: 3, unit: 'tbsp' },
-    { id: '7', name: 'Lemon juice', quantity: 2, unit: 'tbsp' },
-    { id: '8', name: 'Fresh herbs (parsley, mint)', quantity: 0.25, unit: 'cup' },
-  ],
-  instructions: [
-    {
-      id: '1',
-      stepNumber: 1,
-      description:
-        'Rinse quinoa under cold water until water runs clear. Cook quinoa according to package instructions.',
-    },
-    {
-      id: '2',
-      stepNumber: 2,
-      description: 'While quinoa cooks, dice cucumber, tomatoes, and red onion into small pieces.',
-    },
-    { id: '3', stepNumber: 3, description: 'Crumble feta cheese and chop fresh herbs.' },
-    {
-      id: '4',
-      stepNumber: 4,
-      description: 'In a large bowl, combine cooked quinoa with vegetables and herbs.',
-    },
-    {
-      id: '5',
-      stepNumber: 5,
-      description: 'Drizzle with olive oil and lemon juice. Season with salt and pepper to taste.',
-    },
-    { id: '6', stepNumber: 6, description: 'Top with crumbled feta cheese and serve immediately.' },
-  ],
-  prepTime: 15,
-  cookTime: 20,
-  servings: 4,
-  difficulty: 'easy',
-  mealType: ['lunch', 'dinner'],
-  dietType: ['vegetarian', 'gluten-free', 'gluten-free', 'gluten-free'],
-  cuisineType: 'Mediterranean',
-  mainIngredient: 'Quinoa',
-  nutrition: {
-    calories: 320,
-    protein: 12,
-    carbs: 45,
-    fat: 11,
-    fiber: 5,
-    sodium: 380,
-  },
-  allergies: ['dairy'],
-  ratings: [],
-  comments: [
-    {
-      id: '1',
-      userId: '2',
-      user: {
-        id: '2',
-        email: 'user1@example.com',
-        firstName: 'Sarah',
-        lastName: 'Johnson',
-        role: 'USER',
-        createdAt: '2025-01-10T09:00:00Z',
-        updatedAt: '2025-01-10T09:00:00Z',
-      },
-      content:
-        'This recipe is absolutely delicious! I made it for dinner last night and my family loved it. The quinoa was perfectly cooked and the Mediterranean flavors were spot on.',
-      createdAt: '2025-01-16T14:30:00Z',
-      updatedAt: '2025-01-16T14:30:00Z',
-    },
-    {
-      id: '2',
-      userId: '3',
-      user: {
-        id: '3',
-        email: 'chef2@example.com',
-        firstName: 'David',
-        lastName: 'Chen',
-        role: 'CHEF',
-        createdAt: '2025-01-12T11:00:00Z',
-        updatedAt: '2025-01-12T11:00:00Z',
-      },
-      content:
-        'Great healthy option! I added some roasted chickpeas for extra protein and it was fantastic. Thanks for sharing!',
-      createdAt: '2025-01-17T10:15:00Z',
-      updatedAt: '2025-01-17T10:15:00Z',
-    },
-    {
-      id: '3',
-      userId: '4',
-      user: {
-        id: '4',
-        email: 'user2@example.com',
-        firstName: 'Emma',
-        lastName: 'Williams',
-        role: 'USER',
-        createdAt: '2025-01-14T16:00:00Z',
-        updatedAt: '2025-01-14T16:00:00Z',
-      },
-      content:
-        'Perfect for meal prep! I made a big batch on Sunday and had healthy lunches all week. The flavors actually get better after a day in the fridge.',
-      createdAt: '2025-01-18T09:45:00Z',
-      updatedAt: '2025-01-18T09:45:00Z',
-    },
-    {
-      id: '4',
-      userId: '5',
-      user: {
-        id: '5',
-        email: 'user3@example.com',
-        firstName: 'Michael',
-        lastName: 'Brown',
-        role: 'USER',
-        createdAt: '2025-01-13T08:00:00Z',
-        updatedAt: '2025-01-13T08:00:00Z',
-      },
-      content:
-        'Easy to follow instructions and the result was amazing. I substituted goat cheese for feta and it worked perfectly!',
-      createdAt: '2025-01-19T12:20:00Z',
-      updatedAt: '2025-01-19T12:20:00Z',
-    },
-    {
-      id: '5',
-      userId: '6',
-      user: {
-        id: '6',
-        email: 'user4@example.com',
-        firstName: 'Lisa',
-        lastName: 'Davis',
-        role: 'USER',
-        createdAt: '2025-01-11T13:30:00Z',
-        updatedAt: '2025-01-11T13:30:00Z',
-      },
-      content:
-        'This has become my go-to healthy lunch! So fresh and satisfying. The combination of textures is perfect.',
-      createdAt: '2025-01-20T16:10:00Z',
-      updatedAt: '2025-01-20T16:10:00Z',
-    },
-  ],
-  averageRating: 4.5,
-  totalRatings: 12,
-  totalComments: 5,
-  status: 'approved',
-  chefId: '1',
-  chef: {
-    id: '1',
-    email: 'chef@example.com',
-    firstName: 'Maria',
-    lastName: 'Rodriguez',
-    role: 'CHEF',
-    createdAt: '',
-    updatedAt: '',
-  },
-  createdAt: '2025-01-15T10:00:00Z',
-  updatedAt: '2025-01-15T10:00:00Z',
-};
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [userRating, setUserRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   useEffect(() => {
-    // TODO: Replace with actual API call
     const fetchRecipe = async () => {
-      setLoading(true);
-      // Simulate API delay
-      setTimeout(() => {
-        setRecipe(mockRecipe);
+      if (!id) {
+        setError('Recipe ID is missing');
         setLoading(false);
-      }, 1000);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const fetchedRecipe = await getRecipeById(id);
+        console.log('Fetched recipe data:', fetchedRecipe);
+        console.log('Recipe type:', typeof fetchedRecipe);
+        console.log('Recipe keys:', fetchedRecipe ? Object.keys(fetchedRecipe) : 'null');
+        console.log('Recipe images:', fetchedRecipe?.images);
+        console.log('Recipe imageUrl:', fetchedRecipe?.imageUrl);
+        console.log('Recipe ingredients:', fetchedRecipe?.ingredients);
+        console.log('Recipe instructions:', fetchedRecipe?.instructions);
+        console.log('Recipe title:', fetchedRecipe?.title);
+        setRecipe(fetchedRecipe);
+      } catch (err: unknown) {
+        console.error('Error fetching recipe:', err);
+        
+        if (err && typeof err === 'object' && 'statusCode' in err) {
+          const apiError = err as { statusCode: number; message: string };
+          
+          if (apiError.statusCode === 404) {
+            setError('Recipe not found');
+          } else if (apiError.statusCode === 403) {
+            setError('You do not have permission to view this recipe');
+          } else {
+            setError(apiError.message || 'Failed to load recipe');
+          }
+        } else {
+          setError('Failed to load recipe. Please try again.');
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (id) {
-      fetchRecipe();
-    }
-  }, [id]);
+    fetchRecipe();
+  }, [id, navigate]);
 
   const handleRating = (rating: number) => {
     setUserRating(rating);
@@ -238,8 +102,8 @@ export function RecipeDetailPage() {
 
         setRecipe({
           ...recipe,
-          comments: [newComment, ...recipe.comments],
-          totalComments: recipe.totalComments + 1,
+          comments: [newComment, ...(recipe.comments || [])],
+          totalComments: (recipe.totalComments || 0) + 1,
         });
       }
 
@@ -247,6 +111,15 @@ export function RecipeDetailPage() {
       setIsSubmittingComment(false);
     }, 1000);
   };
+
+  // Get images array - handle both imageUrl (single) and images (array)
+  const recipeImages = recipe
+    ? recipe.images && recipe.images.length > 0
+      ? recipe.images
+      : recipe.imageUrl
+        ? [recipe.imageUrl]
+        : []
+    : [];
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -262,7 +135,7 @@ export function RecipeDetailPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="animate-pulse space-y-8">
+        <div className="animate-pulse space-y-8 max-w-4xl mx-auto">
           <div className="h-8 bg-gray-300 rounded w-1/3"></div>
           <div className="h-64 bg-gray-300 rounded"></div>
           <div className="space-y-4">
@@ -270,6 +143,25 @@ export function RecipeDetailPage() {
             <div className="h-4 bg-gray-300 rounded w-3/4"></div>
             <div className="h-4 bg-gray-300 rounded w-1/2"></div>
           </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="text-center py-12 max-w-md mx-auto">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{error}</h1>
+          <p className="text-gray-600 mb-6">
+            {error.includes('permission')
+              ? 'This recipe may be pending approval or has been rejected.'
+              : 'Please try again later or contact support if the problem persists.'}
+          </p>
+          <Link to="/">
+            <Button>Browse All Recipes</Button>
+          </Link>
         </div>
       </Layout>
     );
@@ -315,7 +207,7 @@ export function RecipeDetailPage() {
             <div className="flex items-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
-                <span>{recipe.prepTime + recipe.cookTime} minutes</span>
+                <span>{recipe.prepTime + (recipe.cookingTime || 0)} minutes</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
@@ -343,36 +235,48 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Recipe Images */}
-        <div className="space-y-4">
-          <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm">
-            <img
-              src={recipe.images[selectedImageIndex]}
-              alt={recipe.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-          {recipe.images.length > 1 && (
-            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-              {recipe.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105 ${
-                    selectedImageIndex === index
-                      ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${recipe.title} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+        {recipeImages.length > 0 && (
+          <div className="space-y-4">
+            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+              <img
+                src={recipeImages[selectedImageIndex]}
+                alt={recipe.title}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              />
             </div>
-          )}
-        </div>
+            {recipeImages.length > 1 && (
+              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+                {recipeImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105 ${
+                      selectedImageIndex === index
+                        ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${recipe.title} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* No Image Placeholder */}
+        {recipeImages.length === 0 && (
+          <div className="aspect-video rounded-lg overflow-hidden bg-gray-200 shadow-sm flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <MessageCircle className="h-16 w-16 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No image available</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -384,14 +288,14 @@ export function RecipeDetailPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {recipe.ingredients.map(ingredient => (
+                  {recipe.ingredients?.map((ingredient, index) => (
                     <li
-                      key={ingredient.id}
+                      key={index}
                       className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
                     >
                       <span className="font-medium">{ingredient.name}</span>
                       <span className="text-gray-600">
-                        {ingredient.quantity} {ingredient.unit}
+                        {ingredient.amount} {ingredient.unit}
                       </span>
                     </li>
                   ))}
@@ -406,12 +310,12 @@ export function RecipeDetailPage() {
               </CardHeader>
               <CardContent>
                 <ol className="space-y-4">
-                  {recipe.instructions.map(instruction => (
-                    <li key={instruction.id} className="flex space-x-4">
+                  {recipe.instructions?.map((instruction, index) => (
+                    <li key={index} className="flex space-x-4">
                       <span className="flex-shrink-0 w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-semibold">
-                        {instruction.stepNumber}
+                        {index + 1}
                       </span>
-                      <p className="text-gray-700 pt-1">{instruction.description}</p>
+                      <p className="text-gray-700 pt-1">{instruction}</p>
                     </li>
                   ))}
                 </ol>
@@ -433,7 +337,7 @@ export function RecipeDetailPage() {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Cook Time</h4>
-                  <p className="text-gray-600">{recipe.cookTime} minutes</p>
+                  <p className="text-gray-600">{recipe.cookingTime || 0} minutes</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Difficulty</h4>
@@ -447,24 +351,48 @@ export function RecipeDetailPage() {
                   <h4 className="font-medium text-gray-900">Main Ingredient</h4>
                   <p className="text-gray-600">{recipe.mainIngredient}</p>
                 </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Diet Type</h4>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {recipe.dietType.map(diet => (
-                      <span
-                        key={diet}
-                        className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
-                      >
-                        {diet}
-                      </span>
-                    ))}
+                {recipe.dietaryInfo && (
+                  <div>
+                    <h4 className="font-medium text-gray-900">Dietary Info</h4>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {recipe.dietaryInfo.isVegetarian && (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          Vegetarian
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isVegan && (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          Vegan
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isGlutenFree && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          Gluten-Free
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isDairyFree && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          Dairy-Free
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isKeto && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                          Keto
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isPaleo && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                          Paleo
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Nutrition */}
-            {recipe.nutrition && (
+            {recipe.nutritionInfo && (
               <Card>
                 <CardHeader>
                   <CardTitle>Nutrition (per serving)</CardTitle>
@@ -472,54 +400,56 @@ export function RecipeDetailPage() {
                 <CardContent className="space-y-2">
                   <div className="flex justify-between">
                     <span>Calories</span>
-                    <span>{recipe.nutrition.calories}</span>
+                    <span>{recipe.nutritionInfo.calories}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Protein</span>
-                    <span>{recipe.nutrition.protein}g</span>
+                    <span>{recipe.nutritionInfo.protein}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Carbs</span>
-                    <span>{recipe.nutrition.carbs}g</span>
+                    <span>{recipe.nutritionInfo.carbs}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Fat</span>
-                    <span>{recipe.nutrition.fat}g</span>
+                    <span>{recipe.nutritionInfo.fat}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Fiber</span>
-                    <span>{recipe.nutrition.fiber}g</span>
+                    <span>{recipe.nutritionInfo.fiber}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Sodium</span>
-                    <span>{recipe.nutrition.sodium}mg</span>
+                    <span>{recipe.nutritionInfo.sodium}mg</span>
                   </div>
                 </CardContent>
               </Card>
             )}
 
             {/* Chef Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Chef</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span className="text-primary-600 font-semibold">
-                      {recipe.chef.firstName[0]}
-                      {recipe.chef.lastName[0]}
-                    </span>
+            {recipe.author && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Chef</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                      <span className="text-primary-600 font-semibold">
+                        {recipe.author.firstName[0]}
+                        {recipe.author.lastName[0]}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {recipe.author.firstName} {recipe.author.lastName}
+                      </p>
+                      <p className="text-sm text-gray-600">Chef</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">
-                      {recipe.chef.firstName} {recipe.chef.lastName}
-                    </p>
-                    <p className="text-sm text-gray-600">Chef</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 
@@ -584,9 +514,9 @@ export function RecipeDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recipe.comments.length > 0 ? (
+              {recipe.comments && recipe.comments.length > 0 ? (
                 <div className="space-y-6">
-                  {recipe.comments.map(comment => (
+                  {recipe.comments?.map(comment => (
                     <div
                       key={comment.id}
                       className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0 hover:bg-gray-50 rounded-lg p-4 -m-4 transition-colors"

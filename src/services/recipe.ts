@@ -157,7 +157,8 @@ export async function submitRecipe(formData: RecipeFormData): Promise<Recipe> {
  * @returns Recipe details
  */
 export async function getRecipeById(recipeId: string): Promise<Recipe> {
-  return await api.get<Recipe>(`/api/v1/recipes/${recipeId}`);
+  const response = await api.get<{ recipe: Recipe }>(`/api/v1/recipes/${recipeId}`);
+  return response.recipe;
 }
 
 /**
