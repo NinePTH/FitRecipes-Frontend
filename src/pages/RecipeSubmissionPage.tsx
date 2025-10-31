@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertDialog } from '@/components/ui/alert-dialog';
 import { Layout } from '@/components/Layout';
 import { submitRecipe, uploadRecipeImage, getRecipeById, updateRecipe } from '@/services/recipe';
 import type { ApiError } from '@/services/api';
@@ -23,6 +24,21 @@ export function RecipeSubmissionPage() {
   const [originalStatus, setOriginalStatus] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | null>(null);
   const [allergiesInput, setAllergiesInput] = useState(''); // Raw string input for allergies
   const [imageUploadStatus, setImageUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  
+  // Alert dialog state
+  const [alertDialog, setAlertDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    title: '',
+    description: '',
+  });
+
+  const showAlert = (title: string, description: string) => {
+    setAlertDialog({ open: true, title, description });
+  };
 
   const [formData, setFormData] = useState<RecipeFormData>({
     title: '',
@@ -62,8 +78,10 @@ export function RecipeSubmissionPage() {
 
           // Check if recipe can be edited (only PENDING and REJECTED)
           if (recipe.status === 'APPROVED') {
-            alert('Approved recipes cannot be edited. Please contact an admin if you need to make changes.');
-            window.location.href = '/my-recipes';
+            showAlert('Cannot Edit Recipe', 'Approved recipes cannot be edited. Please contact an admin if you need to make changes.');
+            setTimeout(() => {
+              window.location.href = '/my-recipes';
+            }, 2000);
             return;
           }
 
@@ -388,14 +406,13 @@ export function RecipeSubmissionPage() {
       // Show success message
       if (isEditing) {
         const message = originalStatus === 'REJECTED'
-          ? `Recipe "${recipe.title}" updated and resubmitted for review!\n\nYour recipe will be reviewed by an admin again.`
-          : `Recipe "${recipe.title}" updated successfully!\n\nYour changes have been saved.`;
-        alert(message);
+          ? `Your recipe will be reviewed by an admin again.`
+          : `Your changes have been saved.`;
+        showAlert('Recipe Updated Successfully', `Recipe "${recipe.title}" has been updated!\n\n${message}`);
       } else {
-        alert(
-          `Recipe "${recipe.title}" submitted successfully!\n\n` +
-            `Status: ${recipe.status}\n` +
-            `Your recipe is now pending admin review. You'll be notified once it's approved.`
+        showAlert(
+          'Recipe Submitted Successfully',
+          `Recipe "${recipe.title}" has been submitted!\n\nStatus: ${recipe.status}\n\nYour recipe is now pending admin review. You'll be notified once it's approved.`
         );
       }
 
@@ -446,7 +463,7 @@ export function RecipeSubmissionPage() {
         }
       }
 
-      alert(errorMessage);
+      showAlert('Submission Failed', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -459,32 +476,38 @@ export function RecipeSubmissionPage() {
 
     // Check if already at limit
     if (remainingSlots <= 0) {
-      alert('Maximum 3 images allowed per recipe.');
+      showAlert('Maximum Images Reached', 'You can only upload a maximum of 3 images per recipe.');
       e.target.value = '';
       return;
     }
 
     // Validate file types and sizes
+    const invalidFiles: string[] = [];
     const validFiles = files.filter(file => {
       const isValidType = file.type.startsWith('image/');
       const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
 
       if (!isValidType) {
-        alert(`${file.name} is not a valid image file.`);
+        invalidFiles.push(`${file.name} (invalid file type)`);
         return false;
       }
       if (!isValidSize) {
-        alert(`${file.name} is too large. Maximum size is 10MB.`);
+        invalidFiles.push(`${file.name} (exceeds 10MB)`);
         return false;
       }
       return true;
     });
 
+    // Show validation errors if any
+    if (invalidFiles.length > 0) {
+      showAlert('Invalid Files', `The following files could not be added:\n\n${invalidFiles.join('\n')}\n\nPlease select valid image files (JPG, PNG, WebP) under 10MB.`);
+    }
+
     // Limit to remaining slots
     const filesToAdd = validFiles.slice(0, remainingSlots);
 
     if (filesToAdd.length < validFiles.length) {
-      alert(`Only ${remainingSlots} more image${remainingSlots !== 1 ? 's' : ''} can be added (maximum 3 total).`);
+      showAlert('Image Limit', `Only ${remainingSlots} more image${remainingSlots !== 1 ? 's' : ''} can be added (maximum 3 total).`);
     }
 
     if (filesToAdd.length > 0) {
@@ -1365,6 +1388,14 @@ export function RecipeSubmissionPage() {
         {/* TODO: Add ingredient suggestions */}
         {/* TODO: Add rich text editor for instructions */}
       </div>
+      
+      {/* Alert Dialog */}
+      <AlertDialog
+        open={alertDialog.open}
+        onOpenChange={(open) => setAlertDialog(prev => ({ ...prev, open }))}
+        title={alertDialog.title}
+        description={alertDialog.description}
+      />
     </Layout>
   );
 }
