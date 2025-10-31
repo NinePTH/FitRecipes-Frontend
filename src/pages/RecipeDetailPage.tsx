@@ -112,13 +112,15 @@ export function RecipeDetailPage() {
     }, 1000);
   };
 
-  // Get images array - handle both imageUrl (single) and images (array)
+  // Get images array - handle imageUrls (new), images (deprecated), and imageUrl (deprecated)
   const recipeImages = recipe
-    ? recipe.images && recipe.images.length > 0
-      ? recipe.images
-      : recipe.imageUrl
-        ? [recipe.imageUrl]
-        : []
+    ? recipe.imageUrls && recipe.imageUrls.length > 0
+      ? recipe.imageUrls
+      : recipe.images && recipe.images.length > 0
+        ? recipe.images
+        : recipe.imageUrl
+          ? [recipe.imageUrl]
+          : []
     : [];
 
   const formatDate = (dateString: string) => {

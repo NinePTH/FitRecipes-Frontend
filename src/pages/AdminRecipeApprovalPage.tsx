@@ -172,7 +172,7 @@ export function AdminRecipeApprovalPage() {
     <Card className="hover:shadow-lg transition-shadow duration-200">
       <div className="aspect-video relative">
         <img
-          src={recipe.images[0] || 'https://via.placeholder.com/300x200'}
+          src={recipe.imageUrls?.[0] || recipe.images?.[0] || recipe.imageUrl || 'https://via.placeholder.com/300x200'}
           alt={recipe.title}
           className="w-full h-full object-cover rounded-t-lg"
         />
@@ -253,7 +253,7 @@ export function AdminRecipeApprovalPage() {
             {/* Recipe Image */}
             <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
               <img
-                src={recipe.images[0] || 'https://via.placeholder.com/400x300'}
+                src={recipe.imageUrls?.[0] || recipe.images?.[0] || recipe.imageUrl || 'https://via.placeholder.com/400x300'}
                 alt={recipe.title}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />

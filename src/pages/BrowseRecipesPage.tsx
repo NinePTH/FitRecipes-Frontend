@@ -197,7 +197,7 @@ export function BrowseRecipesPage() {
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer">
         <div className="aspect-video relative">
           <img
-            src={recipe.images[0] || 'https://via.placeholder.com/300x200'}
+            src={recipe.imageUrls?.[0] || recipe.images?.[0] || recipe.imageUrl || 'https://via.placeholder.com/300x200'}
             alt={recipe.title}
             className="w-full h-full object-cover"
           />

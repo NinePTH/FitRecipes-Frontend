@@ -73,8 +73,9 @@ export interface Recipe {
   id: string;
   title: string;
   description: string;
-  images: string[];
-  imageUrl?: string; // Single image URL for backend compatibility
+  imageUrls: string[]; // Backend uses 'imageUrls' (array, max 3)
+  imageUrl?: string; // Deprecated: For backward compatibility only
+  images?: string[]; // Deprecated: For backward compatibility only
   ingredients: Ingredient[];
   instructions: string[]; // Backend uses string array
   prepTime: number; // in minutes
@@ -202,7 +203,8 @@ export interface RecipeFormData {
   title: string;
   description: string;
   images: File[];
-  imageUrl?: string;
+  imageUrls?: string[]; // Existing image URLs from backend (for edit mode)
+  imageUrl?: string; // Deprecated: For backward compatibility
   ingredients: Array<{ name: string; quantity: number; unit: string }>; // UI uses quantity as number
   instructions: Array<{ stepNumber: number; description: string }>; // UI uses structured instructions
   prepTime: number;
@@ -235,7 +237,8 @@ export interface RecipeSubmissionData {
   nutritionInfo?: NutritionInfo;
   allergies?: string[]; // Optional array of allergen names (2-50 chars each, auto-normalized to lowercase)
   tags?: string[];
-  imageUrl?: string;
+  imageUrls?: string[]; // Array of image URLs (max 3)
+  imageUrl?: string; // Deprecated: For backward compatibility
 }
 
 // Component Props Types

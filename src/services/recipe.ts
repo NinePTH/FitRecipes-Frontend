@@ -83,8 +83,11 @@ export function transformRecipeFormDataToSubmission(
     submissionData.allergies = formData.allergies;
   }
 
-  if (formData.imageUrl) {
-    submissionData.imageUrl = formData.imageUrl;
+  // Handle both new imageUrls (array) and deprecated imageUrl (string)
+  if (formData.imageUrls && formData.imageUrls.length > 0) {
+    submissionData.imageUrls = formData.imageUrls;
+  } else if (formData.imageUrl) {
+    submissionData.imageUrls = [formData.imageUrl]; // Convert single URL to array
   }
 
   return submissionData;
@@ -159,6 +162,66 @@ export async function submitRecipe(formData: RecipeFormData): Promise<Recipe> {
 export async function getRecipeById(recipeId: string): Promise<Recipe> {
   const response = await api.get<{ recipe: Recipe }>(`/api/v1/recipes/${recipeId}`);
   return response.recipe;
+}
+
+/**
+ * Get user's submitted recipes (Chef/Admin only)
+ * @param status Optional filter by status: 'PENDING' | 'APPROVED' | 'REJECTED'
+ * @returns User's recipes with statistics
+ */
+export async function getMyRecipes(status?: 'PENDING' | 'APPROVED' | 'REJECTED'): Promise<{
+  recipes: Recipe[];
+  meta: {
+    total: number;
+    approved: number;
+    pending: number;
+    rejected: number;
+  };
+}> {
+  const url = status
+    ? `/api/v1/recipes/my-recipes?status=${status}`
+    : '/api/v1/recipes/my-recipes';
+  
+  const response = await api.get<{
+    recipes: Recipe[];
+    meta: {
+      total: number;
+      approved: number;
+      pending: number;
+      rejected: number;
+    };
+  }>(url);
+
+  return response;
+}
+
+/**
+ * Update an existing recipe (Chef/Admin only)
+ * Note: Only PENDING and REJECTED recipes can be updated
+ * REJECTED recipes will be reset to PENDING status
+ * @param recipeId Recipe ID
+ * @param formData Updated recipe form data
+ * @returns Updated recipe
+ */
+export async function updateRecipe(recipeId: string, formData: RecipeFormData): Promise<Recipe> {
+  const submissionData = transformRecipeFormDataToSubmission(formData);
+
+  console.log('Updating recipe:', recipeId, submissionData);
+
+  const response = await api.put<{ recipe: Recipe }>(
+    `/api/v1/recipes/${recipeId}`,
+    submissionData
+  );
+
+  return response.recipe;
+}
+
+/**
+ * Delete a recipe (Chef/Admin only)
+ * @param recipeId Recipe ID
+ */
+export async function deleteRecipe(recipeId: string): Promise<void> {
+  await api.deleteRequest(`/api/v1/recipes/${recipeId}`);
 }
 
 /**
