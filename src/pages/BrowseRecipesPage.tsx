@@ -22,17 +22,20 @@ const mockRecipes: Recipe[] = [
     title: 'Mediterranean Quinoa Bowl',
     description:
       'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
-    images: [
+    imageUrls: [
       'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
     ],
     ingredients: [],
     instructions: [],
     prepTime: 15,
-    cookTime: 20,
+    cookingTime: 20,
     servings: 2,
-    difficulty: 'easy',
-    mealType: ['lunch', 'dinner'],
-    dietType: ['vegetarian', 'gluten-free', 'gluten-free'],
+    difficulty: 'EASY',
+    mealType: ['LUNCH', 'DINNER'],
+    dietaryInfo: {
+      isVegetarian: true,
+      isGlutenFree: true,
+    },
     cuisineType: 'Mediterranean',
     mainIngredient: 'Quinoa',
     allergies: [],
@@ -41,9 +44,9 @@ const mockRecipes: Recipe[] = [
     averageRating: 4.5,
     totalRatings: 12,
     totalComments: 5,
-    status: 'approved',
-    chefId: '1',
-    chef: {
+    status: 'APPROVED',
+    authorId: '1',
+    author: {
       id: '1',
       email: 'chef@example.com',
       firstName: 'Maria',
@@ -138,7 +141,7 @@ export function BrowseRecipesPage() {
           recipe =>
             recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            recipe.cuisineType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (recipe.cuisineType && recipe.cuisineType.toLowerCase().includes(searchTerm.toLowerCase())) ||
             recipe.mainIngredient.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setRecipes(filteredRecipes);
@@ -214,26 +217,32 @@ export function BrowseRecipesPage() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
-                <span>{recipe.prepTime + recipe.cookTime}m</span>
+                <span>{recipe.prepTime + (recipe.cookingTime ?? 0)}m</span>
               </div>
-              <span className="capitalize">{recipe.difficulty}</span>
+              <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
             </div>
-            <span className="text-xs">by {recipe.chef.firstName}</span>
+            <span className="text-xs">by {recipe.author.firstName}</span>
           </div>
 
           <div className="flex flex-wrap gap-1 mt-3">
-            {recipe.dietType.slice(0, 2).map(diet => (
-              <span
-                key={diet}
-                className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
-              >
-                {diet}
-              </span>
-            ))}
-            {recipe.dietType.length > 2 && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                +{recipe.dietType.length - 2}
-              </span>
+            {recipe.dietaryInfo && (
+              <>
+                {recipe.dietaryInfo.isVegan && (
+                  <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                    Vegan
+                  </span>
+                )}
+                {recipe.dietaryInfo.isVegetarian && (
+                  <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                    Vegetarian
+                  </span>
+                )}
+                {recipe.dietaryInfo.isGlutenFree && (
+                  <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                    Gluten-Free
+                  </span>
+                )}
+              </>
             )}
           </div>
         </CardContent>
@@ -367,7 +376,7 @@ export function BrowseRecipesPage() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Meal Type</h4>
                   <div className="space-y-2">
-                    {(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'] as const).map(
+                    {(['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK', 'DESSERT'] as const).map(
                       mealType => (
                         <label
                           key={mealType}
@@ -392,7 +401,7 @@ export function BrowseRecipesPage() {
                             }}
                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <span className="text-sm text-gray-700 capitalize">{mealType}</span>
+                          <span className="text-sm text-gray-700 capitalize">{mealType.toLowerCase()}</span>
                         </label>
                       )
                     )}
@@ -438,7 +447,7 @@ export function BrowseRecipesPage() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Difficulty</h4>
                   <div className="space-y-2">
-                    {(['easy', 'medium', 'hard'] as const).map(difficulty => (
+                    {(['EASY', 'MEDIUM', 'HARD'] as const).map(difficulty => (
                       <label
                         key={difficulty}
                         className="flex items-center space-x-2 cursor-pointer"
@@ -462,7 +471,7 @@ export function BrowseRecipesPage() {
                           }}
                           className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <span className="text-sm text-gray-700 capitalize">{difficulty}</span>
+                        <span className="text-sm text-gray-700 capitalize">{difficulty.toLowerCase()}</span>
                       </label>
                     ))}
                   </div>

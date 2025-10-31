@@ -22,6 +22,7 @@ export function RecipeSubmissionPage() {
   const [loading, setLoading] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [originalStatus, setOriginalStatus] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | null>(null);
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [allergiesInput, setAllergiesInput] = useState(''); // Raw string input for allergies
   const [imageUploadStatus, setImageUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   
@@ -87,6 +88,11 @@ export function RecipeSubmissionPage() {
 
           // Store original status for success message
           setOriginalStatus(recipe.status);
+
+          // Store rejection reason if recipe was rejected
+          if (recipe.status === 'REJECTED' && recipe.rejectionReason) {
+            setRejectionReason(recipe.rejectionReason);
+          }
 
           // Convert Recipe to RecipeFormData format
           setFormData({
@@ -336,6 +342,16 @@ export function RecipeSubmissionPage() {
       newErrors.servings = 'Servings must be less than 20';
     }
 
+    // Meal Type: at least 1 required
+    if (formData.mealType.length === 0) {
+      newErrors.mealType = 'Please select at least one meal type';
+    }
+
+    // Diet Type: at least 1 required
+    if (formData.dietType.length === 0) {
+      newErrors.dietType = 'Please select at least one diet type';
+    }
+
     // Cuisine type (optional but if provided should not be empty)
     if (formData.cuisineType && !formData.cuisineType.trim()) {
       newErrors.cuisineType = 'Please provide a cuisine type or leave it empty';
@@ -349,7 +365,14 @@ export function RecipeSubmissionPage() {
     e.preventDefault();
 
     if (!validateForm()) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to first error field
+      setTimeout(() => {
+        const firstErrorField = document.querySelector('.text-red-500');
+        if (firstErrorField) {
+          const fieldContainer = firstErrorField.closest('div');
+          fieldContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
 
@@ -771,16 +794,29 @@ export function RecipeSubmissionPage() {
 
         {/* Info banner for rejected recipes */}
         {isEditing && originalStatus === 'REJECTED' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-            <div className="text-blue-600 text-xl">ℹ️</div>
-            <div>
-              <h3 className="font-semibold text-blue-900 mb-1">Resubmission Notice</h3>
-              <p className="text-sm text-blue-800">
-                This recipe was previously rejected. After updating, it will be automatically
-                resubmitted with PENDING status for admin review.
-              </p>
+          <>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+              <div className="text-blue-600 text-xl">ℹ️</div>
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-1">Resubmission Notice</h3>
+                <p className="text-sm text-blue-800">
+                  This recipe was previously rejected. After updating, it will be automatically
+                  resubmitted with PENDING status for admin review.
+                </p>
+              </div>
             </div>
-          </div>
+
+            {/* Rejection reason */}
+            {rejectionReason && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                <div className="text-red-600 text-xl">❌</div>
+                <div>
+                  <h3 className="font-semibold text-red-900 mb-1">Rejection Reason</h3>
+                  <p className="text-sm text-red-800">{rejectionReason}</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -1170,7 +1206,9 @@ export function RecipeSubmissionPage() {
 
               {/* Meal Types */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">Meal Types</label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Meal Types *
+                </label>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   {(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'] as const).map(type => (
                     <label key={type} className="flex items-center space-x-2 cursor-pointer">
@@ -1189,11 +1227,16 @@ export function RecipeSubmissionPage() {
                     </label>
                   ))}
                 </div>
+                {errors.mealType && (
+                  <p className="text-red-500 text-sm mt-1">{errors.mealType}</p>
+                )}
               </div>
 
               {/* Diet Types */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">Diet Types</label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Diet Types *
+                </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {(
                     ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'paleo'] as const
@@ -1216,6 +1259,9 @@ export function RecipeSubmissionPage() {
                     </label>
                   ))}
                 </div>
+                {errors.dietType && (
+                  <p className="text-red-500 text-sm mt-1">{errors.dietType}</p>
+                )}
               </div>
 
               {/* Allergies */}

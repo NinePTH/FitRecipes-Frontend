@@ -85,7 +85,6 @@ export interface Recipe {
   mealType: Array<'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'DESSERT'>; // Array of meal types, uppercase
   cuisineType?: string;
   mainIngredient: string;
-  tags?: string[]; // Optional tags for search
   dietaryInfo?: DietaryInfo; // Backend uses object with boolean flags
   nutritionInfo?: NutritionInfo; // Backend uses 'nutritionInfo'
   allergies?: string[]; // Keep for UI compatibility
@@ -217,7 +216,6 @@ export interface RecipeFormData {
   mainIngredient: string;
   nutrition?: NutritionInfo;
   allergies: string[];
-  tags?: string[];
 }
 
 // Backend Recipe Submission Data (what API expects)
@@ -236,7 +234,6 @@ export interface RecipeSubmissionData {
   dietaryInfo?: DietaryInfo;
   nutritionInfo?: NutritionInfo;
   allergies?: string[]; // Optional array of allergen names (2-50 chars each, auto-normalized to lowercase)
-  tags?: string[];
   imageUrls?: string[]; // Array of image URLs (max 3)
   imageUrl?: string; // Deprecated: For backward compatibility
 }

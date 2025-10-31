@@ -1,4 +1,4 @@
-import type { BackendResponse } from '@/types';
+import type { BackendResponse, Recipe } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
@@ -214,6 +214,16 @@ export async function deleteRequest<T>(endpoint: string): Promise<T> {
   });
 }
 
+export async function putWithMessage<T>(
+  endpoint: string,
+  data?: unknown
+): Promise<{ data: T; message: string }> {
+  return requestWithMessage<T>(endpoint, {
+    method: 'PUT',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+}
+
 export async function uploadFile<T>(
   endpoint: string,
   file: File,
@@ -237,3 +247,36 @@ export async function uploadFile<T>(
     headers,
   });
 }
+
+// Admin API functions
+export const adminApi = {
+  // Get pending recipes
+  getPendingRecipes: (params?: { page?: number; limit?: number; sortBy?: string; sortOrder?: string }) =>
+    get<{ 
+      recipes: Recipe[]; 
+      pagination: { 
+        page: number; 
+        limit: number;
+        total: number; 
+        totalPages: number; 
+        hasNext: boolean; 
+        hasPrev: boolean; 
+      } 
+    }>('/api/v1/admin/recipes/pending', params),
+
+  // Approve recipe
+  approveRecipe: (recipeId: string, adminNote?: string) =>
+    putWithMessage<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}/approve`, adminNote ? { adminNote } : undefined),
+
+  // Reject recipe
+  rejectRecipe: (recipeId: string, rejectionReason: string, adminNote?: string) =>
+    putWithMessage<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}/reject`, { reason: rejectionReason, adminNote }),
+
+  // Get approval statistics
+  getApprovalStats: (period?: 'today' | 'week' | 'month' | 'all') =>
+    get<{ pending: number; approvedToday: number; rejectedToday: number }>('/api/v1/admin/recipes/stats', period ? { period } : undefined),
+
+  // Get recipe by ID (admin view - any status)
+  getRecipeById: (recipeId: string) =>
+    get<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}`),
+};

@@ -75,10 +75,6 @@ export function transformRecipeFormDataToSubmission(
     submissionData.nutritionInfo = formData.nutrition;
   }
 
-  if (formData.tags && formData.tags.length > 0) {
-    submissionData.tags = formData.tags;
-  }
-
   if (formData.allergies && formData.allergies.length > 0) {
     submissionData.allergies = formData.allergies;
   }
