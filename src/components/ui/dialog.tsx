@@ -39,9 +39,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       />
 
       {/* Dialog Content */}
-      <div className="relative z-50 w-full max-w-lg mx-4">
-        {children}
-      </div>
+      <div className="relative z-50 w-full max-w-lg mx-4">{children}</div>
     </div>
   );
 }
@@ -73,11 +71,7 @@ interface DialogHeaderProps {
 }
 
 export function DialogHeader({ className, children }: DialogHeaderProps) {
-  return (
-    <div className={cn('flex flex-col space-y-1.5 p-6 pb-4', className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn('flex flex-col space-y-1.5 p-6 pb-4', className)}>{children}</div>;
 }
 
 interface DialogTitleProps {
@@ -86,11 +80,7 @@ interface DialogTitleProps {
 }
 
 export function DialogTitle({ className, children }: DialogTitleProps) {
-  return (
-    <h2 className={cn('text-lg font-semibold text-gray-900', className)}>
-      {children}
-    </h2>
-  );
+  return <h2 className={cn('text-lg font-semibold text-gray-900', className)}>{children}</h2>;
 }
 
 interface DialogDescriptionProps {
@@ -99,11 +89,7 @@ interface DialogDescriptionProps {
 }
 
 export function DialogDescription({ className, children }: DialogDescriptionProps) {
-  return (
-    <p className={cn('text-sm text-gray-600', className)}>
-      {children}
-    </p>
-  );
+  return <p className={cn('text-sm text-gray-600', className)}>{children}</p>;
 }
 
 interface DialogFooterProps {

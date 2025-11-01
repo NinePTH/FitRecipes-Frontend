@@ -60,7 +60,9 @@ export function RecommendedRecipesPage() {
     <Link to={`/recipe/${recipe.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer">
         <div className="aspect-video relative bg-gray-200">
-          {(recipe.imageUrls && recipe.imageUrls.length > 0) || recipe.imageUrl || (recipe.images && recipe.images.length > 0) ? (
+          {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
+          recipe.imageUrl ||
+          (recipe.images && recipe.images.length > 0) ? (
             <img
               src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
               alt={recipe.title}

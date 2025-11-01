@@ -58,16 +58,10 @@ export function AlertDialog({
         aria-describedby="alert-dialog-description"
       >
         <div className="p-6 space-y-4">
-          <h2
-            id="alert-dialog-title"
-            className="text-lg font-semibold text-gray-900"
-          >
+          <h2 id="alert-dialog-title" className="text-lg font-semibold text-gray-900">
             {title}
           </h2>
-          <p
-            id="alert-dialog-description"
-            className="text-sm text-gray-600 leading-relaxed"
-          >
+          <p id="alert-dialog-description" className="text-sm text-gray-600 leading-relaxed">
             {description}
           </p>
         </div>

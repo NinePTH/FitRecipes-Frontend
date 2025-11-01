@@ -79,10 +79,7 @@ export function ConfirmDialog({
           )}
 
           {/* Title */}
-          <h2
-            id="confirm-dialog-title"
-            className="text-lg font-semibold text-gray-900 text-center"
-          >
+          <h2 id="confirm-dialog-title" className="text-lg font-semibold text-gray-900 text-center">
             {title}
           </h2>
 
@@ -104,11 +101,7 @@ export function ConfirmDialog({
           >
             {cancelText}
           </Button>
-          <Button
-            variant={variant}
-            onClick={handleConfirm}
-            className="flex-1 min-w-[80px]"
-          >
+          <Button variant={variant} onClick={handleConfirm} className="flex-1 min-w-[80px]">
             {confirmText}
           </Button>
         </div>

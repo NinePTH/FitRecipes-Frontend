@@ -218,7 +218,9 @@ export function BrowseRecipesPage() {
     <Link to={`/recipe/${recipe.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer">
         <div className="aspect-video relative bg-gray-200">
-          {(recipe.imageUrls && recipe.imageUrls.length > 0) || recipe.imageUrl || (recipe.images && recipe.images.length > 0) ? (
+          {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
+          recipe.imageUrl ||
+          (recipe.images && recipe.images.length > 0) ? (
             <img
               src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
               alt={recipe.title}
@@ -444,7 +446,9 @@ export function BrowseRecipesPage() {
                             }}
                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <span className="text-sm text-gray-700 capitalize">{mealType.toLowerCase()}</span>
+                          <span className="text-sm text-gray-700 capitalize">
+                            {mealType.toLowerCase()}
+                          </span>
                         </label>
                       )
                     )}
@@ -514,7 +518,9 @@ export function BrowseRecipesPage() {
                           }}
                           className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <span className="text-sm text-gray-700 capitalize">{difficulty.toLowerCase()}</span>
+                        <span className="text-sm text-gray-700 capitalize">
+                          {difficulty.toLowerCase()}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -821,10 +827,7 @@ export function BrowseRecipesPage() {
                   <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
                 </div>
                 {recommendedRecipes.length >= 4 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/recipes/recommended')}
-                  >
+                  <Button variant="outline" onClick={() => navigate('/recipes/recommended')}>
                     View All
                   </Button>
                 )}
@@ -845,10 +848,7 @@ export function BrowseRecipesPage() {
                 <h2 className="text-2xl font-bold text-gray-900">Trending This Week</h2>
               </div>
               {trendingRecipes.length >= 4 && (
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/recipes/trending')}
-                >
+                <Button variant="outline" onClick={() => navigate('/recipes/trending')}>
                   View All
                 </Button>
               )}
@@ -857,7 +857,9 @@ export function BrowseRecipesPage() {
               <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <TrendingUp className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-600">No trending recipes available at the moment.</p>
-                <p className="text-sm text-gray-500 mt-1">Start Rating or Comment on Recipes to start the Trend.</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Start Rating or Comment on Recipes to start the Trend.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -877,10 +879,7 @@ export function BrowseRecipesPage() {
                   <h2 className="text-2xl font-bold text-gray-900">Newly Added</h2>
                 </div>
                 {newRecipes.length >= 4 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/recipes/new')}
-                  >
+                  <Button variant="outline" onClick={() => navigate('/recipes/new')}>
                     View All
                   </Button>
                 )}
@@ -916,9 +915,7 @@ export function BrowseRecipesPage() {
               <div className="text-center py-12">
                 <div className="max-w-md mx-auto">
                   <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    No recipes found
-                  </h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
                   <p className="text-gray-600 mb-6">
                     Try adjusting your filters to see more results.
                   </p>
@@ -941,7 +938,7 @@ export function BrowseRecipesPage() {
                     <RecipeCard key={recipe.id} recipe={recipe} />
                   ))}
                 </div>
-                
+
                 {/* Load More Button */}
                 {hasNextPage && (
                   <div className="flex justify-center mt-8">

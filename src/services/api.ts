@@ -251,32 +251,45 @@ export async function uploadFile<T>(
 // Admin API functions
 export const adminApi = {
   // Get pending recipes
-  getPendingRecipes: (params?: { page?: number; limit?: number; sortBy?: string; sortOrder?: string }) =>
-    get<{ 
-      recipes: Recipe[]; 
-      pagination: { 
-        page: number; 
+  getPendingRecipes: (params?: {
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: string;
+  }) =>
+    get<{
+      recipes: Recipe[];
+      pagination: {
+        page: number;
         limit: number;
-        total: number; 
-        totalPages: number; 
-        hasNext: boolean; 
-        hasPrev: boolean; 
-      } 
+        total: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
     }>('/api/v1/admin/recipes/pending', params),
 
   // Approve recipe
   approveRecipe: (recipeId: string, adminNote?: string) =>
-    putWithMessage<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}/approve`, adminNote ? { adminNote } : undefined),
+    putWithMessage<{ recipe: Recipe }>(
+      `/api/v1/admin/recipes/${recipeId}/approve`,
+      adminNote ? { adminNote } : undefined
+    ),
 
   // Reject recipe
   rejectRecipe: (recipeId: string, rejectionReason: string, adminNote?: string) =>
-    putWithMessage<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}/reject`, { reason: rejectionReason, adminNote }),
+    putWithMessage<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}/reject`, {
+      reason: rejectionReason,
+      adminNote,
+    }),
 
   // Get approval statistics
   getApprovalStats: (period?: 'today' | 'week' | 'month' | 'all') =>
-    get<{ pending: number; approvedToday: number; rejectedToday: number }>('/api/v1/admin/recipes/stats', period ? { period } : undefined),
+    get<{ pending: number; approvedToday: number; rejectedToday: number }>(
+      '/api/v1/admin/recipes/stats',
+      period ? { period } : undefined
+    ),
 
   // Get recipe by ID (admin view - any status)
-  getRecipeById: (recipeId: string) =>
-    get<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}`),
+  getRecipeById: (recipeId: string) => get<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}`),
 };

@@ -48,16 +48,19 @@ export function MyRecipesPage() {
     setError(null);
 
     try {
-      const statusFilter = filter === 'all' ? undefined : filter.toUpperCase() as 'PENDING' | 'APPROVED' | 'REJECTED';
+      const statusFilter =
+        filter === 'all'
+          ? undefined
+          : (filter.toUpperCase() as 'PENDING' | 'APPROVED' | 'REJECTED');
       const data = await getMyRecipes(statusFilter);
       setRecipes(data.recipes);
       setMeta(data.meta);
     } catch (err: unknown) {
       console.error('Error fetching recipes:', err);
-      
+
       if (err && typeof err === 'object' && 'statusCode' in err) {
         const apiError = err as { statusCode: number; message: string };
-        
+
         if (apiError.statusCode === 401) {
           navigate('/auth');
           return;
@@ -315,7 +318,9 @@ export function MyRecipesPage() {
                   <div className="flex flex-col md:flex-row md:items-stretch">
                     {/* Recipe Image */}
                     <div className="md:w-72 flex-shrink-0 h-56 md:h-auto md:flex bg-gray-200 relative">
-                      {(recipe.imageUrls && recipe.imageUrls.length > 0) || recipe.imageUrl || (recipe.images && recipe.images.length > 0) ? (
+                      {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
+                      recipe.imageUrl ||
+                      (recipe.images && recipe.images.length > 0) ? (
                         <img
                           src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
                           alt={recipe.title}
@@ -427,21 +432,15 @@ export function MyRecipesPage() {
             <DialogHeader>
               <DialogTitle>Delete Recipe</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete "{recipeToDelete?.title}"? This action cannot be undone.
+                Are you sure you want to delete "{recipeToDelete?.title}"? This action cannot be
+                undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={cancelDelete}
-              >
+              <Button variant="outline" onClick={cancelDelete}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={confirmDelete}
-                disabled={deletingId !== null}
-              >
+              <Button variant="destructive" onClick={confirmDelete} disabled={deletingId !== null}>
                 {deletingId ? 'Deleting...' : 'Delete'}
               </Button>
             </DialogFooter>

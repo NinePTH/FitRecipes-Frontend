@@ -106,7 +106,7 @@ export function AdminRecipeApprovalPage() {
 
     try {
       const result = await adminApi.approveRecipe(recipeId);
-      
+
       // Remove from list and update stats
       setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
       setStats(prev => ({
@@ -114,7 +114,7 @@ export function AdminRecipeApprovalPage() {
         pending: prev.pending - 1,
         approvedToday: prev.approvedToday + 1,
       }));
-      
+
       setSelectedRecipe(null);
       showAlert('Success', result.message || 'Recipe approved successfully!');
     } catch (error) {
@@ -127,7 +127,7 @@ export function AdminRecipeApprovalPage() {
 
   const handleReject = async (recipeId: string, reason?: string) => {
     const reasonToUse = reason || rejectionReason;
-    
+
     if (!reasonToUse.trim()) {
       showAlert('Error', 'Rejection reason is required');
       return;
@@ -142,7 +142,7 @@ export function AdminRecipeApprovalPage() {
 
     try {
       const result = await adminApi.rejectRecipe(recipeId, reasonToUse);
-      
+
       // Remove from list and update stats
       setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
       setStats(prev => ({
@@ -150,7 +150,7 @@ export function AdminRecipeApprovalPage() {
         pending: prev.pending - 1,
         rejectedToday: prev.rejectedToday + 1,
       }));
-      
+
       setSelectedRecipe(null);
       setRejectionReason('');
       showAlert('Success', result.message || 'Recipe rejected successfully');
@@ -175,7 +175,9 @@ export function AdminRecipeApprovalPage() {
   const RecipeCard = ({ recipe }: { recipe: Recipe }) => (
     <Card className="hover:shadow-lg transition-shadow duration-200">
       <div className="aspect-video relative bg-gray-200">
-        {(recipe.imageUrls && recipe.imageUrls.length > 0) || recipe.imageUrl || (recipe.images && recipe.images.length > 0) ? (
+        {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
+        recipe.imageUrl ||
+        (recipe.images && recipe.images.length > 0) ? (
           <img
             src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
             alt={recipe.title}
@@ -291,7 +293,12 @@ export function AdminRecipeApprovalPage() {
               {/* Recipe Image */}
               <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
                 <img
-                  src={recipe.imageUrls?.[0] || recipe.images?.[0] || recipe.imageUrl || 'https://via.placeholder.com/400x300'}
+                  src={
+                    recipe.imageUrls?.[0] ||
+                    recipe.images?.[0] ||
+                    recipe.imageUrl ||
+                    'https://via.placeholder.com/400x300'
+                  }
                   alt={recipe.title}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
@@ -319,7 +326,9 @@ export function AdminRecipeApprovalPage() {
                   </div>
                   <div>
                     <span className="font-medium text-gray-900">Difficulty:</span>
-                    <span className="ml-2 text-gray-600 capitalize">{recipe.difficulty?.toLowerCase() ?? ''}</span>
+                    <span className="ml-2 text-gray-600 capitalize">
+                      {recipe.difficulty?.toLowerCase() ?? ''}
+                    </span>
                   </div>
                 </div>
 
@@ -439,108 +448,108 @@ export function AdminRecipeApprovalPage() {
 
   return (
     <>
-    <Layout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Recipe Approval</h1>
-          <p className="text-gray-600 mt-2">Review and approve recipes submitted by chefs</p>
-        </div>
+      <Layout>
+        <div className="space-y-8">
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Recipe Approval</h1>
+            <p className="text-gray-600 mt-2">Review and approve recipes submitted by chefs</p>
+          </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-yellow-500" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.pending}</p>
-                  <p className="text-sm text-gray-600">Pending Reviews</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Check className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.approvedToday}</p>
-                  <p className="text-sm text-gray-600">Approved Today</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <X className="h-5 w-5 text-red-500" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.rejectedToday}</p>
-                  <p className="text-sm text-gray-600">Rejected Today</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Pending Recipes */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Pending Recipes</h2>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5 text-yellow-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{stats.pending}</p>
+                    <p className="text-sm text-gray-600">Pending Reviews</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : recipes.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Pending Recipes</h3>
-                <p className="text-gray-600">All recipes have been reviewed. Great job!</p>
               </CardContent>
             </Card>
-          ) : (
-            <>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-2">
+                  <Check className="h-5 w-5 text-green-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{stats.approvedToday}</p>
+                    <p className="text-sm text-gray-600">Approved Today</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-2">
+                  <X className="h-5 w-5 text-red-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{stats.rejectedToday}</p>
+                    <p className="text-sm text-gray-600">Rejected Today</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Pending Recipes */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Pending Recipes</h2>
+
+            {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recipes.map(recipe => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                  </div>
                 ))}
               </div>
-
-              {/* Infinite Scroll Load More */}
-              {hasNextPage && (
-                <div className="text-center mt-8">
-                  <Button
-                    onClick={loadMoreRecipes}
-                    disabled={isFetchingNextPage}
-                    variant="outline"
-                    size="lg"
-                  >
-                    {isFetchingNextPage ? 'Loading...' : 'Load More Recipes'}
-                  </Button>
+            ) : recipes.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Pending Recipes</h3>
+                  <p className="text-gray-600">All recipes have been reviewed. Great job!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recipes.map(recipe => (
+                    <RecipeCard key={recipe.id} recipe={recipe} />
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
 
-        {/* TODO: Add filtering and sorting options */}
-        {/* TODO: Add bulk approval actions */}
-        {/* TODO: Add rejection reason templates */}
-        {/* TODO: Add approval history */}
-      </div>
-    </Layout>
+                {/* Infinite Scroll Load More */}
+                {hasNextPage && (
+                  <div className="text-center mt-8">
+                    <Button
+                      onClick={loadMoreRecipes}
+                      disabled={isFetchingNextPage}
+                      variant="outline"
+                      size="lg"
+                    >
+                      {isFetchingNextPage ? 'Loading...' : 'Load More Recipes'}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* TODO: Add filtering and sorting options */}
+          {/* TODO: Add bulk approval actions */}
+          {/* TODO: Add rejection reason templates */}
+          {/* TODO: Add approval history */}
+        </div>
+      </Layout>
 
       {/* Recipe Detail Modal - Outside Layout for full-screen overlay */}
       {selectedRecipe && (
@@ -556,7 +565,7 @@ export function AdminRecipeApprovalPage() {
       {/* Alert Dialog - Outside Layout */}
       <AlertDialog
         open={alertDialog.open}
-        onOpenChange={(open) => setAlertDialog(prev => ({ ...prev, open }))}
+        onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}
         title={alertDialog.title}
         description={alertDialog.description}
       />

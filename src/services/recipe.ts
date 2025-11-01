@@ -103,7 +103,7 @@ export async function uploadRecipeImage(file: File): Promise<string> {
 
   // Get auth token
   const token = localStorage.getItem('fitrecipes_token');
-  
+
   const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -144,10 +144,7 @@ export async function submitRecipe(formData: RecipeFormData): Promise<Recipe> {
 
   console.log('Submitting recipe to backend:', submissionData);
 
-  const response = await api.post<{ recipe: Recipe }>(
-    '/api/v1/recipes',
-    submissionData
-  );
+  const response = await api.post<{ recipe: Recipe }>('/api/v1/recipes', submissionData);
 
   return response.recipe;
 }
@@ -176,10 +173,8 @@ export async function getMyRecipes(status?: 'PENDING' | 'APPROVED' | 'REJECTED')
     rejected: number;
   };
 }> {
-  const url = status
-    ? `/api/v1/recipes/my-recipes?status=${status}`
-    : '/api/v1/recipes/my-recipes';
-  
+  const url = status ? `/api/v1/recipes/my-recipes?status=${status}` : '/api/v1/recipes/my-recipes';
+
   const response = await api.get<{
     recipes: Recipe[];
     meta: {
@@ -206,10 +201,7 @@ export async function updateRecipe(recipeId: string, formData: RecipeFormData): 
 
   console.log('Updating recipe:', recipeId, submissionData);
 
-  const response = await api.put<{ recipe: Recipe }>(
-    `/api/v1/recipes/${recipeId}`,
-    submissionData
-  );
+  const response = await api.put<{ recipe: Recipe }>(`/api/v1/recipes/${recipeId}`, submissionData);
 
   return response.recipe;
 }
@@ -253,10 +245,7 @@ export async function getPendingRecipes(
  * @param adminNote Optional admin feedback
  * @returns Approved recipe
  */
-export async function approveRecipe(
-  recipeId: string,
-  adminNote?: string
-): Promise<Recipe> {
+export async function approveRecipe(recipeId: string, adminNote?: string): Promise<Recipe> {
   const response = await api.put<{ recipe: Recipe }>(
     `/api/v1/admin/recipes/${recipeId}/approve`,
     adminNote ? { adminNote } : {}
@@ -272,10 +261,9 @@ export async function approveRecipe(
  * @returns Rejected recipe
  */
 export async function rejectRecipe(recipeId: string, reason: string): Promise<Recipe> {
-  const response = await api.put<{ recipe: Recipe }>(
-    `/api/v1/admin/recipes/${recipeId}/reject`,
-    { reason }
-  );
+  const response = await api.put<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}/reject`, {
+    reason,
+  });
 
   return response.recipe;
 }
@@ -319,7 +307,7 @@ export async function browseRecipes(params: {
   // Add pagination params
   if (params.page) queryParams.append('page', params.page.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
-  
+
   // Add sort params
   if (params.sortBy) queryParams.append('sortBy', params.sortBy);
   if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);

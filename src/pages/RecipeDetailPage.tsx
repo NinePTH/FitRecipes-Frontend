@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Clock, Users, Star, Heart, Share2, MessageCircle, ChevronLeft, AlertCircle, Edit2, Trash2, AlertTriangle } from 'lucide-react';
+import {
+  Clock,
+  Users,
+  Star,
+  Heart,
+  Share2,
+  MessageCircle,
+  ChevronLeft,
+  AlertCircle,
+  Edit2,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,16 +51,16 @@ export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  
+
   // Rating state
   const [userRating, setUserRating] = useState(0);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
-  
+
   // Comment state
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [comment, setComment] = useState('');
@@ -89,10 +101,10 @@ export function RecipeDetailPage() {
         setRecipe(fetchedRecipe);
       } catch (err: unknown) {
         console.error('Error fetching recipe:', err);
-        
+
         if (err && typeof err === 'object' && 'statusCode' in err) {
           const apiError = err as { statusCode: number; message: string };
-          
+
           if (apiError.statusCode === 404) {
             setError('Recipe not found');
           } else if (apiError.statusCode === 403) {
@@ -115,7 +127,7 @@ export function RecipeDetailPage() {
   useEffect(() => {
     const loadUserRating = async () => {
       if (!id || !user) return;
-      
+
       try {
         const rating = await getUserRating(id);
         if (rating) {
@@ -133,7 +145,7 @@ export function RecipeDetailPage() {
   useEffect(() => {
     const loadComments = async () => {
       if (!id) return;
-      
+
       setLoadingComments(true);
       try {
         const result = await getComments(id, {
@@ -142,13 +154,13 @@ export function RecipeDetailPage() {
           sortBy: 'createdAt',
           sortOrder: 'desc',
         });
-        
+
         if (commentPage === 1) {
           setComments(result.comments);
         } else {
           setComments(prev => [...prev, ...result.comments]);
         }
-        
+
         setHasMoreComments(result.pagination.hasNext);
       } catch (error) {
         console.error('Error loading comments:', error);
@@ -180,7 +192,7 @@ export function RecipeDetailPage() {
     try {
       const result = await submitRating(id, rating);
       setUserRating(result.rating.rating);
-      
+
       // Update recipe stats
       if (recipe) {
         setRecipe({
@@ -204,7 +216,7 @@ export function RecipeDetailPage() {
     try {
       const result = await deleteRating(id);
       setUserRating(0);
-      
+
       // Update recipe stats
       if (recipe) {
         setRecipe({
@@ -236,10 +248,10 @@ export function RecipeDetailPage() {
 
     try {
       const newComment = await addComment(id, comment.trim());
-      
+
       // Add new comment to the top of the list
       setComments(prev => [newComment, ...prev]);
-      
+
       // Update recipe total comments
       if (recipe) {
         setRecipe({
@@ -262,7 +274,7 @@ export function RecipeDetailPage() {
 
     try {
       const updated = await updateComment(id, commentId, editingCommentContent.trim());
-      
+
       // Update comment in the list
       setComments(prev => {
         return prev.map(c => {
@@ -272,7 +284,7 @@ export function RecipeDetailPage() {
           return c;
         });
       });
-      
+
       setEditingCommentId(null);
       setEditingCommentContent('');
     } catch (error) {
@@ -291,10 +303,10 @@ export function RecipeDetailPage() {
 
     try {
       await deleteComment(id, commentToDelete);
-      
+
       // Remove comment from the list
       setComments(prev => prev.filter(c => c.id !== commentToDelete));
-      
+
       // Update recipe total comments
       if (recipe) {
         setRecipe({
@@ -756,7 +768,7 @@ export function RecipeDetailPage() {
                                 {formatDate(commentItem.createdAt)}
                               </span>
                             </div>
-                            
+
                             {/* Edit/Delete buttons for own comments */}
                             {user && user.id === commentItem.userId && (
                               <div className="flex items-center space-x-2">
@@ -804,7 +816,7 @@ export function RecipeDetailPage() {
                               </div>
                             )}
                           </div>
-                          
+
                           {/* Comment text or edit textarea */}
                           {editingCommentId === commentItem.id ? (
                             <Textarea
@@ -822,7 +834,7 @@ export function RecipeDetailPage() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {/* Load More Comments Button */}
                   {hasMoreComments && (
                     <div className="text-center pt-4">
