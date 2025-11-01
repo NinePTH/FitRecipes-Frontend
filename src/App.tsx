@@ -15,6 +15,9 @@ import { RecipeDetailPage } from '@/pages/RecipeDetailPage';
 import { RecipeSubmissionPage } from '@/pages/RecipeSubmissionPage';
 import { AdminRecipeApprovalPage } from '@/pages/AdminRecipeApprovalPage';
 import { MyRecipesPage } from '@/pages/MyRecipesPage';
+import { RecommendedRecipesPage } from '@/pages/RecommendedRecipesPage';
+import { TrendingRecipesPage } from '@/pages/TrendingRecipesPage';
+import { NewRecipesPage } from '@/pages/NewRecipesPage';
 
 function App() {
   return (
@@ -38,6 +41,38 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BrowseRecipesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/browse-recipes"
+              element={
+                <ProtectedRoute>
+                  <BrowseRecipesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recipes/recommended"
+              element={
+                <ProtectedRoute>
+                  <RecommendedRecipesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recipes/trending"
+              element={
+                <ProtectedRoute>
+                  <TrendingRecipesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recipes/new"
+              element={
+                <ProtectedRoute>
+                  <NewRecipesPage />
                 </ProtectedRoute>
               }
             />

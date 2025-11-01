@@ -285,13 +285,18 @@ export function RecipeSubmissionPage() {
       newErrors.title = 'Recipe name must be less than 200 characters';
     }
 
-    // Description: 10-1000 characters (backend requirement)
+    // Description: 10-1000 characters, at least 8 words (backend requirement + word count)
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
     } else if (formData.description.length < 10) {
       newErrors.description = 'Description must be at least 10 characters';
     } else if (formData.description.length > 1000) {
       newErrors.description = 'Description must be less than 1000 characters';
+    } else {
+      const wordCount = formData.description.trim().split(/\s+/).length;
+      if (wordCount < 8) {
+        newErrors.description = `Description must be at least 8 words (currently ${wordCount} word${wordCount === 1 ? '' : 's'})`;
+      }
     }
 
     // Main Ingredient: 2-50 characters (backend requirement)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Clock, Star, TrendingUp, X, Sparkles, ChefHat } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,204 +13,232 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Layout } from '@/components/Layout';
+import {
+  browseRecipes,
+  getRecommendedRecipes,
+  getTrendingRecipes,
+  getNewRecipes,
+} from '@/services/recipe';
 import type { Recipe, RecipeFilters, SortOption } from '@/types';
 
-// Mock data - TODO: Replace with API calls
-const mockRecipes: Recipe[] = [
-  {
-    id: '1',
-    title: 'Mediterranean Quinoa Bowl',
-    description:
-      'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
-    imageUrls: [
-      'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
-    ],
-    ingredients: [],
-    instructions: [],
-    prepTime: 15,
-    cookingTime: 20,
-    servings: 2,
-    difficulty: 'EASY',
-    mealType: ['LUNCH', 'DINNER'],
-    dietaryInfo: {
-      isVegetarian: true,
-      isGlutenFree: true,
-    },
-    cuisineType: 'Mediterranean',
-    mainIngredient: 'Quinoa',
-    allergies: [],
-    ratings: [],
-    comments: [],
-    averageRating: 4.5,
-    totalRatings: 12,
-    totalComments: 5,
-    status: 'APPROVED',
-    authorId: '1',
-    author: {
-      id: '1',
-      email: 'chef@example.com',
-      firstName: 'Maria',
-      lastName: 'Rodriguez',
-      role: 'CHEF',
-      createdAt: '',
-      updatedAt: '',
-    },
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-15T10:00:00Z',
-  },
-  // Add more mock recipes as needed
-];
-
-// Search suggestions mock data
-const mockSuggestions = {
-  ingredients: [
-    'chicken',
-    'salmon',
-    'quinoa',
-    'avocado',
-    'spinach',
-    'sweet potato',
-    'broccoli',
-    'tofu',
-  ],
-  cuisines: [
-    'Mediterranean',
-    'Thai',
-    'Indian',
-    'Mexican',
-    'Italian',
-    'Japanese',
-    'Korean',
-    'Greek',
-  ],
-  recipes: [
-    'Mediterranean Quinoa Bowl',
-    'Spicy Thai Basil Chicken',
-    'Indian Butter Chicken',
-    'Greek Salad',
-  ],
-};
-
 export function BrowseRecipesPage() {
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recommendedRecipes, setRecommendedRecipes] = useState<Recipe[]>([]);
+  const [trendingRecipes, setTrendingRecipes] = useState<Recipe[]>([]);
+  const [newRecipes, setNewRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({});
   const [sortBy, setSortBy] = useState<SortOption>('rating');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Search suggestions state
+  // Search suggestions state (placeholder - not implemented yet)
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<{
+  const [suggestions] = useState<{
     ingredients: string[];
     cuisines: string[];
     recipes: string[];
   }>({ ingredients: [], cuisines: [], recipes: [] });
 
-  // Infinite scroll state
-  const [hasNextPage, setHasNextPage] = useState(true);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
 
+  // Fetch main recipes with filters
   useEffect(() => {
-    // TODO: Replace with actual API call
     const fetchRecipes = async () => {
       setLoading(true);
-      // Simulate API delay
-      setTimeout(() => {
-        setRecipes(mockRecipes);
+      try {
+        // Convert UI filters to API format
+        const apiFilters: {
+          page: number;
+          limit: number;
+          sortBy: SortOption;
+          sortOrder: 'asc' | 'desc';
+          mealType?: Array<'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'DESSERT'>;
+          difficulty?: Array<'EASY' | 'MEDIUM' | 'HARD'>;
+          cuisineType?: string;
+          mainIngredient?: string;
+          maxPrepTime?: number;
+          isVegetarian?: boolean;
+          isVegan?: boolean;
+          isGlutenFree?: boolean;
+          isDairyFree?: boolean;
+          isKeto?: boolean;
+          isPaleo?: boolean;
+        } = {
+          page: 1,
+          limit: 8,
+          sortBy,
+          sortOrder: 'desc',
+        };
+
+        // Map meal types
+        if (filters.mealType && filters.mealType.length > 0) {
+          apiFilters.mealType = filters.mealType;
+        }
+
+        // Map difficulty
+        if (filters.difficulty && filters.difficulty.length > 0) {
+          apiFilters.difficulty = filters.difficulty;
+        }
+
+        // Map other filters
+        if (filters.cuisineType) apiFilters.cuisineType = filters.cuisineType;
+        if (filters.mainIngredient) apiFilters.mainIngredient = filters.mainIngredient;
+        if (filters.maxPrepTime) apiFilters.maxPrepTime = filters.maxPrepTime;
+
+        // Map dietary filters
+        if (filters.dietType) {
+          if (filters.dietType.includes('vegetarian')) apiFilters.isVegetarian = true;
+          if (filters.dietType.includes('vegan')) apiFilters.isVegan = true;
+          if (filters.dietType.includes('gluten-free')) apiFilters.isGlutenFree = true;
+          if (filters.dietType.includes('dairy-free')) apiFilters.isDairyFree = true;
+          if (filters.dietType.includes('keto')) apiFilters.isKeto = true;
+          if (filters.dietType.includes('paleo')) apiFilters.isPaleo = true;
+        }
+
+        const response = await browseRecipes(apiFilters);
+        setRecipes(response.recipes);
+        setCurrentPage(response.pagination.page);
+        setHasNextPage(response.pagination.hasNext);
+      } catch (error) {
+        console.error('Error fetching recipes:', error);
+        setRecipes([]);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     fetchRecipes();
-  }, [searchTerm, filters, sortBy]);
+  }, [filters, sortBy]);
+
+  // Fetch recommended, trending, and new recipes on mount
+  useEffect(() => {
+    const fetchSpecialSections = async () => {
+      try {
+        const [recommended, trending, newRec] = await Promise.all([
+          getRecommendedRecipes(4),
+          getTrendingRecipes(4, '7d'),
+          getNewRecipes(4),
+        ]);
+        setRecommendedRecipes(recommended.recipes);
+        setTrendingRecipes(trending.recipes);
+        setNewRecipes(newRec.recipes);
+      } catch (error) {
+        console.error('Error fetching special sections:', error);
+      }
+    };
+
+    fetchSpecialSections();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    setLoading(true);
-
-    // Simulate search API call
-    console.log('Searching for:', searchTerm);
-
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      // Filter mock recipes based on search term
-      if (searchTerm.trim()) {
-        const filteredRecipes = mockRecipes.filter(
-          recipe =>
-            recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (recipe.cuisineType && recipe.cuisineType.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            recipe.mainIngredient.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setRecipes(filteredRecipes);
-      } else {
-        setRecipes(mockRecipes);
-      }
-      setLoading(false);
-    }, 800);
+    // TODO: Implement search when backend is ready
+    console.log('Search not implemented yet:', searchTerm);
   };
 
   const handleSearchInputChange = (value: string) => {
     setSearchTerm(value);
-
-    if (value.trim().length > 0) {
-      // Filter suggestions based on input
-      const filteredSuggestions = {
-        ingredients: mockSuggestions.ingredients
-          .filter(item => item.toLowerCase().includes(value.toLowerCase()))
-          .slice(0, 4),
-        cuisines: mockSuggestions.cuisines
-          .filter(item => item.toLowerCase().includes(value.toLowerCase()))
-          .slice(0, 3),
-        recipes: mockSuggestions.recipes
-          .filter(item => item.toLowerCase().includes(value.toLowerCase()))
-          .slice(0, 3),
-      };
-
-      setSuggestions(filteredSuggestions);
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
-    }
+    // TODO: Implement search suggestions when backend is ready
+    setShowSuggestions(false);
   };
 
   const handleSuggestionSelect = (suggestion: string) => {
     setSearchTerm(suggestion);
     setShowSuggestions(false);
-    // Trigger search automatically
+    // TODO: Trigger search when backend is ready
     console.log('Selected suggestion:', suggestion);
   };
 
-  const loadMoreRecipes = () => {
-    // TODO: Implement infinite scroll
-    console.log('Loading more recipes...');
-    setIsFetchingNextPage(true);
+  const loadMoreRecipes = async () => {
+    if (!hasNextPage || isFetchingNextPage) return;
 
-    setTimeout(() => {
+    setIsFetchingNextPage(true);
+    try {
+      // Build API filters (same as main fetch)
+      const apiFilters: {
+        page: number;
+        limit: number;
+        sortBy: SortOption;
+        sortOrder: 'asc' | 'desc';
+        mealType?: Array<'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'DESSERT'>;
+        difficulty?: Array<'EASY' | 'MEDIUM' | 'HARD'>;
+        cuisineType?: string;
+        mainIngredient?: string;
+        maxPrepTime?: number;
+        isVegetarian?: boolean;
+        isVegan?: boolean;
+        isGlutenFree?: boolean;
+        isDairyFree?: boolean;
+        isKeto?: boolean;
+        isPaleo?: boolean;
+      } = {
+        page: currentPage + 1,
+        limit: 8,
+        sortBy,
+        sortOrder: 'desc',
+      };
+
+      if (filters.mealType && filters.mealType.length > 0) {
+        apiFilters.mealType = filters.mealType;
+      }
+      if (filters.difficulty && filters.difficulty.length > 0) {
+        apiFilters.difficulty = filters.difficulty;
+      }
+      if (filters.cuisineType) apiFilters.cuisineType = filters.cuisineType;
+      if (filters.mainIngredient) apiFilters.mainIngredient = filters.mainIngredient;
+      if (filters.maxPrepTime) apiFilters.maxPrepTime = filters.maxPrepTime;
+
+      if (filters.dietType) {
+        if (filters.dietType.includes('vegetarian')) apiFilters.isVegetarian = true;
+        if (filters.dietType.includes('vegan')) apiFilters.isVegan = true;
+        if (filters.dietType.includes('gluten-free')) apiFilters.isGlutenFree = true;
+        if (filters.dietType.includes('dairy-free')) apiFilters.isDairyFree = true;
+        if (filters.dietType.includes('keto')) apiFilters.isKeto = true;
+        if (filters.dietType.includes('paleo')) apiFilters.isPaleo = true;
+      }
+
+      const response = await browseRecipes(apiFilters);
+      setRecipes(prev => [...prev, ...response.recipes]);
+      setCurrentPage(response.pagination.page);
+      setHasNextPage(response.pagination.hasNext);
+    } catch (error) {
+      console.error('Error loading more recipes:', error);
+    } finally {
       setIsFetchingNextPage(false);
-      // Simulate no more pages after first load
-      setHasNextPage(false);
-    }, 1000);
+    }
   };
 
   const RecipeCard = ({ recipe }: { recipe: Recipe }) => (
     <Link to={`/recipe/${recipe.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer">
-        <div className="aspect-video relative">
-          <img
-            src={recipe.imageUrls?.[0] || recipe.images?.[0] || recipe.imageUrl || 'https://via.placeholder.com/300x200'}
-            alt={recipe.title}
-            className="w-full h-full object-cover"
-          />
+        <div className="aspect-video relative bg-gray-200">
+          {(recipe.imageUrls && recipe.imageUrls.length > 0) || recipe.imageUrl || (recipe.images && recipe.images.length > 0) ? (
+            <img
+              src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
+              alt={recipe.title}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={e => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+              <ChefHat className="h-12 w-12" />
+            </div>
+          )}
           <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
             <Star className="h-3 w-3 text-yellow-400 fill-current" />
             <span>{recipe.averageRating}</span>
           </div>
         </div>
         <CardContent className="p-4">
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2">{recipe.title}</h3>
+          <h3 className="font-semibold text-lg mb-2 line-clamp-1">{recipe.title}</h3>
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
 
           <div className="flex items-center justify-between text-sm text-gray-500">
@@ -228,18 +256,33 @@ export function BrowseRecipesPage() {
             {recipe.dietaryInfo && (
               <>
                 {recipe.dietaryInfo.isVegan && (
-                  <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                     Vegan
                   </span>
                 )}
                 {recipe.dietaryInfo.isVegetarian && (
-                  <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                     Vegetarian
                   </span>
                 )}
                 {recipe.dietaryInfo.isGlutenFree && (
-                  <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
                     Gluten-Free
+                  </span>
+                )}
+                {recipe.dietaryInfo.isDairyFree && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    Dairy-Free
+                  </span>
+                )}
+                {recipe.dietaryInfo.isKeto && (
+                  <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                    Keto
+                  </span>
+                )}
+                {recipe.dietaryInfo.isPaleo && (
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                    Paleo
                   </span>
                 )}
               </>
@@ -736,10 +779,7 @@ export function BrowseRecipesPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setRecipes(mockRecipes);
-                  }}
+                  onClick={() => setSearchTerm('')}
                   className="text-blue-600 border-blue-200 hover:bg-blue-100"
                 >
                   <X className="h-4 w-4 mr-1" />
@@ -772,91 +812,56 @@ export function BrowseRecipesPage() {
 
         {/* Recipe Sections */}
         <div className="space-y-12">
-          {/* Search Results or Recommended */}
-          <section>
-            <div className="flex items-center space-x-2 mb-6">
-              {searchTerm ? (
-                <>
-                  <Search className="h-6 w-6 text-blue-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">Search Results</h2>
-                </>
-              ) : (
-                <>
+          {/* Recommended Recipes */}
+          {recommendedRecipes.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-2">
                   <Star className="h-6 w-6 text-primary-600" />
                   <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
-                </>
-              )}
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="animate-pulse">
-                    <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : recipes.length === 0 && searchTerm ? (
-              <div className="text-center py-12">
-                <div className="max-w-md mx-auto">
-                  <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    No recipes found for "{searchTerm}"
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Try adjusting your search terms or removing some filters to see more results.
-                  </p>
-                  <div className="space-y-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setSearchTerm('');
-                        setRecipes(mockRecipes);
-                      }}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Clear Search
-                    </Button>
-                    <div className="text-sm text-gray-500">
-                      <p>Popular searches: chicken, mediterranean, quinoa, vegetarian</p>
-                    </div>
-                  </div>
                 </div>
+                {recommendedRecipes.length >= 4 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/recipes/recommended')}
+                  >
+                    View All
+                  </Button>
+                )}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {(searchTerm ? recipes : recipes.slice(0, 4)).map(recipe => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {recommendedRecipes.map(recipe => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* Trending Recipes */}
           <section>
-            <div className="flex items-center space-x-2 mb-6">
-              <TrendingUp className="h-6 w-6 text-primary-600" />
-              <h2 className="text-2xl font-bold text-gray-900">Trending Recipes</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-6 w-6 text-primary-600" />
+                <h2 className="text-2xl font-bold text-gray-900">Trending This Week</h2>
+              </div>
+              {trendingRecipes.length >= 4 && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/recipes/trending')}
+                >
+                  View All
+                </Button>
+              )}
             </div>
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="animate-pulse">
-                    <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
+            {trendingRecipes.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <TrendingUp className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-600">No trending recipes available at the moment.</p>
+                <p className="text-sm text-gray-500 mt-1">Start Rating or Comment on Recipes to start the Trend.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {recipes.map(recipe => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {trendingRecipes.map(recipe => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
@@ -864,14 +869,40 @@ export function BrowseRecipesPage() {
           </section>
 
           {/* New Recipes */}
+          {newRecipes.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-6 w-6 text-primary-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">Newly Added</h2>
+                </div>
+                {newRecipes.length >= 4 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/recipes/new')}
+                  >
+                    View All
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {newRecipes.map(recipe => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* All Recipes (with filters applied) */}
           <section>
             <div className="flex items-center space-x-2 mb-6">
-              <Sparkles className="h-6 w-6 text-primary-600" />
-              <h2 className="text-2xl font-bold text-gray-900">New Recipes</h2>
+              <Search className="h-6 w-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900">All Recipes</h2>
             </div>
+
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map(i => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                   <div key={i} className="animate-pulse">
                     <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
                     <div className="space-y-2">
@@ -881,34 +912,52 @@ export function BrowseRecipesPage() {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {recipes.map(recipe => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
-                ))}
+            ) : recipes.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="max-w-md mx-auto">
+                  <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    No recipes found
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Try adjusting your filters to see more results.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFilters({});
+                      setSearchTerm('');
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Clear All Filters
+                  </Button>
+                </div>
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {recipes.map(recipe => (
+                    <RecipeCard key={recipe.id} recipe={recipe} />
+                  ))}
+                </div>
+                
+                {/* Load More Button */}
+                {hasNextPage && (
+                  <div className="flex justify-center mt-8">
+                    <Button
+                      onClick={loadMoreRecipes}
+                      disabled={isFetchingNextPage}
+                      className="px-8"
+                    >
+                      {isFetchingNextPage ? 'Loading...' : 'Load More Recipes'}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </section>
-
-          {/* Infinite Scroll Load More */}
-          {hasNextPage && (
-            <div className="text-center">
-              <Button
-                onClick={loadMoreRecipes}
-                disabled={isFetchingNextPage}
-                variant="outline"
-                size="lg"
-              >
-                {isFetchingNextPage ? 'Loading...' : 'Load More Recipes'}
-              </Button>
-            </div>
-          )}
         </div>
-
-        {/* TODO: Implement infinite scroll with intersection observer */}
-        {/* TODO: Add skeleton loading states */}
-        {/* TODO: Add error handling */}
-        {/* TODO: Add empty state */}
       </div>
     </Layout>
   );
