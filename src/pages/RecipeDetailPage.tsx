@@ -98,6 +98,7 @@ export function RecipeDetailPage() {
   }, [toast]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchRecipe = async () => {
       if (!id) {
         setError('Recipe ID is missing');
