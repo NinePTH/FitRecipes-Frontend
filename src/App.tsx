@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider, ToastProvider } from '@/contexts';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { NotificationSidebar } from '@/components/ui/notification-sidebar';
+// import { NotificationSidebar } from '@/components/ui/notification-sidebar'; // DISABLED: Waiting for backend
 import { AuthPage } from '@/pages/AuthPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
@@ -25,7 +25,7 @@ function App() {
     <Router>
       <AuthProvider>
         <ToastProvider>
-          <NotificationSidebar />
+          {/* <NotificationSidebar /> */} {/* DISABLED: Waiting for backend */}
           <div className="App">
             <Routes>
             {/* Public Routes */}

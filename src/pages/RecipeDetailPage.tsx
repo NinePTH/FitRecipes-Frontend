@@ -4,7 +4,7 @@ import {
   Clock,
   Users,
   Star,
-  Heart,
+  // Heart, // DISABLED: Save feature not yet implemented
   Share2,
   MessageCircle,
   ChevronLeft,
@@ -79,23 +79,22 @@ export function RecipeDetailPage() {
   const [deleteCommentDialog, setDeleteCommentDialog] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
-  // Demo: Show welcome notifications on first load (for demonstration purposes)
-  useEffect(() => {
-    const hasShownDemo = sessionStorage.getItem('notificationDemoShown');
-    
-    if (!hasShownDemo) {
-      // Show a sequence of demo notifications
-      setTimeout(() => {
-        toast.info('👋 Welcome!', 'Try rating this recipe or adding a comment.');
-      }, 1000);
-      
-      setTimeout(() => {
-        toast.info('💡 Tip', 'Click the bell icon (🔔) to see your notification history!');
-      }, 3000);
-      
-      sessionStorage.setItem('notificationDemoShown', 'true');
-    }
-  }, [toast]);
+  // DISABLED: Demo notifications removed (notification system disabled)
+  // useEffect(() => {
+  //   const hasShownDemo = sessionStorage.getItem('notificationDemoShown');
+  //   
+  //   if (!hasShownDemo) {
+  //     setTimeout(() => {
+  //       toast.info('👋 Welcome!', 'Try rating this recipe or adding a comment.');
+  //     }, 1000);
+  //     
+  //     setTimeout(() => {
+  //       toast.info('💡 Tip', 'Click the bell icon (🔔) to see your notification history!');
+  //     }, 3000);
+  //     
+  //     sessionStorage.setItem('notificationDemoShown', 'true');
+  //   }
+  // }, [toast]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -111,14 +110,6 @@ export function RecipeDetailPage() {
 
       try {
         const fetchedRecipe = await getRecipeById(id);
-        console.log('Fetched recipe data:', fetchedRecipe);
-        console.log('Recipe type:', typeof fetchedRecipe);
-        console.log('Recipe keys:', fetchedRecipe ? Object.keys(fetchedRecipe) : 'null');
-        console.log('Recipe images:', fetchedRecipe?.images);
-        console.log('Recipe imageUrl:', fetchedRecipe?.imageUrl);
-        console.log('Recipe ingredients:', fetchedRecipe?.ingredients);
-        console.log('Recipe instructions:', fetchedRecipe?.instructions);
-        console.log('Recipe title:', fetchedRecipe?.title);
         setRecipe(fetchedRecipe);
       } catch (err: unknown) {
         console.error('Error fetching recipe:', err);
@@ -369,14 +360,14 @@ export function RecipeDetailPage() {
     }
   };
 
-  // Mock handlers for Save and Share buttons (for demonstration)
-  const handleSaveRecipe = () => {
-    if (!user) {
-      toast.warning('Login required', 'Please login to save recipes to your collection.');
-      return;
-    }
-    toast.success('Recipe saved!', 'Added to your saved recipes collection.');
-  };
+  // DISABLED: Save feature - waiting for backend implementation
+  // const handleSaveRecipe = () => {
+  //   if (!user) {
+  //     toast.warning('Login required', 'Please login to save recipes to your collection.');
+  //     return;
+  //   }
+  //   toast.success('Recipe saved!', 'Added to your saved recipes collection.');
+  // };
 
   const handleShareRecipe = async () => {
     try {
@@ -504,10 +495,12 @@ export function RecipeDetailPage() {
             </div>
 
             <div className="flex items-center space-x-2">
+              {/* DISABLED: Save button - waiting for backend
               <Button variant="outline" size="sm" onClick={handleSaveRecipe}>
                 <Heart className="h-4 w-4 mr-1" />
                 Save
               </Button>
+              */}
               <Button variant="outline" size="sm" onClick={handleShareRecipe}>
                 <Share2 className="h-4 w-4 mr-1" />
                 Share

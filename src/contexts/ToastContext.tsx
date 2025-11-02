@@ -6,8 +6,9 @@ import { ToastContext } from './ToastContext.ts';
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [notifications, setNotifications] = useState<Toast[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // DISABLED: Notification history - waiting for backend
+  // const [notifications, setNotifications] = useState<Toast[]>([]);
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const showToast = useCallback(
     (type: ToastType, title: string, description?: string, duration?: number) => {
@@ -23,7 +24,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       };
 
       setToasts(prev => [...prev, newToast]);
-      setNotifications(prev => [newToast, ...prev]); // Add to history (newest first)
+      // DISABLED: Not adding to notification history
+      // setNotifications(prev => [newToast, ...prev]);
     },
     []
   );
@@ -60,25 +62,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [showToast]
   );
 
+  // DISABLED: Notification sidebar functions - waiting for backend
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev =>
-      prev.map(notif => (notif.id === id ? { ...notif, isRead: true } : notif))
-    );
+    // Disabled function - do nothing
+    console.log('markAsRead disabled, id:', id);
   }, []);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
+    // setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
   }, []);
 
   const clearNotifications = useCallback(() => {
-    setNotifications([]);
+    // setNotifications([]);
   }, []);
 
   const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen(prev => !prev);
+    // setIsSidebarOpen(prev => !prev);
   }, []);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  // const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = 0; // DISABLED
 
   return (
     <ToastContext.Provider
@@ -88,11 +91,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         error,
         warning,
         info,
-        notifications,
+        notifications: [], // DISABLED: Empty array
         markAsRead,
         markAllAsRead,
         clearNotifications,
-        isSidebarOpen,
+        isSidebarOpen: false, // DISABLED: Always false
         toggleSidebar,
         unreadCount,
       }}
