@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChefHat, User, LogOut, Menu, X } from 'lucide-react';
+import { ChefHat, User, LogOut, Menu, X, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { toggleSidebar, unreadCount } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
@@ -91,6 +93,20 @@ export function Layout({ children }: LayoutProps) {
 
             {/* User Menu */}
             <div className="flex items-center space-x-4">
+              {/* Notification Bell */}
+              <button
+                onClick={toggleSidebar}
+                className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs font-semibold rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"

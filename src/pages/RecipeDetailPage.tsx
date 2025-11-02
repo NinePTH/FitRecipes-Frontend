@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 import {
   getRecipeById,
   submitRating,
@@ -51,6 +52,7 @@ export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const toast = useToast();
 
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,6 +78,24 @@ export function RecipeDetailPage() {
   const [ratingToDelete, setRatingToDelete] = useState(0);
   const [deleteCommentDialog, setDeleteCommentDialog] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+
+  // Demo: Show welcome notifications on first load (for demonstration purposes)
+  useEffect(() => {
+    const hasShownDemo = sessionStorage.getItem('notificationDemoShown');
+    
+    if (!hasShownDemo) {
+      // Show a sequence of demo notifications
+      setTimeout(() => {
+        toast.info('👋 Welcome!', 'Try rating this recipe or adding a comment.');
+      }, 1000);
+      
+      setTimeout(() => {
+        toast.info('💡 Tip', 'Click the bell icon (🔔) to see your notification history!');
+      }, 3000);
+      
+      sessionStorage.setItem('notificationDemoShown', 'true');
+    }
+  }, [toast]);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -201,9 +221,25 @@ export function RecipeDetailPage() {
           totalRatings: result.recipeStats.totalRatings,
         });
       }
-    } catch (error) {
+
+      // Show success toast
+      toast.success(
+        'Rating submitted!',
+        `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}.`
+      );
+    } catch (error: unknown) {
       console.error('Error submitting rating:', error);
-      alert('Failed to submit rating. Please try again.');
+      
+      // Check if error is from own recipe
+      if (error && typeof error === 'object' && 'message' in error) {
+        const apiError = error as { message: string };
+        if (apiError.message === 'You cannot rate your own recipe') {
+          toast.warning('Cannot rate own recipe', 'You cannot rate your own recipe.');
+          return;
+        }
+      }
+      
+      toast.error('Rating failed', 'Failed to submit rating. Please try again.');
     } finally {
       setIsSubmittingRating(false);
     }
@@ -225,9 +261,12 @@ export function RecipeDetailPage() {
           totalRatings: result.recipeStats.totalRatings,
         });
       }
+
+      // Show success toast
+      toast.success('Rating removed', 'Your rating has been deleted.');
     } catch (error) {
       console.error('Error deleting rating:', error);
-      alert('Failed to delete rating. Please try again.');
+      toast.error('Delete failed', 'Failed to delete rating. Please try again.');
     } finally {
       setIsSubmittingRating(false);
     }
@@ -238,7 +277,7 @@ export function RecipeDetailPage() {
     if (!comment.trim()) return;
 
     if (!user) {
-      alert('Please login to comment');
+      toast.warning('Login required', 'Please login to comment on recipes.');
       return;
     }
 
@@ -261,9 +300,12 @@ export function RecipeDetailPage() {
       }
 
       setComment('');
+
+      // Show success toast
+      toast.success('Comment posted!', 'Your comment has been added to this recipe.');
     } catch (error) {
       console.error('Error submitting comment:', error);
-      alert('Failed to post comment. Please try again.');
+      toast.error('Comment failed', 'Failed to post comment. Please try again.');
     } finally {
       setIsSubmittingComment(false);
     }
@@ -287,9 +329,12 @@ export function RecipeDetailPage() {
 
       setEditingCommentId(null);
       setEditingCommentContent('');
+
+      // Show success toast
+      toast.success('Comment updated', 'Your comment has been edited successfully.');
     } catch (error) {
       console.error('Error updating comment:', error);
-      alert('Failed to update comment. Please try again.');
+      toast.error('Update failed', 'Failed to update comment. Please try again.');
     }
   };
 
@@ -314,9 +359,31 @@ export function RecipeDetailPage() {
           totalComments: Math.max(0, (recipe.totalComments || 0) - 1),
         });
       }
+
+      // Show success toast
+      toast.success('Comment deleted', 'Your comment has been removed.');
     } catch (error) {
       console.error('Error deleting comment:', error);
-      alert('Failed to delete comment. Please try again.');
+      toast.error('Delete failed', 'Failed to delete comment. Please try again.');
+    }
+  };
+
+  // Mock handlers for Save and Share buttons (for demonstration)
+  const handleSaveRecipe = () => {
+    if (!user) {
+      toast.warning('Login required', 'Please login to save recipes to your collection.');
+      return;
+    }
+    toast.success('Recipe saved!', 'Added to your saved recipes collection.');
+  };
+
+  const handleShareRecipe = async () => {
+    try {
+      // Copy link to clipboard
+      await navigator.clipboard.writeText(window.location.href);
+      toast.info('Link copied!', 'Recipe link copied to clipboard. Share it with friends!');
+    } catch {
+      toast.info('Share this recipe', 'Copy this URL to share: ' + window.location.href, 8000);
     }
   };
 
@@ -417,7 +484,7 @@ export function RecipeDetailPage() {
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-0 justify-between">
             <div className="flex items-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
@@ -436,11 +503,11 @@ export function RecipeDetailPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleSaveRecipe}>
                 <Heart className="h-4 w-4 mr-1" />
                 Save
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleShareRecipe}>
                 <Share2 className="h-4 w-4 mr-1" />
                 Share
               </Button>

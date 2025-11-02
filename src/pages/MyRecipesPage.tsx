@@ -24,11 +24,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Layout } from '@/components/Layout';
+import { useToast } from '@/hooks/useToast';
 import { getMyRecipes, deleteRecipe } from '@/services/recipe';
 import type { Recipe } from '@/types';
 
 export function MyRecipesPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [meta, setMeta] = useState({
     total: 0,
@@ -95,9 +97,20 @@ export function MyRecipesPage() {
     try {
       await deleteRecipe(recipeToDelete.id);
       await fetchUserRecipes(); // Refresh the list
+      
+      // Show success toast
+      toast.success(
+        'Recipe deleted!',
+        `"${recipeToDelete.title}" has been removed from your recipes.`
+      );
     } catch (err: unknown) {
       console.error('Error deleting recipe:', err);
-      alert('Failed to delete recipe. Please try again.');
+      
+      // Show error toast
+      toast.error(
+        'Delete failed',
+        'Failed to delete recipe. Please try again.'
+      );
     } finally {
       setDeletingId(null);
       setRecipeToDelete(null);

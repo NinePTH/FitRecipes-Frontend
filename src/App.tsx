@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@/contexts';
+import { AuthProvider, ToastProvider } from '@/contexts';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { NotificationSidebar } from '@/components/ui/notification-sidebar';
 import { AuthPage } from '@/pages/AuthPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
@@ -23,8 +24,10 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="App">
-          <Routes>
+        <ToastProvider>
+          <NotificationSidebar />
+          <div className="App">
+            <Routes>
             {/* Public Routes */}
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -117,6 +120,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
+        </ToastProvider>
       </AuthProvider>
     </Router>
   );
