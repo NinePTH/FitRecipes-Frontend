@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Star, TrendingUp, X, Sparkles, ChefHat } from 'lucide-react';
+import { Search, Filter, Clock, Star, TrendingUp, X, Sparkles, ChefHat, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Command,
   CommandEmpty,
@@ -23,6 +24,7 @@ import type { Recipe, RecipeFilters, SortOption } from '@/types';
 
 export function BrowseRecipesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [recommendedRecipes, setRecommendedRecipes] = useState<Recipe[]>([]);
   const [trendingRecipes, setTrendingRecipes] = useState<Recipe[]>([]);
@@ -840,35 +842,27 @@ export function BrowseRecipesPage() {
             </section>
           )}
 
-          {/* Trending Recipes */}
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="h-6 w-6 text-primary-600" />
-                <h2 className="text-2xl font-bold text-gray-900">Trending This Week</h2>
+          {/* Trending Recipes - Only show if there are recipes */}
+          {trendingRecipes.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-6 w-6 text-primary-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">Trending This Week</h2>
+                </div>
+                {trendingRecipes.length >= 4 && (
+                  <Button variant="outline" onClick={() => navigate('/recipes/trending')}>
+                    View All
+                  </Button>
+                )}
               </div>
-              {trendingRecipes.length >= 4 && (
-                <Button variant="outline" onClick={() => navigate('/recipes/trending')}>
-                  View All
-                </Button>
-              )}
-            </div>
-            {trendingRecipes.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <TrendingUp className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-600">No trending recipes available at the moment.</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Start Rating or Comment on Recipes to start the Trend.
-                </p>
-              </div>
-            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {trendingRecipes.map(recipe => (
                   <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
               </div>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* New Recipes */}
           {newRecipes.length > 0 && (
@@ -916,19 +910,51 @@ export function BrowseRecipesPage() {
                 <div className="max-w-md mx-auto">
                   <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
-                  <p className="text-gray-600 mb-6">
-                    Try adjusting your filters to see more results.
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setFilters({});
-                      setSearchTerm('');
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Clear All Filters
-                  </Button>
+                  
+                  {/* Check if any filters are active */}
+                  {(filters.mealType?.length ||
+                    filters.dietType?.length ||
+                    filters.difficulty?.length ||
+                    searchTerm ||
+                    filters.mainIngredient ||
+                    filters.cuisineType ||
+                    filters.maxPrepTime) ? (
+                    // Filters are active - show filter-related message
+                    <>
+                      <p className="text-gray-600 mb-6">
+                        Try adjusting your filters to see more results.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setFilters({});
+                          setSearchTerm('');
+                        }}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear All Filters
+                      </Button>
+                    </>
+                  ) : (
+                    // No filters active - show role-based message
+                    <>
+                      {user?.role === 'USER' ? (
+                        <p className="text-gray-600 mb-6">
+                          Please give chefs a time to post new recipes.
+                        </p>
+                      ) : (
+                        <>
+                          <p className="text-gray-600 mb-6">
+                            No recipes available yet. Be the first to add one!
+                          </p>
+                          <Button onClick={() => navigate('/submit-recipe')}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Recipe
+                          </Button>
+                        </>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
