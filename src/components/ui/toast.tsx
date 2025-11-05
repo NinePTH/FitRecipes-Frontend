@@ -75,9 +75,7 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
           </div>
           <div className="ml-3 flex-1">
             <p className="text-sm font-semibold">{toast.title}</p>
-            {toast.description && (
-              <p className="mt-1 text-sm opacity-90">{toast.description}</p>
-            )}
+            {toast.description && <p className="mt-1 text-sm opacity-90">{toast.description}</p>}
           </div>
           <div className="ml-4 flex flex-shrink-0">
             <button
@@ -100,7 +98,13 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
   );
 }
 
-export function ToastContainer({ toasts, onClose }: { toasts: Toast[]; onClose: (id: string) => void }) {
+export function ToastContainer({
+  toasts,
+  onClose,
+}: {
+  toasts: Toast[];
+  onClose: (id: string) => void;
+}) {
   return (
     <div
       aria-live="assertive"

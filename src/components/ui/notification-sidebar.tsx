@@ -74,7 +74,15 @@ function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps)
 }
 
 export function NotificationSidebar() {
-  const { notifications, isSidebarOpen, toggleSidebar, markAsRead, markAllAsRead, clearNotifications, unreadCount } = useToast();
+  const {
+    notifications,
+    isSidebarOpen,
+    toggleSidebar,
+    markAsRead,
+    markAllAsRead,
+    clearNotifications,
+    unreadCount,
+  } = useToast();
 
   return (
     <>

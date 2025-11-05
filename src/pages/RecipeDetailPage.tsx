@@ -82,16 +82,16 @@ export function RecipeDetailPage() {
   // DISABLED: Demo notifications removed (notification system disabled)
   // useEffect(() => {
   //   const hasShownDemo = sessionStorage.getItem('notificationDemoShown');
-  //   
+  //
   //   if (!hasShownDemo) {
   //     setTimeout(() => {
   //       toast.info('👋 Welcome!', 'Try rating this recipe or adding a comment.');
   //     }, 1000);
-  //     
+  //
   //     setTimeout(() => {
   //       toast.info('💡 Tip', 'Click the bell icon (🔔) to see your notification history!');
   //     }, 3000);
-  //     
+  //
   //     sessionStorage.setItem('notificationDemoShown', 'true');
   //   }
   // }, [toast]);
@@ -221,7 +221,7 @@ export function RecipeDetailPage() {
       );
     } catch (error: unknown) {
       console.error('Error submitting rating:', error);
-      
+
       // Check if error is from own recipe
       if (error && typeof error === 'object' && 'message' in error) {
         const apiError = error as { message: string };
@@ -230,7 +230,7 @@ export function RecipeDetailPage() {
           return;
         }
       }
-      
+
       toast.error('Rating failed', 'Failed to submit rating. Please try again.');
     } finally {
       setIsSubmittingRating(false);

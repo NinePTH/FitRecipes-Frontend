@@ -97,7 +97,7 @@ export function MyRecipesPage() {
     try {
       await deleteRecipe(recipeToDelete.id);
       await fetchUserRecipes(); // Refresh the list
-      
+
       // Show success toast
       toast.success(
         'Recipe deleted!',
@@ -105,12 +105,9 @@ export function MyRecipesPage() {
       );
     } catch (err: unknown) {
       console.error('Error deleting recipe:', err);
-      
+
       // Show error toast
-      toast.error(
-        'Delete failed',
-        'Failed to delete recipe. Please try again.'
-      );
+      toast.error('Delete failed', 'Failed to delete recipe. Please try again.');
     } finally {
       setDeletingId(null);
       setRecipeToDelete(null);

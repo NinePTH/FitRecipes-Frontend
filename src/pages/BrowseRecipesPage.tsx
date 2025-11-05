@@ -910,15 +910,15 @@ export function BrowseRecipesPage() {
                 <div className="max-w-md mx-auto">
                   <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
-                  
+
                   {/* Check if any filters are active */}
-                  {(filters.mealType?.length ||
-                    filters.dietType?.length ||
-                    filters.difficulty?.length ||
-                    searchTerm ||
-                    filters.mainIngredient ||
-                    filters.cuisineType ||
-                    filters.maxPrepTime) ? (
+                  {filters.mealType?.length ||
+                  filters.dietType?.length ||
+                  filters.difficulty?.length ||
+                  searchTerm ||
+                  filters.mainIngredient ||
+                  filters.cuisineType ||
+                  filters.maxPrepTime ? (
                     // Filters are active - show filter-related message
                     <>
                       <p className="text-gray-600 mb-6">
