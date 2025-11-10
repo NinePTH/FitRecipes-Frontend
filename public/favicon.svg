@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#2563eb"/>
+  
+  <!-- Chef hat -->
+  <g fill="#ffffff">
+    <!-- Hat base -->
+    <rect x="18" y="36" width="28" height="8" rx="2"/>
+    
+    <!-- Hat top puffs -->
+    <circle cx="24" cy="26" r="6"/>
+    <circle cx="32" cy="22" r="7"/>
+    <circle cx="40" cy="26" r="6"/>
+    
+    <!-- Hat band -->
+    <rect x="18" y="33" width="28" height="3" rx="1.5"/>
+  </g>
+  
+  <!-- Sparkle/star accent -->
+  <circle cx="48" cy="18" r="2" fill="#fbbf24"/>
+  <circle cx="52" cy="22" r="1.5" fill="#fbbf24"/>
+</svg>

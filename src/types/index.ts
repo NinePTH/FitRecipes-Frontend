@@ -73,41 +73,59 @@ export interface Recipe {
   id: string;
   title: string;
   description: string;
-  images: string[];
+  imageUrls: string[]; // Backend uses 'imageUrls' (array, max 3)
+  imageUrl?: string; // Deprecated: For backward compatibility only
+  images?: string[]; // Deprecated: For backward compatibility only
   ingredients: Ingredient[];
-  instructions: Instruction[];
+  instructions: string[]; // Backend uses string array
   prepTime: number; // in minutes
-  cookTime: number; // in minutes
+  cookingTime: number; // Backend uses 'cookingTime' not 'cookTime'
   servings: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-  mealType: MealType[];
-  dietType: DietType[];
-  cuisineType: string;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD'; // Backend uses uppercase
+  mealType: Array<'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'DESSERT'>; // Array of meal types, uppercase
+  cuisineType?: string;
   mainIngredient: string;
-  nutrition?: NutritionInfo;
-  allergies: string[];
-  ratings: RecipeRating[];
-  comments: RecipeComment[];
+  dietaryInfo?: DietaryInfo; // Backend uses object with boolean flags
+  nutritionInfo?: NutritionInfo; // Backend uses 'nutritionInfo'
+  allergies?: string[]; // Keep for UI compatibility
+  ratings?: RecipeRating[];
+  comments?: RecipeComment[];
   averageRating: number;
   totalRatings: number;
-  totalComments: number;
-  status: 'pending' | 'approved' | 'rejected';
+  totalComments?: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'; // Backend uses uppercase
+  approvedAt?: string;
+  approvedById?: string;
+  approvedBy?: { firstName: string; lastName: string };
+  rejectedAt?: string;
+  rejectedById?: string;
   rejectionReason?: string;
-  chefId: string;
-  chef: User;
+  adminNote?: string;
+  authorId: string; // Backend uses 'authorId' not 'chefId'
+  author: User; // Backend uses 'author' not 'chef'
   createdAt: string;
   updatedAt: string;
 }
 
+// Dietary Information (Backend format)
+export interface DietaryInfo {
+  isVegetarian?: boolean;
+  isVegan?: boolean;
+  isGlutenFree?: boolean;
+  isDairyFree?: boolean;
+  isKeto?: boolean;
+  isPaleo?: boolean;
+}
+
 export interface Ingredient {
-  id: string;
+  id?: string; // Optional for UI
   name: string;
-  quantity: number;
+  amount: string; // Backend uses 'amount' as string
   unit: string;
 }
 
 export interface Instruction {
-  id: string;
+  id?: string; // Optional for UI
   stepNumber: number;
   description: string;
   image?: string;
@@ -140,8 +158,8 @@ export interface RecipeComment {
 }
 
 // Filter and Search Types
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert';
-export type DietType = 'vegetarian' | 'vegan' | 'gluten-free' | 'keto' | 'paleo' | 'dairy-free';
+export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'DESSERT'; // Backend uses uppercase
+export type DietType = 'vegetarian' | 'vegan' | 'gluten-free' | 'keto' | 'paleo' | 'dairy-free'; // UI-level type
 export type SortOption = 'rating' | 'recent' | 'prep-time-asc' | 'prep-time-desc';
 
 export interface RecipeFilters {
@@ -179,23 +197,45 @@ export interface ApiError {
   details?: unknown;
 }
 
-// Form Types
+// Form Types (UI-level structure - uses lowercase for compatibility)
 export interface RecipeFormData {
   title: string;
   description: string;
   images: File[];
-  ingredients: Omit<Ingredient, 'id'>[];
-  instructions: Omit<Instruction, 'id'>[];
+  imageUrls?: string[]; // Existing image URLs from backend (for edit mode)
+  imageUrl?: string; // Deprecated: For backward compatibility
+  ingredients: Array<{ name: string; quantity: number; unit: string }>; // UI uses quantity as number
+  instructions: Array<{ stepNumber: number; description: string }>; // UI uses structured instructions
   prepTime: number;
-  cookTime: number;
+  cookTime: number; // UI uses 'cookTime', will be transformed to 'cookingTime' for backend
   servings: number;
-  difficulty: Recipe['difficulty'];
-  mealType: MealType[];
-  dietType: DietType[];
+  difficulty: 'easy' | 'medium' | 'hard'; // UI uses lowercase, will be transformed to uppercase
+  mealType: Array<'breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert'>; // UI allows multiple, lowercase
+  dietType: DietType[]; // UI uses array, will be transformed to dietaryInfo object
   cuisineType: string;
   mainIngredient: string;
   nutrition?: NutritionInfo;
   allergies: string[];
+}
+
+// Backend Recipe Submission Data (what API expects)
+export interface RecipeSubmissionData {
+  title: string;
+  description: string;
+  mainIngredient: string;
+  ingredients: Array<{ name: string; amount: string; unit: string }>;
+  instructions: string[]; // Array of step descriptions
+  prepTime?: number; // Optional, defaults to 10
+  cookingTime: number; // Required
+  servings: number;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  mealType?: Array<'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'DESSERT'>; // Optional array of meal types
+  cuisineType?: string;
+  dietaryInfo?: DietaryInfo;
+  nutritionInfo?: NutritionInfo;
+  allergies?: string[]; // Optional array of allergen names (2-50 chars each, auto-normalized to lowercase)
+  imageUrls?: string[]; // Array of image URLs (max 3)
+  imageUrl?: string; // Deprecated: For backward compatibility
 }
 
 // Component Props Types

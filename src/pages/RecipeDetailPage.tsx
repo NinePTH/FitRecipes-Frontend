@@ -1,252 +1,398 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Clock, Users, Star, Heart, Share2, MessageCircle, ChevronLeft } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import {
+  Clock,
+  Users,
+  Star,
+  // Heart, // DISABLED: Save feature not yet implemented
+  Share2,
+  MessageCircle,
+  ChevronLeft,
+  AlertCircle,
+  Edit2,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Layout } from '@/components/Layout';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
+import {
+  getRecipeById,
+  submitRating,
+  getUserRating,
+  deleteRating,
+  addComment,
+  getComments,
+  updateComment,
+  deleteComment,
+} from '@/services/recipe';
 import type { Recipe } from '@/types';
 
-// Mock data - TODO: Replace with API call
-const mockRecipe: Recipe = {
-  id: '1',
-  title: 'Mediterranean Quinoa Bowl',
-  description:
-    'A healthy and colorful bowl packed with protein and fresh vegetables. This recipe combines the earthy flavors of quinoa with the vibrant tastes of Mediterranean cuisine.',
-  images: [
-    'https://www.eatingbirdfood.com/wp-content/uploads/2022/11/mediterranean-quinoa-bowl-hero.jpg',
-    'https://www.cookedandloved.com/wp-content/uploads/2023/07/mediterranean-chicken-quinoa-bowl-social.jpg',
-    'https://choosingchia.com/jessh-jessh/uploads/2019/07/meditteranean-quinoa-salad-2.jpg',
-  ],
-  ingredients: [
-    { id: '1', name: 'Quinoa', quantity: 1, unit: 'cup' },
-    { id: '2', name: 'Cucumber', quantity: 1, unit: 'large' },
-    { id: '3', name: 'Tomatoes', quantity: 2, unit: 'medium' },
-    { id: '4', name: 'Red onion', quantity: 0.5, unit: 'small' },
-    { id: '5', name: 'Feta cheese', quantity: 100, unit: 'g' },
-    { id: '6', name: 'Olive oil', quantity: 3, unit: 'tbsp' },
-    { id: '7', name: 'Lemon juice', quantity: 2, unit: 'tbsp' },
-    { id: '8', name: 'Fresh herbs (parsley, mint)', quantity: 0.25, unit: 'cup' },
-  ],
-  instructions: [
-    {
-      id: '1',
-      stepNumber: 1,
-      description:
-        'Rinse quinoa under cold water until water runs clear. Cook quinoa according to package instructions.',
-    },
-    {
-      id: '2',
-      stepNumber: 2,
-      description: 'While quinoa cooks, dice cucumber, tomatoes, and red onion into small pieces.',
-    },
-    { id: '3', stepNumber: 3, description: 'Crumble feta cheese and chop fresh herbs.' },
-    {
-      id: '4',
-      stepNumber: 4,
-      description: 'In a large bowl, combine cooked quinoa with vegetables and herbs.',
-    },
-    {
-      id: '5',
-      stepNumber: 5,
-      description: 'Drizzle with olive oil and lemon juice. Season with salt and pepper to taste.',
-    },
-    { id: '6', stepNumber: 6, description: 'Top with crumbled feta cheese and serve immediately.' },
-  ],
-  prepTime: 15,
-  cookTime: 20,
-  servings: 4,
-  difficulty: 'easy',
-  mealType: ['lunch', 'dinner'],
-  dietType: ['vegetarian', 'gluten-free', 'gluten-free', 'gluten-free'],
-  cuisineType: 'Mediterranean',
-  mainIngredient: 'Quinoa',
-  nutrition: {
-    calories: 320,
-    protein: 12,
-    carbs: 45,
-    fat: 11,
-    fiber: 5,
-    sodium: 380,
-  },
-  allergies: ['dairy'],
-  ratings: [],
-  comments: [
-    {
-      id: '1',
-      userId: '2',
-      user: {
-        id: '2',
-        email: 'user1@example.com',
-        firstName: 'Sarah',
-        lastName: 'Johnson',
-        role: 'USER',
-        createdAt: '2025-01-10T09:00:00Z',
-        updatedAt: '2025-01-10T09:00:00Z',
-      },
-      content:
-        'This recipe is absolutely delicious! I made it for dinner last night and my family loved it. The quinoa was perfectly cooked and the Mediterranean flavors were spot on.',
-      createdAt: '2025-01-16T14:30:00Z',
-      updatedAt: '2025-01-16T14:30:00Z',
-    },
-    {
-      id: '2',
-      userId: '3',
-      user: {
-        id: '3',
-        email: 'chef2@example.com',
-        firstName: 'David',
-        lastName: 'Chen',
-        role: 'CHEF',
-        createdAt: '2025-01-12T11:00:00Z',
-        updatedAt: '2025-01-12T11:00:00Z',
-      },
-      content:
-        'Great healthy option! I added some roasted chickpeas for extra protein and it was fantastic. Thanks for sharing!',
-      createdAt: '2025-01-17T10:15:00Z',
-      updatedAt: '2025-01-17T10:15:00Z',
-    },
-    {
-      id: '3',
-      userId: '4',
-      user: {
-        id: '4',
-        email: 'user2@example.com',
-        firstName: 'Emma',
-        lastName: 'Williams',
-        role: 'USER',
-        createdAt: '2025-01-14T16:00:00Z',
-        updatedAt: '2025-01-14T16:00:00Z',
-      },
-      content:
-        'Perfect for meal prep! I made a big batch on Sunday and had healthy lunches all week. The flavors actually get better after a day in the fridge.',
-      createdAt: '2025-01-18T09:45:00Z',
-      updatedAt: '2025-01-18T09:45:00Z',
-    },
-    {
-      id: '4',
-      userId: '5',
-      user: {
-        id: '5',
-        email: 'user3@example.com',
-        firstName: 'Michael',
-        lastName: 'Brown',
-        role: 'USER',
-        createdAt: '2025-01-13T08:00:00Z',
-        updatedAt: '2025-01-13T08:00:00Z',
-      },
-      content:
-        'Easy to follow instructions and the result was amazing. I substituted goat cheese for feta and it worked perfectly!',
-      createdAt: '2025-01-19T12:20:00Z',
-      updatedAt: '2025-01-19T12:20:00Z',
-    },
-    {
-      id: '5',
-      userId: '6',
-      user: {
-        id: '6',
-        email: 'user4@example.com',
-        firstName: 'Lisa',
-        lastName: 'Davis',
-        role: 'USER',
-        createdAt: '2025-01-11T13:30:00Z',
-        updatedAt: '2025-01-11T13:30:00Z',
-      },
-      content:
-        'This has become my go-to healthy lunch! So fresh and satisfying. The combination of textures is perfect.',
-      createdAt: '2025-01-20T16:10:00Z',
-      updatedAt: '2025-01-20T16:10:00Z',
-    },
-  ],
-  averageRating: 4.5,
-  totalRatings: 12,
-  totalComments: 5,
-  status: 'approved',
-  chefId: '1',
-  chef: {
-    id: '1',
-    email: 'chef@example.com',
-    firstName: 'Maria',
-    lastName: 'Rodriguez',
-    role: 'CHEF',
-    createdAt: '',
-    updatedAt: '',
-  },
-  createdAt: '2025-01-15T10:00:00Z',
-  updatedAt: '2025-01-15T10:00:00Z',
+type CommentItem = {
+  id: string;
+  recipeId: string;
+  userId: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    email?: string;
+  };
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const toast = useToast();
+
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  // Rating state
   const [userRating, setUserRating] = useState(0);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  // Comment state
+  const [comments, setComments] = useState<CommentItem[]>([]);
   const [comment, setComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentContent, setEditingCommentContent] = useState('');
+  const [commentPage, setCommentPage] = useState(1);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [loadingComments, setLoadingComments] = useState(false);
+
+  // Confirmation dialog state
+  const [deleteRatingDialog, setDeleteRatingDialog] = useState(false);
+  const [ratingToDelete, setRatingToDelete] = useState(0);
+  const [deleteCommentDialog, setDeleteCommentDialog] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+
+  // DISABLED: Demo notifications removed (notification system disabled)
+  // useEffect(() => {
+  //   const hasShownDemo = sessionStorage.getItem('notificationDemoShown');
+  //
+  //   if (!hasShownDemo) {
+  //     setTimeout(() => {
+  //       toast.info('👋 Welcome!', 'Try rating this recipe or adding a comment.');
+  //     }, 1000);
+  //
+  //     setTimeout(() => {
+  //       toast.info('💡 Tip', 'Click the bell icon (🔔) to see your notification history!');
+  //     }, 3000);
+  //
+  //     sessionStorage.setItem('notificationDemoShown', 'true');
+  //   }
+  // }, [toast]);
 
   useEffect(() => {
-    // TODO: Replace with actual API call
+    window.scrollTo(0, 0);
     const fetchRecipe = async () => {
-      setLoading(true);
-      // Simulate API delay
-      setTimeout(() => {
-        setRecipe(mockRecipe);
+      if (!id) {
+        setError('Recipe ID is missing');
         setLoading(false);
-      }, 1000);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const fetchedRecipe = await getRecipeById(id);
+        setRecipe(fetchedRecipe);
+      } catch (err: unknown) {
+        console.error('Error fetching recipe:', err);
+
+        if (err && typeof err === 'object' && 'statusCode' in err) {
+          const apiError = err as { statusCode: number; message: string };
+
+          if (apiError.statusCode === 404) {
+            setError('Recipe not found');
+          } else if (apiError.statusCode === 403) {
+            setError('You do not have permission to view this recipe');
+          } else {
+            setError(apiError.message || 'Failed to load recipe');
+          }
+        } else {
+          setError('Failed to load recipe. Please try again.');
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (id) {
-      fetchRecipe();
-    }
-  }, [id]);
+    fetchRecipe();
+  }, [id, navigate]);
 
-  const handleRating = (rating: number) => {
-    setUserRating(rating);
-    // TODO: Submit rating to API
-    console.log('Rating submitted:', rating);
+  // Load user's rating when recipe is loaded
+  useEffect(() => {
+    const loadUserRating = async () => {
+      if (!id || !user) return;
+
+      try {
+        const rating = await getUserRating(id);
+        if (rating) {
+          setUserRating(rating.rating);
+        }
+      } catch (error) {
+        console.error('Error loading user rating:', error);
+      }
+    };
+
+    loadUserRating();
+  }, [id, user]);
+
+  // Load comments when recipe is loaded
+  useEffect(() => {
+    const loadComments = async () => {
+      if (!id) return;
+
+      setLoadingComments(true);
+      try {
+        const result = await getComments(id, {
+          page: commentPage,
+          limit: 10,
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
+        });
+
+        if (commentPage === 1) {
+          setComments(result.comments);
+        } else {
+          setComments(prev => [...prev, ...result.comments]);
+        }
+
+        setHasMoreComments(result.pagination.hasNext);
+      } catch (error) {
+        console.error('Error loading comments:', error);
+      } finally {
+        setLoadingComments(false);
+      }
+    };
+
+    loadComments();
+  }, [id, commentPage]);
+
+  const handleRating = async (rating: number) => {
+    if (!user) {
+      alert('Please login to rate this recipe');
+      return;
+    }
+
+    if (!id) return;
+
+    // If clicking on the same star rating, show delete confirmation dialog
+    if (rating === userRating) {
+      setRatingToDelete(rating);
+      setDeleteRatingDialog(true);
+      return;
+    }
+
+    // Otherwise, submit new rating
+    setIsSubmittingRating(true);
+    try {
+      const result = await submitRating(id, rating);
+      setUserRating(result.rating.rating);
+
+      // Update recipe stats
+      if (recipe) {
+        setRecipe({
+          ...recipe,
+          averageRating: result.recipeStats.averageRating,
+          totalRatings: result.recipeStats.totalRatings,
+        });
+      }
+
+      // Show success toast
+      toast.success(
+        'Rating submitted!',
+        `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}.`
+      );
+    } catch (error: unknown) {
+      console.error('Error submitting rating:', error);
+
+      // Check if error is from own recipe
+      if (error && typeof error === 'object' && 'message' in error) {
+        const apiError = error as { message: string };
+        if (apiError.message === 'You cannot rate your own recipe') {
+          toast.warning('Cannot rate own recipe', 'You cannot rate your own recipe.');
+          return;
+        }
+      }
+
+      toast.error('Rating failed', 'Failed to submit rating. Please try again.');
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
+  const confirmDeleteRating = async () => {
+    if (!id) return;
+
+    setIsSubmittingRating(true);
+    try {
+      const result = await deleteRating(id);
+      setUserRating(0);
+
+      // Update recipe stats
+      if (recipe) {
+        setRecipe({
+          ...recipe,
+          averageRating: result.recipeStats.averageRating,
+          totalRatings: result.recipeStats.totalRatings,
+        });
+      }
+
+      // Show success toast
+      toast.success('Rating removed', 'Your rating has been deleted.');
+    } catch (error) {
+      console.error('Error deleting rating:', error);
+      toast.error('Delete failed', 'Failed to delete rating. Please try again.');
+    } finally {
+      setIsSubmittingRating(false);
+    }
   };
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
 
+    if (!user) {
+      toast.warning('Login required', 'Please login to comment on recipes.');
+      return;
+    }
+
+    if (!id) return;
+
     setIsSubmittingComment(true);
 
-    // TODO: Submit comment to API
-    console.log('Comment submitted:', comment);
+    try {
+      const newComment = await addComment(id, comment.trim());
 
-    // Simulate adding comment to the list (replace with actual API call)
-    setTimeout(() => {
+      // Add new comment to the top of the list
+      setComments(prev => [newComment, ...prev]);
+
+      // Update recipe total comments
       if (recipe) {
-        const newComment = {
-          id: `temp-${Date.now()}`,
-          userId: 'current-user',
-          user: {
-            id: 'current-user',
-            email: 'currentuser@example.com',
-            firstName: 'Current',
-            lastName: 'User',
-            role: 'USER' as const,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          content: comment,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
         setRecipe({
           ...recipe,
-          comments: [newComment, ...recipe.comments],
-          totalComments: recipe.totalComments + 1,
+          totalComments: (recipe.totalComments || 0) + 1,
         });
       }
 
       setComment('');
+
+      // Show success toast
+      toast.success('Comment posted!', 'Your comment has been added to this recipe.');
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+      toast.error('Comment failed', 'Failed to post comment. Please try again.');
+    } finally {
       setIsSubmittingComment(false);
-    }, 1000);
+    }
   };
+
+  const handleCommentEdit = async (commentId: string) => {
+    if (!editingCommentContent.trim() || !id) return;
+
+    try {
+      const updated = await updateComment(id, commentId, editingCommentContent.trim());
+
+      // Update comment in the list
+      setComments(prev => {
+        return prev.map(c => {
+          if (c.id === commentId) {
+            return { ...c, content: updated.content, updatedAt: updated.updatedAt };
+          }
+          return c;
+        });
+      });
+
+      setEditingCommentId(null);
+      setEditingCommentContent('');
+
+      // Show success toast
+      toast.success('Comment updated', 'Your comment has been edited successfully.');
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      toast.error('Update failed', 'Failed to update comment. Please try again.');
+    }
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    setCommentToDelete(commentId);
+    setDeleteCommentDialog(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!id || !commentToDelete) return;
+
+    try {
+      await deleteComment(id, commentToDelete);
+
+      // Remove comment from the list
+      setComments(prev => prev.filter(c => c.id !== commentToDelete));
+
+      // Update recipe total comments
+      if (recipe) {
+        setRecipe({
+          ...recipe,
+          totalComments: Math.max(0, (recipe.totalComments || 0) - 1),
+        });
+      }
+
+      // Show success toast
+      toast.success('Comment deleted', 'Your comment has been removed.');
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast.error('Delete failed', 'Failed to delete comment. Please try again.');
+    }
+  };
+
+  // DISABLED: Save feature - waiting for backend implementation
+  // const handleSaveRecipe = () => {
+  //   if (!user) {
+  //     toast.warning('Login required', 'Please login to save recipes to your collection.');
+  //     return;
+  //   }
+  //   toast.success('Recipe saved!', 'Added to your saved recipes collection.');
+  // };
+
+  const handleShareRecipe = async () => {
+    try {
+      // Copy link to clipboard
+      await navigator.clipboard.writeText(window.location.href);
+      toast.info('Link copied!', 'Recipe link copied to clipboard. Share it with friends!');
+    } catch {
+      toast.info('Share this recipe', 'Copy this URL to share: ' + window.location.href, 8000);
+    }
+  };
+
+  const loadMoreComments = () => {
+    setCommentPage(prev => prev + 1);
+  };
+
+  // Get images array - handle imageUrls (new), images (deprecated), and imageUrl (deprecated)
+  const recipeImages = recipe
+    ? recipe.imageUrls && recipe.imageUrls.length > 0
+      ? recipe.imageUrls
+      : recipe.images && recipe.images.length > 0
+        ? recipe.images
+        : recipe.imageUrl
+          ? [recipe.imageUrl]
+          : []
+    : [];
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -262,7 +408,7 @@ export function RecipeDetailPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="animate-pulse space-y-8">
+        <div className="animate-pulse space-y-8 max-w-4xl mx-auto">
           <div className="h-8 bg-gray-300 rounded w-1/3"></div>
           <div className="h-64 bg-gray-300 rounded"></div>
           <div className="space-y-4">
@@ -270,6 +416,25 @@ export function RecipeDetailPage() {
             <div className="h-4 bg-gray-300 rounded w-3/4"></div>
             <div className="h-4 bg-gray-300 rounded w-1/2"></div>
           </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="text-center py-12 max-w-md mx-auto">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{error}</h1>
+          <p className="text-gray-600 mb-6">
+            {error.includes('permission')
+              ? 'This recipe may be pending approval or has been rejected.'
+              : 'Please try again later or contact support if the problem persists.'}
+          </p>
+          <Link to="/">
+            <Button>Browse All Recipes</Button>
+          </Link>
         </div>
       </Layout>
     );
@@ -311,11 +476,11 @@ export function RecipeDetailPage() {
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-0 justify-between">
             <div className="flex items-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
-                <span>{recipe.prepTime + recipe.cookTime} minutes</span>
+                <span>{recipe.prepTime + (recipe.cookingTime || 0)} minutes</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
@@ -330,11 +495,13 @@ export function RecipeDetailPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
+              {/* DISABLED: Save button - waiting for backend
+              <Button variant="outline" size="sm" onClick={handleSaveRecipe}>
                 <Heart className="h-4 w-4 mr-1" />
                 Save
               </Button>
-              <Button variant="outline" size="sm">
+              */}
+              <Button variant="outline" size="sm" onClick={handleShareRecipe}>
                 <Share2 className="h-4 w-4 mr-1" />
                 Share
               </Button>
@@ -343,36 +510,48 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Recipe Images */}
-        <div className="space-y-4">
-          <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm">
-            <img
-              src={recipe.images[selectedImageIndex]}
-              alt={recipe.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-          {recipe.images.length > 1 && (
-            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-              {recipe.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105 ${
-                    selectedImageIndex === index
-                      ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${recipe.title} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+        {recipeImages.length > 0 && (
+          <div className="space-y-4">
+            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+              <img
+                src={recipeImages[selectedImageIndex]}
+                alt={recipe.title}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              />
             </div>
-          )}
-        </div>
+            {recipeImages.length > 1 && (
+              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+                {recipeImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg overflow-hidden border-3 transition-all duration-200 hover:scale-105 ${
+                      selectedImageIndex === index
+                        ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${recipe.title} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* No Image Placeholder */}
+        {recipeImages.length === 0 && (
+          <div className="aspect-video rounded-lg overflow-hidden bg-gray-200 shadow-sm flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <MessageCircle className="h-16 w-16 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No image available</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -384,14 +563,14 @@ export function RecipeDetailPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {recipe.ingredients.map(ingredient => (
+                  {recipe.ingredients?.map((ingredient, index) => (
                     <li
-                      key={ingredient.id}
+                      key={index}
                       className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
                     >
                       <span className="font-medium">{ingredient.name}</span>
                       <span className="text-gray-600">
-                        {ingredient.quantity} {ingredient.unit}
+                        {ingredient.amount} {ingredient.unit}
                       </span>
                     </li>
                   ))}
@@ -406,12 +585,12 @@ export function RecipeDetailPage() {
               </CardHeader>
               <CardContent>
                 <ol className="space-y-4">
-                  {recipe.instructions.map(instruction => (
-                    <li key={instruction.id} className="flex space-x-4">
+                  {recipe.instructions?.map((instruction, index) => (
+                    <li key={index} className="flex space-x-4">
                       <span className="flex-shrink-0 w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-semibold">
-                        {instruction.stepNumber}
+                        {index + 1}
                       </span>
-                      <p className="text-gray-700 pt-1">{instruction.description}</p>
+                      <p className="text-gray-700 pt-1">{instruction}</p>
                     </li>
                   ))}
                 </ol>
@@ -433,7 +612,7 @@ export function RecipeDetailPage() {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Cook Time</h4>
-                  <p className="text-gray-600">{recipe.cookTime} minutes</p>
+                  <p className="text-gray-600">{recipe.cookingTime || 0} minutes</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Difficulty</h4>
@@ -447,24 +626,48 @@ export function RecipeDetailPage() {
                   <h4 className="font-medium text-gray-900">Main Ingredient</h4>
                   <p className="text-gray-600">{recipe.mainIngredient}</p>
                 </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Diet Type</h4>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {recipe.dietType.map(diet => (
-                      <span
-                        key={diet}
-                        className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
-                      >
-                        {diet}
-                      </span>
-                    ))}
+                {recipe.dietaryInfo && (
+                  <div>
+                    <h4 className="font-medium text-gray-900">Dietary Info</h4>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {recipe.dietaryInfo.isVegetarian && (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          Vegetarian
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isVegan && (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          Vegan
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isGlutenFree && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          Gluten-Free
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isDairyFree && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          Dairy-Free
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isKeto && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                          Keto
+                        </span>
+                      )}
+                      {recipe.dietaryInfo.isPaleo && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                          Paleo
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Nutrition */}
-            {recipe.nutrition && (
+            {recipe.nutritionInfo && (
               <Card>
                 <CardHeader>
                   <CardTitle>Nutrition (per serving)</CardTitle>
@@ -472,54 +675,56 @@ export function RecipeDetailPage() {
                 <CardContent className="space-y-2">
                   <div className="flex justify-between">
                     <span>Calories</span>
-                    <span>{recipe.nutrition.calories}</span>
+                    <span>{recipe.nutritionInfo.calories}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Protein</span>
-                    <span>{recipe.nutrition.protein}g</span>
+                    <span>{recipe.nutritionInfo.protein}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Carbs</span>
-                    <span>{recipe.nutrition.carbs}g</span>
+                    <span>{recipe.nutritionInfo.carbs}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Fat</span>
-                    <span>{recipe.nutrition.fat}g</span>
+                    <span>{recipe.nutritionInfo.fat}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Fiber</span>
-                    <span>{recipe.nutrition.fiber}g</span>
+                    <span>{recipe.nutritionInfo.fiber}g</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Sodium</span>
-                    <span>{recipe.nutrition.sodium}mg</span>
+                    <span>{recipe.nutritionInfo.sodium}mg</span>
                   </div>
                 </CardContent>
               </Card>
             )}
 
             {/* Chef Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Chef</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span className="text-primary-600 font-semibold">
-                      {recipe.chef.firstName[0]}
-                      {recipe.chef.lastName[0]}
-                    </span>
+            {recipe.author && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Chef</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                      <span className="text-primary-600 font-semibold">
+                        {recipe.author.firstName[0]}
+                        {recipe.author.lastName[0]}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {recipe.author.firstName} {recipe.author.lastName}
+                      </p>
+                      <p className="text-sm text-gray-600">Chef</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">
-                      {recipe.chef.firstName} {recipe.chef.lastName}
-                    </p>
-                    <p className="text-sm text-gray-600">Chef</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 
@@ -536,17 +741,25 @@ export function RecipeDetailPage() {
                   <button
                     key={rating}
                     onClick={() => handleRating(rating)}
+                    disabled={isSubmittingRating}
                     className={`text-2xl ${
                       rating <= userRating ? 'text-yellow-400' : 'text-gray-300'
-                    } hover:text-yellow-400 transition-colors`}
+                    } hover:text-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                    title={
+                      rating === userRating
+                        ? `Click to remove your ${rating}-star rating`
+                        : `Rate ${rating} star${rating > 1 ? 's' : ''}`
+                    }
                   >
                     ★
                   </button>
                 ))}
                 <span className="ml-2 text-sm text-gray-600">
-                  {userRating > 0
-                    ? `You rated this ${userRating} star${userRating > 1 ? 's' : ''}`
-                    : 'Click to rate'}
+                  {isSubmittingRating
+                    ? 'Submitting...'
+                    : userRating > 0
+                      ? `You rated this ${userRating} star${userRating > 1 ? 's' : ''} (click to remove)`
+                      : 'Click to rate'}
                 </span>
               </div>
             </CardContent>
@@ -584,42 +797,117 @@ export function RecipeDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recipe.comments.length > 0 ? (
+              {comments && comments.length > 0 ? (
                 <div className="space-y-6">
-                  {recipe.comments.map(comment => (
+                  {comments.map(commentItem => (
                     <div
-                      key={comment.id}
+                      key={commentItem.id}
                       className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0 hover:bg-gray-50 rounded-lg p-4 -m-4 transition-colors"
                     >
                       <div className="flex items-start space-x-4">
                         {/* User Avatar */}
                         <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                           <span className="text-primary-600 font-semibold text-sm">
-                            {comment.user.firstName[0]}
-                            {comment.user.lastName[0]}
+                            {commentItem.user.firstName[0]}
+                            {commentItem.user.lastName[0]}
                           </span>
                         </div>
 
                         {/* Comment Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="text-sm font-semibold text-gray-900">
-                              {comment.user.firstName} {comment.user.lastName}
-                            </h4>
-                            {comment.user.role === 'CHEF' && (
-                              <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
-                                Chef
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <h4 className="text-sm font-semibold text-gray-900">
+                                {commentItem.user.firstName} {commentItem.user.lastName}
+                              </h4>
+                              {commentItem.user.role === 'CHEF' && (
+                                <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                                  Chef
+                                </span>
+                              )}
+                              <span className="text-xs text-gray-500">
+                                {formatDate(commentItem.createdAt)}
                               </span>
+                            </div>
+
+                            {/* Edit/Delete buttons for own comments */}
+                            {user && user.id === commentItem.userId && (
+                              <div className="flex items-center space-x-2">
+                                {editingCommentId === commentItem.id ? (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingCommentId(null);
+                                        setEditingCommentContent('');
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleCommentEdit(commentItem.id)}
+                                      disabled={!editingCommentContent.trim()}
+                                    >
+                                      Save
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        setEditingCommentId(commentItem.id);
+                                        setEditingCommentContent(commentItem.content);
+                                      }}
+                                      className="text-gray-400 hover:text-primary-600 transition-colors"
+                                      title="Edit comment"
+                                    >
+                                      <Edit2 className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleCommentDelete(commentItem.id)}
+                                      className="text-gray-400 hover:text-red-600 transition-colors"
+                                      title="Delete comment"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                             )}
-                            <span className="text-xs text-gray-500">
-                              {formatDate(comment.createdAt)}
-                            </span>
                           </div>
-                          <p className="text-gray-700 text-sm leading-relaxed">{comment.content}</p>
+
+                          {/* Comment text or edit textarea */}
+                          {editingCommentId === commentItem.id ? (
+                            <Textarea
+                              value={editingCommentContent}
+                              onChange={e => setEditingCommentContent(e.target.value)}
+                              rows={3}
+                              className="mt-2"
+                            />
+                          ) : (
+                            <p className="text-gray-700 text-sm leading-relaxed">
+                              {commentItem.content}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
                   ))}
+
+                  {/* Load More Comments Button */}
+                  {hasMoreComments && (
+                    <div className="text-center pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={loadMoreComments}
+                        disabled={loadingComments}
+                      >
+                        {loadingComments ? 'Loading...' : 'Load More Comments'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
@@ -635,6 +923,31 @@ export function RecipeDetailPage() {
         {/* TODO: Implement actual comment loading and display */}
         {/* TODO: Add print recipe functionality */}
         {/* TODO: Add recipe scaling (adjust servings) */}
+
+        {/* Confirmation Dialogs */}
+        <ConfirmDialog
+          open={deleteRatingDialog}
+          onOpenChange={setDeleteRatingDialog}
+          onConfirm={confirmDeleteRating}
+          title="Remove Your Rating?"
+          description={`Are you sure you want to remove your ${ratingToDelete}-star rating? This action will update the recipe's average rating.`}
+          confirmText="Remove Rating"
+          cancelText="Cancel"
+          variant="destructive"
+          icon={<AlertTriangle className="h-6 w-6 text-red-600" />}
+        />
+
+        <ConfirmDialog
+          open={deleteCommentDialog}
+          onOpenChange={setDeleteCommentDialog}
+          onConfirm={confirmDeleteComment}
+          title="Delete Comment?"
+          description="Are you sure you want to delete this comment? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="destructive"
+          icon={<AlertTriangle className="h-6 w-6 text-red-600" />}
+        />
       </div>
     </Layout>
   );
