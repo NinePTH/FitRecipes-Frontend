@@ -47,7 +47,7 @@
   - Email verification flow
   - Password reset functionality
   - JWT token management
-  - Role-based access control (Customer, Chef, Admin)
+  - Role-based access control (User, Chef, Admin)
   - Protected routes
   - Session persistence
 
