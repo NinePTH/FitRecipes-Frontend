@@ -43,7 +43,7 @@ export function Layout({ children }: LayoutProps) {
             </Link>
 
             {/* Main Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center space-x-8">
               <Link
                 to="/"
                 className={`text-sm font-medium transition-colors ${
@@ -99,7 +99,7 @@ export function Layout({ children }: LayoutProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="lg:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -123,7 +123,7 @@ export function Layout({ children }: LayoutProps) {
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout" className='hidden lg:block'>
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -136,12 +136,12 @@ export function Layout({ children }: LayoutProps) {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-25 z-40 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-25 z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Menu */}
-          <div className="relative z-50 md:hidden bg-white border-b shadow-lg">
+          <div className="relative z-50 lg:hidden bg-white border-b shadow-lg">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
               <Link
                 to="/"

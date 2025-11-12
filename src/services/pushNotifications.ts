@@ -17,7 +17,7 @@ function getPlatform(): string {
 export async function requestPushPermission(): Promise<string | null> {
   try {
     console.log('🔔 Starting push permission request...');
-    
+
     // Check if notifications are supported
     if (!('Notification' in window)) {
       console.warn('❌ This browser does not support notifications');
@@ -91,7 +91,7 @@ export async function requestPushPermission(): Promise<string | null> {
 export async function unregisterPush(): Promise<void> {
   try {
     console.log('🔔 Starting push token unregistration...');
-    
+
     if (!messaging) {
       console.warn('⚠️ Firebase messaging not initialized, skipping unregister');
       return;
@@ -105,7 +105,7 @@ export async function unregisterPush(): Promise<void> {
 
     console.log('🔔 Getting current FCM token...');
     const fcmToken = await getToken(messaging, { vapidKey });
-    
+
     if (fcmToken) {
       console.log('✅ FCM token found:', fcmToken.substring(0, 20) + '...');
       console.log('🔔 Unregistering token with backend...');

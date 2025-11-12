@@ -44,12 +44,12 @@ function AppContent() {
 
   // Debug: Log auth state
   useEffect(() => {
-    console.log('🔐 Auth State:', { 
-      user: user ? `${user.firstName} ${user.lastName} (${user.email})` : null, 
-      isAuthenticated, 
+    console.log('🔐 Auth State:', {
+      user: user ? `${user.firstName} ${user.lastName} (${user.email})` : null,
+      isAuthenticated,
       isLoading,
       token: localStorage.getItem('fitrecipes_token') ? 'Present' : 'Missing',
-      userInStorage: localStorage.getItem('fitrecipes_user') ? 'Present' : 'Missing'
+      userInStorage: localStorage.getItem('fitrecipes_user') ? 'Present' : 'Missing',
     });
   }, [user, isAuthenticated, isLoading]);
 
@@ -61,11 +61,11 @@ function AppContent() {
   // Users should use the manual button in notification settings instead
   useEffect(() => {
     console.log('🔔 Push permission effect triggered. User:', user ? 'Logged in' : 'Not logged in');
-    
+
     if (user && 'Notification' in window) {
       console.log('🔔 Checking push notification status...');
       console.log('Current permission:', Notification.permission);
-      
+
       if (Notification.permission === 'granted') {
         console.log('✅ Push notifications already granted');
         // Register token if permission already granted
@@ -84,8 +84,12 @@ function AppContent() {
       } else if (Notification.permission === 'denied') {
         console.log('❌ Push notifications denied by user');
       } else {
-        console.log('⚠️ Push notification permission not set. User needs to grant permission manually.');
-        console.log('👉 Go to /notification-settings and click "Request Push Permission Now" button');
+        console.log(
+          '⚠️ Push notification permission not set. User needs to grant permission manually.'
+        );
+        console.log(
+          '👉 Go to /notification-settings and click "Request Push Permission Now" button'
+        );
       }
     } else if (!user) {
       console.log('No user logged in');
@@ -98,7 +102,7 @@ function AppContent() {
     <div className="App">
       {/* Push Notification Prompt Banner (shows for authenticated users with default permission) */}
       {user && <PushNotificationPrompt />}
-      
+
       <Routes>
         {/* Public Routes */}
         <Route path="/auth" element={<AuthPage />} />
@@ -110,121 +114,121 @@ function AppContent() {
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
         <Route path="/resend-verification" element={<ResendVerificationPage />} />
 
-              {/* Protected Routes - All authenticated users */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <BrowseRecipesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/browse-recipes"
-                element={
-                  <ProtectedRoute>
-                    <BrowseRecipesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/recipes/recommended"
-                element={
-                  <ProtectedRoute>
-                    <RecommendedRecipesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/recipes/trending"
-                element={
-                  <ProtectedRoute>
-                    <TrendingRecipesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/recipes/new"
-                element={
-                  <ProtectedRoute>
-                    <NewRecipesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/recipe/:id"
-                element={
-                  <ProtectedRoute>
-                    <RecipeDetailPage />
-                  </ProtectedRoute>
-                }
-              />
+        {/* Protected Routes - All authenticated users */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <BrowseRecipesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/browse-recipes"
+          element={
+            <ProtectedRoute>
+              <BrowseRecipesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/recommended"
+          element={
+            <ProtectedRoute>
+              <RecommendedRecipesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/trending"
+          element={
+            <ProtectedRoute>
+              <TrendingRecipesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipes/new"
+          element={
+            <ProtectedRoute>
+              <NewRecipesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recipe/:id"
+          element={
+            <ProtectedRoute>
+              <RecipeDetailPage />
+            </ProtectedRoute>
+          }
+        />
 
-              {/* Protected Routes - Chef and Admin only */}
-              <Route
-                path="/submit-recipe"
-                element={
-                  <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
-                    <RecipeSubmissionPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/my-recipes"
-                element={
-                  <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
-                    <MyRecipesPage />
-                  </ProtectedRoute>
-                }
-              />
+        {/* Protected Routes - Chef and Admin only */}
+        <Route
+          path="/submit-recipe"
+          element={
+            <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
+              <RecipeSubmissionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-recipes"
+          element={
+            <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
+              <MyRecipesPage />
+            </ProtectedRoute>
+          }
+        />
 
-              {/* Protected Routes - Admin only */}
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute requiredRoles={['ADMIN']}>
-                    <AdminRecipeApprovalPage />
-                  </ProtectedRoute>
-                }
-              />
+        {/* Protected Routes - Admin only */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <AdminRecipeApprovalPage />
+            </ProtectedRoute>
+          }
+        />
 
-              {/* Notification Routes - All authenticated users */}
-              <Route
-                path="/notifications"
-                element={
-                  <ProtectedRoute>
-                    <AllNotificationsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/notification-settings"
-                element={
-                  <ProtectedRoute>
-                    <NotificationSettingsPage />
-                  </ProtectedRoute>
-                }
-              />
+        {/* Notification Routes - All authenticated users */}
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <AllNotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notification-settings"
+          element={
+            <ProtectedRoute>
+              <NotificationSettingsPage />
+            </ProtectedRoute>
+          }
+        />
 
-              {/* Catch all - 404 Not Found */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </div>
-        );
-      }
+        {/* Catch all - 404 Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </div>
+  );
+}
 
-      function App() {
-        return (
-          <QueryClientProvider client={queryClient}>
-            <Router>
-              <AuthProvider>
-                <ToastProvider>
-                  <AppContent />
-                </ToastProvider>
-              </AuthProvider>
-            </Router>
-          </QueryClientProvider>
-        );
-      }
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
+  );
+}
 
-      export default App;
+export default App;

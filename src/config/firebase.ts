@@ -21,10 +21,10 @@ try {
   console.log('- Project ID:', firebaseConfig.projectId ? '✅ Set' : '❌ Missing');
   console.log('- Messaging Sender ID:', firebaseConfig.messagingSenderId ? '✅ Set' : '❌ Missing');
   console.log('- App ID:', firebaseConfig.appId ? '✅ Set' : '❌ Missing');
-  
+
   app = initializeApp(firebaseConfig);
   console.log('✅ Firebase app initialized');
-  
+
   // Only initialize messaging if in browser and service worker is supported
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     console.log('✅ Service Worker API available');

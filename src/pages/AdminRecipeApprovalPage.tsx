@@ -55,7 +55,11 @@ export function AdminRecipeApprovalPage() {
         setHasNextPage(result.pagination.hasNext);
       } catch (error) {
         console.error('Failed to fetch pending recipes:', error);
-        showToast('error', 'Error loading recipes', 'Failed to load pending recipes. Please try again.');
+        showToast(
+          'error',
+          'Error loading recipes',
+          'Failed to load pending recipes. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
@@ -81,7 +85,11 @@ export function AdminRecipeApprovalPage() {
       setHasNextPage(result.pagination.hasNext);
     } catch (error) {
       console.error('Failed to load more recipes:', error);
-      showToast('error', 'Error loading more recipes', 'Failed to load more recipes. Please try again.');
+      showToast(
+        'error',
+        'Error loading more recipes',
+        'Failed to load more recipes. Please try again.'
+      );
     } finally {
       setIsFetchingNextPage(false);
     }

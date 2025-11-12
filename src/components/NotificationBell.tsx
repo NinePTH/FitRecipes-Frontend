@@ -6,6 +6,7 @@ import { NotificationDropdown } from './NotificationDropdown';
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: unreadCount } = useQuery({
@@ -14,18 +15,48 @@ export function NotificationBell() {
     refetchInterval: 60000, // Poll every minute
   });
 
-  // Close dropdown when clicking outside
+  // Detect screen size (mobile/tablet = below lg breakpoint = < 1024px)
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  }, []);
+
+  // Close dropdown when clicking outside (desktop only)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (!isMobile && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen && !isMobile) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen, isMobile]);
+
+  // Close on Escape key
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape' && isOpen) {
         setIsOpen(false);
       }
     }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
       return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleEscape);
       };
     }
   }, [isOpen]);
@@ -45,7 +76,7 @@ export function NotificationBell() {
         )}
       </button>
 
-      {isOpen && <NotificationDropdown onClose={() => setIsOpen(false)} />}
+      {isOpen && <NotificationDropdown onClose={() => setIsOpen(false)} isMobile={isMobile} />}
     </div>
   );
 }

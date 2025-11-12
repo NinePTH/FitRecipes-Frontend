@@ -28,9 +28,17 @@ export function NotificationSettingsPage() {
             newSubmission: preferences?.pushNotifications.newSubmission ?? false,
           },
         });
-        showToast('success', 'Push notifications enabled', 'You will now receive browser notifications');
+        showToast(
+          'success',
+          'Push notifications enabled',
+          'You will now receive browser notifications'
+        );
       } else {
-        showToast('error', 'Failed to enable push notifications', 'Check browser console for details');
+        showToast(
+          'error',
+          'Failed to enable push notifications',
+          'Check browser console for details'
+        );
       }
     } catch (error) {
       console.error('Failed to enable push notifications:', error);
@@ -57,7 +65,11 @@ export function NotificationSettingsPage() {
           newSubmission: preferences?.pushNotifications.newSubmission ?? false,
         },
       });
-      showToast('success', 'Push notifications disabled', 'You will no longer receive browser notifications');
+      showToast(
+        'success',
+        'Push notifications disabled',
+        'You will no longer receive browser notifications'
+      );
     } catch (error) {
       console.error('Failed to disable push notifications:', error);
       showToast('error', 'Error disabling push notifications', 'Check browser console for details');
@@ -72,9 +84,17 @@ export function NotificationSettingsPage() {
       console.log('🔔 Manual push permission test started');
       const token = await requestPushPermission();
       if (token) {
-        showToast('success', 'Permission granted', 'Push notification token registered successfully');
+        showToast(
+          'success',
+          'Permission granted',
+          'Push notification token registered successfully'
+        );
       } else {
-        showToast('error', 'Permission denied', 'Push notification permission was denied or failed');
+        showToast(
+          'error',
+          'Permission denied',
+          'Push notification permission was denied or failed'
+        );
       }
     } catch (error) {
       console.error('Push permission test failed:', error);
@@ -108,9 +128,7 @@ export function NotificationSettingsPage() {
               <li>Notification endpoints are not implemented yet</li>
               <li>Network connection issue</li>
             </ul>
-            <p className="text-red-600 text-sm">
-              Check the browser console for more details.
-            </p>
+            <p className="text-red-600 text-sm">Check the browser console for more details.</p>
           </div>
         </div>
       </Layout>
@@ -146,30 +164,26 @@ export function NotificationSettingsPage() {
         )}
 
         {/* Manual Push Permission Button (for debugging if automatic prompt was dismissed) */}
-        {typeof window !== 'undefined' && 
-         'Notification' in window && 
-         Notification.permission === 'default' && (
-          <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="w-5 h-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium text-blue-900">
-                  Enable browser notifications
-                </p>
-                <p className="text-xs text-blue-700">
-                  Get notified even when the app is closed
-                </p>
+        {typeof window !== 'undefined' &&
+          'Notification' in window &&
+          Notification.permission === 'default' && (
+            <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Enable browser notifications</p>
+                  <p className="text-xs text-blue-700">Get notified even when the app is closed</p>
+                </div>
               </div>
+              <button
+                onClick={handleTestPushPermission}
+                disabled={testingPush}
+                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {testingPush ? 'Enabling...' : 'Enable'}
+              </button>
             </div>
-            <button
-              onClick={handleTestPushPermission}
-              disabled={testingPush}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {testingPush ? 'Enabling...' : 'Enable'}
-            </button>
-          </div>
-        )}
+          )}
 
         {/* In-App Notifications */}
         <section className="mb-8 bg-white rounded-lg shadow-sm border p-6">
@@ -225,14 +239,12 @@ export function NotificationSettingsPage() {
           <p className="text-sm text-gray-600 mb-4">
             Receive browser push notifications even when the app is closed
           </p>
-          
+
           {/* Enable/Disable Push Notifications Button */}
           <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 mb-1">
-                  Browser Push Notifications
-                </p>
+                <p className="text-sm font-medium text-gray-900 mb-1">Browser Push Notifications</p>
                 <p className="text-xs text-gray-600">
                   {preferences.pushNotifications.enabled
                     ? 'Push notifications are currently enabled'
@@ -281,16 +293,12 @@ export function NotificationSettingsPage() {
               <ToggleItem
                 label="Recipe Approved"
                 checked={preferences.pushNotifications.recipeApproved}
-                onChange={checked =>
-                  handleToggle('pushNotifications', 'recipeApproved', checked)
-                }
+                onChange={checked => handleToggle('pushNotifications', 'recipeApproved', checked)}
               />
               <ToggleItem
                 label="Recipe Rejected"
                 checked={preferences.pushNotifications.recipeRejected}
-                onChange={checked =>
-                  handleToggle('pushNotifications', 'recipeRejected', checked)
-                }
+                onChange={checked => handleToggle('pushNotifications', 'recipeRejected', checked)}
               />
               <ToggleItem
                 label="New Comments"
@@ -306,9 +314,7 @@ export function NotificationSettingsPage() {
                 <ToggleItem
                   label="New Recipe Submissions (Admin)"
                   checked={preferences.pushNotifications.newSubmission}
-                  onChange={checked =>
-                    handleToggle('pushNotifications', 'newSubmission', checked)
-                  }
+                  onChange={checked => handleToggle('pushNotifications', 'newSubmission', checked)}
                 />
               )}
             </div>
@@ -335,16 +341,12 @@ export function NotificationSettingsPage() {
               <ToggleItem
                 label="Recipe Approved"
                 checked={preferences.emailNotifications.recipeApproved}
-                onChange={checked =>
-                  handleToggle('emailNotifications', 'recipeApproved', checked)
-                }
+                onChange={checked => handleToggle('emailNotifications', 'recipeApproved', checked)}
               />
               <ToggleItem
                 label="Recipe Rejected"
                 checked={preferences.emailNotifications.recipeRejected}
-                onChange={checked =>
-                  handleToggle('emailNotifications', 'recipeRejected', checked)
-                }
+                onChange={checked => handleToggle('emailNotifications', 'recipeRejected', checked)}
               />
               <ToggleItem
                 label="New Comments"

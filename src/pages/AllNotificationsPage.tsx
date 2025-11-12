@@ -18,14 +18,8 @@ export function AllNotificationsPage() {
     ...(filterPriority && { priority: filterPriority }),
   };
 
-  const {
-    notifications,
-    pagination,
-    unreadCount,
-    isLoading,
-    markAllAsRead,
-    clearAll,
-  } = useNotifications(page, filters);
+  const { notifications, pagination, unreadCount, isLoading, markAllAsRead, clearAll } =
+    useNotifications(page, filters);
 
   const handleLoadMore = () => {
     if (pagination?.hasNext) {
@@ -61,7 +55,7 @@ export function AllNotificationsPage() {
             <div className="flex items-center gap-2">
               <Filter className="w-5 h-5 text-gray-600" />
               <span className="font-medium text-gray-900">Filters:</span>
-              
+
               <select
                 value={filterType || ''}
                 onChange={e => {
@@ -152,9 +146,7 @@ export function AllNotificationsPage() {
             <div className="text-center p-12">
               <p className="text-gray-600 font-medium mb-1">No notifications</p>
               <p className="text-sm text-gray-500">
-                {hasActiveFilters
-                  ? 'Try adjusting your filters'
-                  : "You're all caught up!"}
+                {hasActiveFilters ? 'Try adjusting your filters' : "You're all caught up!"}
               </p>
             </div>
           ) : (
@@ -172,11 +164,7 @@ export function AllNotificationsPage() {
               {/* Load More */}
               {pagination && pagination.hasNext && (
                 <div className="p-4 border-t text-center">
-                  <Button
-                    onClick={handleLoadMore}
-                    disabled={isLoading}
-                    variant="outline"
-                  >
+                  <Button onClick={handleLoadMore} disabled={isLoading} variant="outline">
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -19,8 +19,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const isAuth = authService.isAuthenticated();
       console.log('🔐 Is authenticated?', isAuth);
-      console.log('🔐 Token in localStorage:', localStorage.getItem('fitrecipes_token') ? 'Present' : 'Missing');
-      console.log('🔐 User in localStorage:', localStorage.getItem('fitrecipes_user') ? 'Present' : 'Missing');
+      console.log(
+        '🔐 Token in localStorage:',
+        localStorage.getItem('fitrecipes_token') ? 'Present' : 'Missing'
+      );
+      console.log(
+        '🔐 User in localStorage:',
+        localStorage.getItem('fitrecipes_user') ? 'Present' : 'Missing'
+      );
 
       if (isAuth) {
         try {
