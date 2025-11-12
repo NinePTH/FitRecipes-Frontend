@@ -208,9 +208,10 @@ export async function patch<T>(endpoint: string, data?: unknown): Promise<T> {
   });
 }
 
-export async function deleteRequest<T>(endpoint: string): Promise<T> {
+export async function deleteRequest<T>(endpoint: string, data?: unknown): Promise<T> {
   return request<T>(endpoint, {
     method: 'DELETE',
+    body: data ? JSON.stringify(data) : undefined,
   });
 }
 

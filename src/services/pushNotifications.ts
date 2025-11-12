@@ -90,20 +90,32 @@ export async function requestPushPermission(): Promise<string | null> {
 
 export async function unregisterPush(): Promise<void> {
   try {
+    console.log('🔔 Starting push token unregistration...');
+    
     if (!messaging) {
+      console.warn('⚠️ Firebase messaging not initialized, skipping unregister');
       return;
     }
 
     const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
     if (!vapidKey) {
+      console.warn('⚠️ VAPID key not configured, skipping unregister');
       return;
     }
 
+    console.log('🔔 Getting current FCM token...');
     const fcmToken = await getToken(messaging, { vapidKey });
+    
     if (fcmToken) {
+      console.log('✅ FCM token found:', fcmToken.substring(0, 20) + '...');
+      console.log('🔔 Unregistering token with backend...');
       await notificationApi.unregisterFcmToken(fcmToken);
+      console.log('✅ Push token unregistered successfully');
+    } else {
+      console.log('ℹ️ No FCM token found to unregister');
     }
   } catch (error) {
-    console.error('Error unregistering push:', error);
+    console.error('❌ Error unregistering push:', error);
+    throw error; // Re-throw so caller can handle it
   }
 }

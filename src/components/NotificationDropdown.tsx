@@ -72,18 +72,16 @@ export function NotificationDropdown({ onClose }: Props) {
         )}
       </div>
 
-      {/* Footer */}
-      {notifications.length > 5 && (
-        <div className="border-t p-2">
-          <Link
-            to="/notifications"
-            className="block text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2"
-            onClick={onClose}
-          >
-            View all notifications
-          </Link>
-        </div>
-      )}
+      {/* Footer - Always show "View all" link */}
+      <div className="border-t p-2">
+        <Link
+          to="/notifications"
+          className="block text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2"
+          onClick={onClose}
+        >
+          View all notifications
+        </Link>
+      </div>
     </div>
   );
 }

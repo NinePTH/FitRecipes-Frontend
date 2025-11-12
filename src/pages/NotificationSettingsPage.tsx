@@ -1,12 +1,70 @@
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
 import { Layout } from '@/components/Layout';
 import { Loader2, Bell, Mail, Smartphone } from 'lucide-react';
-import { requestPushPermission } from '@/services/pushNotifications';
+import { requestPushPermission, unregisterPush } from '@/services/pushNotifications';
 import { useState } from 'react';
+import { useToast } from '@/hooks/useToast';
 
 export function NotificationSettingsPage() {
   const { preferences, isLoading, updatePreferences, isUpdating } = useNotificationPreferences();
   const [testingPush, setTestingPush] = useState(false);
+  const { showToast } = useToast();
+
+  const handleEnablePushNotifications = async () => {
+    setTestingPush(true);
+    try {
+      console.log('🔔 Enabling push notifications...');
+      const token = await requestPushPermission();
+      if (token) {
+        console.log('✅ Push notifications enabled, updating preferences...');
+        // Enable push notifications in preferences
+        await updatePreferences({
+          pushNotifications: {
+            enabled: true,
+            recipeApproved: preferences?.pushNotifications.recipeApproved ?? true,
+            recipeRejected: preferences?.pushNotifications.recipeRejected ?? true,
+            newComment: preferences?.pushNotifications.newComment ?? true,
+            highRating: preferences?.pushNotifications.highRating ?? true,
+            newSubmission: preferences?.pushNotifications.newSubmission ?? false,
+          },
+        });
+        showToast('success', 'Push notifications enabled', 'You will now receive browser notifications');
+      } else {
+        showToast('error', 'Failed to enable push notifications', 'Check browser console for details');
+      }
+    } catch (error) {
+      console.error('Failed to enable push notifications:', error);
+      showToast('error', 'Error enabling push notifications', 'Check browser console for details');
+    } finally {
+      setTestingPush(false);
+    }
+  };
+
+  const handleDisablePushNotifications = async () => {
+    setTestingPush(true);
+    try {
+      console.log('🔔 Disabling push notifications...');
+      await unregisterPush();
+      console.log('✅ Push token unregistered, updating preferences...');
+      // Disable push notifications in preferences
+      await updatePreferences({
+        pushNotifications: {
+          enabled: false,
+          recipeApproved: preferences?.pushNotifications.recipeApproved ?? true,
+          recipeRejected: preferences?.pushNotifications.recipeRejected ?? true,
+          newComment: preferences?.pushNotifications.newComment ?? true,
+          highRating: preferences?.pushNotifications.highRating ?? true,
+          newSubmission: preferences?.pushNotifications.newSubmission ?? false,
+        },
+      });
+      showToast('success', 'Push notifications disabled', 'You will no longer receive browser notifications');
+    } catch (error) {
+      console.error('Failed to disable push notifications:', error);
+      showToast('error', 'Error disabling push notifications', 'Check browser console for details');
+    } finally {
+      setTestingPush(false);
+    }
+  };
 
   const handleTestPushPermission = async () => {
     setTestingPush(true);
@@ -14,13 +72,13 @@ export function NotificationSettingsPage() {
       console.log('🔔 Manual push permission test started');
       const token = await requestPushPermission();
       if (token) {
-        alert('✅ Push notification permission granted! Token registered successfully.');
+        showToast('success', 'Permission granted', 'Push notification token registered successfully');
       } else {
-        alert('❌ Push notification permission denied or failed. Check browser console for details.');
+        showToast('error', 'Permission denied', 'Push notification permission was denied or failed');
       }
     } catch (error) {
       console.error('Push permission test failed:', error);
-      alert('❌ Error requesting push permission. Check browser console.');
+      showToast('error', 'Error requesting permission', 'Check browser console for details');
     } finally {
       setTestingPush(false);
     }
@@ -167,14 +225,59 @@ export function NotificationSettingsPage() {
           <p className="text-sm text-gray-600 mb-4">
             Receive browser push notifications even when the app is closed
           </p>
-          <ToggleItem
-            label="Enable Push Notifications"
-            description="Receive browser push notifications"
-            checked={preferences.pushNotifications.enabled}
-            onChange={checked => handleToggle('pushNotifications', 'enabled', checked)}
-          />
+          
+          {/* Enable/Disable Push Notifications Button */}
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-1">
+                  Browser Push Notifications
+                </p>
+                <p className="text-xs text-gray-600">
+                  {preferences.pushNotifications.enabled
+                    ? 'Push notifications are currently enabled'
+                    : 'Enable push notifications to receive alerts even when the app is closed'}
+                </p>
+              </div>
+              {preferences.pushNotifications.enabled ? (
+                <button
+                  onClick={handleDisablePushNotifications}
+                  disabled={testingPush}
+                  className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {testingPush ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Disabling...
+                    </>
+                  ) : (
+                    'Disable Push'
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={handleEnablePushNotifications}
+                  disabled={testingPush}
+                  className="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {testingPush ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Enabling...
+                    </>
+                  ) : (
+                    'Enable Push'
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+
           {preferences.pushNotifications.enabled && (
             <div className="ml-6 mt-3 space-y-3 pl-4 border-l-2 border-gray-200">
+              <p className="text-xs text-gray-600 mb-3">
+                Choose which events trigger push notifications:
+              </p>
               <ToggleItem
                 label="Recipe Approved"
                 checked={preferences.pushNotifications.recipeApproved}

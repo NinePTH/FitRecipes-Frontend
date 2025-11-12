@@ -20,8 +20,25 @@ export function useFcmListener() {
       const data = payload.data || {};
 
       // Show toast notification
-      const type = (data.type || 'info') as 'success' | 'error' | 'warning' | 'info';
-      showToast(type, title || 'New Notification', body || '');
+      // Backend sends notification types in uppercase (SUCCESS, ERROR, WARNING, INFO)
+      // Convert to lowercase for toast component
+      const rawType = (data.type || 'INFO') as string;
+      let type = rawType.toLowerCase() as 'success' | 'error' | 'warning' | 'info';
+      
+      // Validate type is one of the allowed values
+      const validTypes: Array<'success' | 'error' | 'warning' | 'info'> = ['success', 'error', 'warning', 'info'];
+      if (!validTypes.includes(type)) {
+        console.warn(`Invalid notification type: ${rawType}, defaulting to 'info'`);
+        type = 'info';
+      }
+
+      // Ensure we have at least a title
+      const notificationTitle = title || 'New Notification';
+      const notificationBody = body || '';
+
+      console.log('Showing toast:', { type, title: notificationTitle, body: notificationBody });
+      
+      showToast(type, notificationTitle, notificationBody);
 
       // Invalidate notifications query to refresh list
       queryClient.invalidateQueries({ queryKey: ['notifications'] });

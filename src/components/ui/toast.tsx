@@ -44,6 +44,9 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
   const [isExiting, setIsExiting] = useState(false);
   const Icon = toastIcons[toast.type];
 
+  // Safety check - if Icon is undefined, use Info icon
+  const IconComponent = Icon || Info;
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsExiting(true);
@@ -71,7 +74,7 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
       <div className="p-4">
         <div className="flex items-start">
           <div className="flex-shrink-0">
-            <Icon className={cn('h-5 w-5', toastIconStyles[toast.type])} />
+            <IconComponent className={cn('h-5 w-5', toastIconStyles[toast.type])} />
           </div>
           <div className="ml-3 flex-1">
             <p className="text-sm font-semibold">{toast.title}</p>

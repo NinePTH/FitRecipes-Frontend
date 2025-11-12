@@ -83,7 +83,6 @@ export const notificationApi = {
 
   // Unregister FCM token
   async unregisterFcmToken(fcmToken: string): Promise<void> {
-    // For DELETE with body, we need to use a workaround since deleteRequest doesn't support body
-    await post('/api/v1/notifications/fcm/unregister', { fcmToken });
+    await deleteRequest('/api/v1/notifications/fcm/unregister', { fcmToken });
   },
 };
