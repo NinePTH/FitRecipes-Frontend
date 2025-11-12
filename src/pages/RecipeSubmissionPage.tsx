@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Upload, Plus, X, Save, Eye } from 'lucide-react';
+import { ChevronLeft, Upload, Plus, X, Save, Eye, Clock, Users, AlertCircle } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -592,80 +592,241 @@ export function RecipeSubmissionPage() {
   }
 
   if (previewMode) {
+    const totalTime = formData.prepTime + formData.cookTime;
+    const displayImages =
+      existingImages.length > 0 ? existingImages : formData.images.length > 0 ? [] : [];
+
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6 pb-8">
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Recipe Preview</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Recipe Preview</h1>
             <Button onClick={() => setPreviewMode(false)} variant="outline">
               <X className="h-4 w-4 mr-2" />
               Close Preview
             </Button>
           </div>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold">{formData.title || 'Recipe Title'}</h2>
-                  <p className="text-gray-600 mt-2">
-                    {formData.description || 'Recipe description...'}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Ingredients</h3>
-                    <ul className="space-y-2">
-                      {formData.ingredients.map((ingredient, index) => (
-                        <li key={index} className="flex justify-between">
-                          <span>{ingredient.name || 'Ingredient name'}</span>
-                          <span>
-                            {ingredient.quantity} {ingredient.unit}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+          {/* Main Content - Match RecipeDetailPage Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Recipe Details */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Image Gallery */}
+              {(displayImages.length > 0 || formData.images.length > 0) && (
+                <div className="space-y-2">
+                  <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                    {displayImages.length > 0 ? (
+                      <img
+                        src={displayImages[0]}
+                        alt={formData.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <span className="text-sm">Image preview not available</span>
+                      </div>
+                    )}
                   </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Instructions</h3>
-                    <ol className="space-y-2">
-                      {formData.instructions.map((instruction, index) => (
-                        <li key={index} className="flex space-x-3">
-                          <span className="font-semibold text-primary-600">{index + 1}.</span>
-                          <span>{instruction.description || 'Instruction description...'}</span>
-                        </li>
+                  {displayImages.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto">
+                      {displayImages.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`${formData.title} ${idx + 1}`}
+                          className="w-20 h-20 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity"
+                        />
                       ))}
-                    </ol>
-                  </div>
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {/* Recipe Details */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-t border-b">
-                  <div className="text-center">
+              {/* Recipe Title & Description */}
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                  {formData.title || 'Recipe Title'}
+                </h1>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  {formData.description || 'Recipe description will appear here...'}
+                </p>
+              </div>
+
+              {/* Quick Info */}
+              <div className="flex flex-wrap gap-4 py-4 border-y">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-gray-500" />
+                  <div>
                     <p className="text-sm text-gray-500">Prep Time</p>
-                    <p className="font-semibold">{formData.prepTime}m</p>
+                    <p className="font-semibold">{formData.prepTime} min</p>
                   </div>
-                  <div className="text-center">
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-gray-500" />
+                  <div>
                     <p className="text-sm text-gray-500">Cook Time</p>
-                    <p className="font-semibold">{formData.cookTime}m</p>
+                    <p className="font-semibold">{formData.cookTime} min</p>
                   </div>
-                  <div className="text-center">
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-500">Total Time</p>
+                    <p className="font-semibold">{totalTime} min</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-gray-500" />
+                  <div>
                     <p className="text-sm text-gray-500">Servings</p>
                     <p className="font-semibold">{formData.servings}</p>
                   </div>
-                  <div className="text-center">
+                </div>
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-gray-500" />
+                  <div>
                     <p className="text-sm text-gray-500">Difficulty</p>
                     <p className="font-semibold capitalize">{formData.difficulty}</p>
                   </div>
                 </div>
+              </div>
 
-                {/* Tags */}
-                <div className="space-y-3">
+              {/* Ingredients */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ingredients</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {formData.ingredients.map((ingredient, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <span className="inline-block w-2 h-2 bg-primary-600 rounded-full mt-2 flex-shrink-0" />
+                        <div className="flex-1 flex justify-between items-center">
+                          <span className="text-gray-900">
+                            {ingredient.name || 'Ingredient name'}
+                          </span>
+                          <span className="text-gray-600 font-medium">
+                            {ingredient.quantity} {ingredient.unit}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Instructions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Instructions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ol className="space-y-4">
+                    {formData.instructions.map((instruction, index) => (
+                      <li key={index} className="flex gap-4">
+                        <span className="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-semibold">
+                          {index + 1}
+                        </span>
+                        <p className="text-gray-700 leading-relaxed pt-1">
+                          {instruction.description || 'Instruction description...'}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Nutrition Info */}
+              {formData.nutrition && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Nutrition Facts</CardTitle>
+                    <p className="text-sm text-gray-500">Per serving</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {formData.nutrition.calories && formData.nutrition.calories > 0 && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-gray-600">Calories</span>
+                        <span className="font-semibold text-gray-900">
+                          {formData.nutrition.calories} kcal
+                        </span>
+                      </div>
+                    )}
+                    {formData.nutrition.protein && formData.nutrition.protein > 0 && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-gray-600">Protein</span>
+                        <span className="font-semibold text-gray-900">
+                          {formData.nutrition.protein}g
+                        </span>
+                      </div>
+                    )}
+                    {formData.nutrition.carbs && formData.nutrition.carbs > 0 && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-gray-600">Carbohydrates</span>
+                        <span className="font-semibold text-gray-900">
+                          {formData.nutrition.carbs}g
+                        </span>
+                      </div>
+                    )}
+                    {formData.nutrition.fat && formData.nutrition.fat > 0 && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-gray-600">Fat</span>
+                        <span className="font-semibold text-gray-900">
+                          {formData.nutrition.fat}g
+                        </span>
+                      </div>
+                    )}
+                    {formData.nutrition.fiber && formData.nutrition.fiber > 0 && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-gray-600">Fiber</span>
+                        <span className="font-semibold text-gray-900">
+                          {formData.nutrition.fiber}g
+                        </span>
+                      </div>
+                    )}
+                    {formData.nutrition.sodium && formData.nutrition.sodium > 0 && (
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-gray-600">Sodium</span>
+                        <span className="font-semibold text-gray-900">
+                          {formData.nutrition.sodium}mg
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Recipe Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Recipe Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {formData.cuisineType && (
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Cuisine</p>
+                      <p className="font-medium text-gray-900 capitalize">
+                        {formData.cuisineType}
+                      </p>
+                    </div>
+                  )}
+                  {formData.mainIngredient && (
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Main Ingredient</p>
+                      <p className="font-medium text-gray-900 capitalize">
+                        {formData.mainIngredient}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Meal Types */}
                   {formData.mealType.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Meal Types</h4>
+                      <p className="text-sm text-gray-500 mb-2">Meal Type</p>
                       <div className="flex flex-wrap gap-2">
                         {formData.mealType.map(type => (
                           <span
@@ -679,9 +840,10 @@ export function RecipeSubmissionPage() {
                     </div>
                   )}
 
+                  {/* Diet Types */}
                   {formData.dietType.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Diet Types</h4>
+                      <p className="text-sm text-gray-500 mb-2">Diet</p>
                       <div className="flex flex-wrap gap-2">
                         {formData.dietType.map(type => (
                           <span
@@ -695,9 +857,10 @@ export function RecipeSubmissionPage() {
                     </div>
                   )}
 
+                  {/* Allergens */}
                   {formData.allergies.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Allergens</h4>
+                      <p className="text-sm text-gray-500 mb-2">Allergens</p>
                       <div className="flex flex-wrap gap-2">
                         {formData.allergies.map(allergy => (
                           <span
@@ -710,67 +873,10 @@ export function RecipeSubmissionPage() {
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* Nutrition Info */}
-                {formData.nutrition && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Nutrition Per Serving</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {formData.nutrition.calories && (
-                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-primary-600">
-                            {formData.nutrition.calories}
-                          </p>
-                          <p className="text-sm text-gray-600">Calories</p>
-                        </div>
-                      )}
-                      {formData.nutrition.protein && (
-                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-primary-600">
-                            {formData.nutrition.protein}g
-                          </p>
-                          <p className="text-sm text-gray-600">Protein</p>
-                        </div>
-                      )}
-                      {formData.nutrition.carbs && (
-                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-primary-600">
-                            {formData.nutrition.carbs}g
-                          </p>
-                          <p className="text-sm text-gray-600">Carbs</p>
-                        </div>
-                      )}
-                      {formData.nutrition.fat && (
-                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-primary-600">
-                            {formData.nutrition.fat}g
-                          </p>
-                          <p className="text-sm text-gray-600">Fat</p>
-                        </div>
-                      )}
-                      {formData.nutrition.fiber && (
-                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-primary-600">
-                            {formData.nutrition.fiber}g
-                          </p>
-                          <p className="text-sm text-gray-600">Fiber</p>
-                        </div>
-                      )}
-                      {formData.nutrition.sodium && (
-                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-primary-600">
-                            {formData.nutrition.sodium}mg
-                          </p>
-                          <p className="text-sm text-gray-600">Sodium</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </Layout>
     );
@@ -779,8 +885,8 @@ export function RecipeSubmissionPage() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        {/* Header - Responsive */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="space-y-2">
             <Link
               to={isEditing ? '/my-recipes' : '/'}
