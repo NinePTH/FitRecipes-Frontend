@@ -798,9 +798,7 @@ export function RecipeSubmissionPage() {
                   {formData.cuisineType && (
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Cuisine</p>
-                      <p className="font-medium text-gray-900 capitalize">
-                        {formData.cuisineType}
-                      </p>
+                      <p className="font-medium text-gray-900 capitalize">{formData.cuisineType}</p>
                     </div>
                   )}
                   {formData.mainIngredient && (

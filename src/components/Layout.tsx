@@ -123,7 +123,13 @@ export function Layout({ children }: LayoutProps) {
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout" className='hidden lg:block'>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                title="Logout"
+                className="hidden lg:block"
+              >
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>

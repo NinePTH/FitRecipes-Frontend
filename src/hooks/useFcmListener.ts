@@ -14,7 +14,6 @@ export function useFcmListener() {
 
     // Listen for foreground messages
     const unsubscribe = onMessage(messaging, payload => {
-
       const { title, body } = payload.notification || {};
       const data = payload.data || {};
 
