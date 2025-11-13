@@ -396,9 +396,22 @@ VITE_API_BASE_URL=https://fitrecipes-backend.onrender.com
 # Frontend URL (required for OAuth redirects)
 VITE_FRONTEND_URL=http://localhost:5173
 
+# Firebase Configuration (required for push notifications)
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_VAPID_KEY=your_vapid_key
+
 # Optional: Enable debug logging
 VITE_DEBUG=false
 ```
+
+**🔒 Security Note:** 
+- Never commit `.env.local` or expose Firebase keys in source code
+- The build process automatically injects Firebase config into the service worker
+- Service worker in `public/` uses placeholders, actual config injected at build time
 
 ## 🚀 Deployment
 
@@ -419,6 +432,12 @@ Or connect your GitHub repository to Vercel for automatic deployments.
 **Important:** Set environment variables in Vercel dashboard:
 - `VITE_API_BASE_URL` → Your backend URL
 - `VITE_FRONTEND_URL` → Your frontend URL
+- `VITE_FIREBASE_API_KEY` → Firebase API key
+- `VITE_FIREBASE_AUTH_DOMAIN` → Firebase auth domain
+- `VITE_FIREBASE_PROJECT_ID` → Firebase project ID
+- `VITE_FIREBASE_MESSAGING_SENDER_ID` → Firebase sender ID
+- `VITE_FIREBASE_APP_ID` → Firebase app ID
+- `VITE_FIREBASE_VAPID_KEY` → Firebase VAPID key
 
 ### Manual Build
 

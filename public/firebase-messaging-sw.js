@@ -2,14 +2,8 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
 // Initialize Firebase in service worker
-// Note: Replace these with your actual Firebase config values
-firebase.initializeApp({
-  apiKey: "AIzaSyCEw_Qs4oEuELIX4OXJcLB5X5vOKF22854",
-  authDomain: "fitrecipes-498da.firebaseapp.com",
-  projectId: "fitrecipes-498da",
-  messagingSenderId: "973381060725",
-  appId: "1:973381060725:web:f18c4de4605c02c3d3503c"
-});
+// Config is injected at build time from environment variables
+firebase.initializeApp(/* FIREBASE_CONFIG_PLACEHOLDER */);
 
 const messaging = firebase.messaging();
 
