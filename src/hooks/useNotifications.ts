@@ -13,7 +13,6 @@ export function useNotifications(page = 1, filters?: NotificationFilters) {
     queryFn: async () => {
       try {
         const result = await notificationApi.getNotifications(page, 20, filters);
-        console.log('✅ Notifications loaded:', result);
         return result;
       } catch (err) {
         console.error('❌ Failed to load notifications:', err);
@@ -30,7 +29,6 @@ export function useNotifications(page = 1, filters?: NotificationFilters) {
     queryFn: async () => {
       try {
         const count = await notificationApi.getUnreadCount();
-        console.log('✅ Unread count:', count);
         return count;
       } catch (err) {
         console.error('❌ Failed to load unread count:', err);

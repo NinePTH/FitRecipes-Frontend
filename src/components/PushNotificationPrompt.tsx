@@ -30,16 +30,12 @@ export function PushNotificationPrompt() {
   const handleEnable = async () => {
     setIsRequesting(true);
     try {
-      console.log('🔔 User clicked to enable push notifications');
       const token = await requestPushPermission();
       if (token) {
-        console.log('✅ Push notifications enabled successfully');
         localStorage.setItem('fcm_token_registered', 'true');
         setShow(false);
-      } else {
-        console.log('❌ User denied push notifications');
-        // Don't hide on denial - let them try again
       }
+      // Don't hide on denial - let them try again
     } catch (error) {
       console.error('Failed to enable push notifications:', error);
     } finally {

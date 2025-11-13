@@ -14,22 +14,11 @@ let app;
 let messaging: Messaging | null = null;
 
 try {
-  console.log('🔥 Initializing Firebase...');
-  console.log('Firebase config check:');
-  console.log('- API Key:', firebaseConfig.apiKey ? '✅ Set' : '❌ Missing');
-  console.log('- Auth Domain:', firebaseConfig.authDomain ? '✅ Set' : '❌ Missing');
-  console.log('- Project ID:', firebaseConfig.projectId ? '✅ Set' : '❌ Missing');
-  console.log('- Messaging Sender ID:', firebaseConfig.messagingSenderId ? '✅ Set' : '❌ Missing');
-  console.log('- App ID:', firebaseConfig.appId ? '✅ Set' : '❌ Missing');
-
   app = initializeApp(firebaseConfig);
-  console.log('✅ Firebase app initialized');
 
   // Only initialize messaging if in browser and service worker is supported
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-    console.log('✅ Service Worker API available');
     messaging = getMessaging(app);
-    console.log('✅ Firebase messaging initialized');
   } else {
     console.warn('⚠️ Service Worker not supported in this environment');
   }

@@ -40,18 +40,7 @@ const queryClient = new QueryClient({
 
 // Inner component to access auth context
 function AppContent() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-
-  // Debug: Log auth state
-  useEffect(() => {
-    console.log('🔐 Auth State:', {
-      user: user ? `${user.firstName} ${user.lastName} (${user.email})` : null,
-      isAuthenticated,
-      isLoading,
-      token: localStorage.getItem('fitrecipes_token') ? 'Present' : 'Missing',
-      userInStorage: localStorage.getItem('fitrecipes_user') ? 'Present' : 'Missing',
-    });
-  }, [user, isAuthenticated, isLoading]);
+  const { user } = useAuth();
 
   // Listen for FCM messages
   useFcmListener();
@@ -60,41 +49,20 @@ function AppContent() {
   // NOTE: Chrome requires user gesture, so this automatic request will fail
   // Users should use the manual button in notification settings instead
   useEffect(() => {
-    console.log('🔔 Push permission effect triggered. User:', user ? 'Logged in' : 'Not logged in');
-
     if (user && 'Notification' in window) {
-      console.log('🔔 Checking push notification status...');
-      console.log('Current permission:', Notification.permission);
-
       if (Notification.permission === 'granted') {
-        console.log('✅ Push notifications already granted');
         // Register token if permission already granted
         const hasRegistered = localStorage.getItem('fcm_token_registered');
         if (!hasRegistered) {
-          console.log('🔔 Registering FCM token...');
           requestPushPermission()
             .then(token => {
               if (token) {
-                console.log('✅ FCM token registered');
                 localStorage.setItem('fcm_token_registered', 'true');
               }
             })
             .catch(err => console.error('Failed to register FCM token:', err));
         }
-      } else if (Notification.permission === 'denied') {
-        console.log('❌ Push notifications denied by user');
-      } else {
-        console.log(
-          '⚠️ Push notification permission not set. User needs to grant permission manually.'
-        );
-        console.log(
-          '👉 Go to /notification-settings and click "Request Push Permission Now" button'
-        );
       }
-    } else if (!user) {
-      console.log('No user logged in');
-    } else if (!('Notification' in window)) {
-      console.log('❌ Notifications not supported in this browser');
     }
   }, [user]);
 

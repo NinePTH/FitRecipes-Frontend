@@ -391,14 +391,11 @@ export function RecipeSubmissionPage() {
     setImageUploadStatus('idle');
 
     try {
-      console.log('Submitting recipe with form data:', formData);
-
       // STEP 1: Upload images first if there are any (max 3 images)
       let uploadedImageUrls: string[] = [];
 
       if (formData.images.length > 0) {
         setImageUploadStatus('uploading');
-        console.log(`Uploading ${formData.images.length} image(s)...`);
 
         try {
           // Upload all images (up to 3)
@@ -406,7 +403,6 @@ export function RecipeSubmissionPage() {
           uploadedImageUrls = await Promise.all(uploadPromises);
 
           setImageUploadStatus('success');
-          console.log('Images uploaded successfully:', uploadedImageUrls);
         } catch (uploadError) {
           setImageUploadStatus('error');
           console.error('Image upload failed:', uploadError);
@@ -424,14 +420,12 @@ export function RecipeSubmissionPage() {
           ...formData,
           imageUrls: combinedImageUrls,
         });
-        console.log('Recipe updated successfully:', recipe);
       } else {
         // Create new recipe with uploaded images
         recipe = await submitRecipe({
           ...formData,
           imageUrls: uploadedImageUrls.length > 0 ? uploadedImageUrls : undefined,
         });
-        console.log('Recipe submitted successfully:', recipe);
       }
 
       // Clear saved draft
@@ -559,11 +553,6 @@ export function RecipeSubmissionPage() {
         ...prev,
         images: [...prev.images, ...filesToAdd],
       }));
-
-      console.log(
-        `Added ${filesToAdd.length} image(s):`,
-        filesToAdd.map(f => f.name)
-      );
     }
 
     // Clear the input so the same file can be selected again if needed

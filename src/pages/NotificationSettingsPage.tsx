@@ -13,10 +13,8 @@ export function NotificationSettingsPage() {
   const handleEnablePushNotifications = async () => {
     setTestingPush(true);
     try {
-      console.log('🔔 Enabling push notifications...');
       const token = await requestPushPermission();
       if (token) {
-        console.log('✅ Push notifications enabled, updating preferences...');
         // Enable push notifications in preferences
         await updatePreferences({
           pushNotifications: {
@@ -51,9 +49,7 @@ export function NotificationSettingsPage() {
   const handleDisablePushNotifications = async () => {
     setTestingPush(true);
     try {
-      console.log('🔔 Disabling push notifications...');
       await unregisterPush();
-      console.log('✅ Push token unregistered, updating preferences...');
       // Disable push notifications in preferences
       await updatePreferences({
         pushNotifications: {
@@ -81,7 +77,6 @@ export function NotificationSettingsPage() {
   const handleTestPushPermission = async () => {
     setTestingPush(true);
     try {
-      console.log('🔔 Manual push permission test started');
       const token = await requestPushPermission();
       if (token) {
         showToast(

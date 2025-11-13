@@ -14,7 +14,6 @@ export function useFcmListener() {
 
     // Listen for foreground messages
     const unsubscribe = onMessage(messaging, payload => {
-      console.log('Received foreground FCM message:', payload);
 
       const { title, body } = payload.notification || {};
       const data = payload.data || {};
@@ -40,8 +39,6 @@ export function useFcmListener() {
       // Ensure we have at least a title
       const notificationTitle = title || 'New Notification';
       const notificationBody = body || '';
-
-      console.log('Showing toast:', { type, title: notificationTitle, body: notificationBody });
 
       showToast(type, notificationTitle, notificationBody);
 

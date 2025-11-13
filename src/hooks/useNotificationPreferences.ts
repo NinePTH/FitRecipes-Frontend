@@ -13,7 +13,6 @@ export function useNotificationPreferences() {
     queryFn: async () => {
       try {
         const prefs = await notificationApi.getPreferences();
-        console.log('✅ Preferences loaded:', prefs);
         return prefs;
       } catch (err) {
         console.error('❌ Failed to load preferences:', err);

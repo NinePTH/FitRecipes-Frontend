@@ -22,14 +22,6 @@ const firebaseConfig = {
   appId: process.env.VITE_FIREBASE_APP_ID || '',
 };
 
-// Log what we found (without exposing full keys)
-console.log('🔍 Firebase config check:');
-console.log('  - API Key:', firebaseConfig.apiKey ? `✅ Set (${firebaseConfig.apiKey.substring(0, 10)}...)` : '❌ Missing');
-console.log('  - Auth Domain:', firebaseConfig.authDomain ? `✅ Set` : '❌ Missing');
-console.log('  - Project ID:', firebaseConfig.projectId ? `✅ Set` : '❌ Missing');
-console.log('  - Messaging Sender ID:', firebaseConfig.messagingSenderId ? `✅ Set` : '❌ Missing');
-console.log('  - App ID:', firebaseConfig.appId ? `✅ Set` : '❌ Missing');
-
 // Replace placeholders with actual values
 swContent = swContent.replace(
   '/* FIREBASE_CONFIG_PLACEHOLDER */',
@@ -39,6 +31,5 @@ swContent = swContent.replace(
 // Write back to the file
 writeFileSync(swPath, swContent, 'utf-8');
 
-console.log('\n✅ Firebase config injected into service worker');
-console.log('📁 Service worker updated: dist/firebase-messaging-sw.js');
+console.log('✅ Firebase config injected into service worker');
 

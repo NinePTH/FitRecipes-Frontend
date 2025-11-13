@@ -63,10 +63,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   // DISABLED: Notification sidebar functions - waiting for backend
-  const markAsRead = useCallback((id: string) => {
-    // Disabled function - do nothing
-    console.log('markAsRead disabled, id:', id);
-  }, []);
+  const markAsRead = (id: string) => {
+    // Optionally implement if needed
+    void id;
+  };
 
   const markAllAsRead = useCallback(() => {
     // setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
