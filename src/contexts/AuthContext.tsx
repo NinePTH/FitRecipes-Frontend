@@ -16,13 +16,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       authService.init();
 
-      if (authService.isAuthenticated()) {
+      const isAuth = authService.isAuthenticated();
+
+      if (isAuth) {
         try {
           // Fetch fresh user data from backend
           const currentUser = await authService.getCurrentUser();
           setUser(currentUser);
         } catch (error) {
-          console.error('Auth verification failed:', error);
+          console.error('❌ Auth verification failed:', error);
           setUser(null);
           // Clear invalid auth data
           authService.init(); // This will clear token if invalid

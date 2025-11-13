@@ -626,6 +626,21 @@ export function RecipeDetailPage() {
                   <h4 className="font-medium text-gray-900">Main Ingredient</h4>
                   <p className="text-gray-600">{recipe.mainIngredient}</p>
                 </div>
+                {recipe.mealType && recipe.mealType.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-gray-900">Meal Type</h4>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {recipe.mealType.map(type => (
+                        <span
+                          key={type}
+                          className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full capitalize"
+                        >
+                          {type.toLowerCase()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {recipe.dietaryInfo && (
                   <div>
                     <h4 className="font-medium text-gray-900">Dietary Info</h4>
@@ -660,6 +675,21 @@ export function RecipeDetailPage() {
                           Paleo
                         </span>
                       )}
+                    </div>
+                  </div>
+                )}
+                {recipe.allergies && recipe.allergies.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-gray-900">Allergens</h4>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {recipe.allergies.map(allergy => (
+                        <span
+                          key={allergy}
+                          className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full"
+                        >
+                          {allergy}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}

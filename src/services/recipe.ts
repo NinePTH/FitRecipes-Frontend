@@ -142,8 +142,6 @@ export async function uploadRecipeImage(file: File): Promise<string> {
 export async function submitRecipe(formData: RecipeFormData): Promise<Recipe> {
   const submissionData = transformRecipeFormDataToSubmission(formData);
 
-  console.log('Submitting recipe to backend:', submissionData);
-
   const response = await api.post<{ recipe: Recipe }>('/api/v1/recipes', submissionData);
 
   return response.recipe;
@@ -198,8 +196,6 @@ export async function getMyRecipes(status?: 'PENDING' | 'APPROVED' | 'REJECTED')
  */
 export async function updateRecipe(recipeId: string, formData: RecipeFormData): Promise<Recipe> {
   const submissionData = transformRecipeFormDataToSubmission(formData);
-
-  console.log('Updating recipe:', recipeId, submissionData);
 
   const response = await api.put<{ recipe: Recipe }>(`/api/v1/recipes/${recipeId}`, submissionData);
 

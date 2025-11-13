@@ -4,7 +4,7 @@ import { ChefHat, Mail, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import * as authService from '@/services/auth';
+import { forgotPassword } from '@/services/auth';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -19,9 +19,8 @@ export function ForgotPasswordPage() {
     setSuccess(null);
 
     try {
-      const response = await authService.forgotPassword({ email });
-      console.log('Forgot password response:', response);
-      setSuccess(response.message || 'Password reset email sent! Please check your inbox.');
+      const response = await forgotPassword({ email });
+      setSuccess(response.message);
       setEmail(''); // Clear email field on success
     } catch (err) {
       const errorMessage =
