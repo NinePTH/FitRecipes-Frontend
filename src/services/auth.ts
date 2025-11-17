@@ -82,8 +82,8 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
 export async function logout(): Promise<void> {
   try {
     await api.post('/api/v1/auth/logout');
-  } catch (error) {
-    console.error('Logout API call failed:', error);
+  } catch {
+    // Silently fail - local cleanup is more important
   } finally {
     // Always clear local data
     clearToken();
@@ -244,7 +244,6 @@ export async function googleMobileAuth(idToken: string): Promise<AuthResponse> {
 export async function verifyEmail(token: string): Promise<string> {
   try {
     const response = await api.get<{ message: string }>(`/api/v1/auth/verify-email/${token}`);
-    console.log(response);
     return response.message;
   } catch (error) {
     if (isApiError(error)) {

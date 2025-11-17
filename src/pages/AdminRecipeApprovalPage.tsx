@@ -4,10 +4,10 @@ import { Check, X, Eye, Clock, User, MessageCircle, ChefHat } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertDialog } from '@/components/ui/alert-dialog';
 import { Layout } from '@/components/Layout';
 import { adminApi } from '@/services/api';
 import type { Recipe } from '@/types';
+import { useToast } from '@/hooks/useToast';
 
 export function AdminRecipeApprovalPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -15,6 +15,7 @@ export function AdminRecipeApprovalPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { showToast } = useToast();
 
   // Statistics state
   const [stats, setStats] = useState({ pending: 0, approvedToday: 0, rejectedToday: 0 });
@@ -23,21 +24,6 @@ export function AdminRecipeApprovalPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-
-  // Alert dialog state
-  const [alertDialog, setAlertDialog] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-  }>({
-    open: false,
-    title: '',
-    description: '',
-  });
-
-  const showAlert = (title: string, description: string) => {
-    setAlertDialog({ open: true, title, description });
-  };
 
   // Fetch statistics
   useEffect(() => {
@@ -69,14 +55,18 @@ export function AdminRecipeApprovalPage() {
         setHasNextPage(result.pagination.hasNext);
       } catch (error) {
         console.error('Failed to fetch pending recipes:', error);
-        showAlert('Error', 'Failed to load pending recipes. Please try again.');
+        showToast(
+          'error',
+          'Error loading recipes',
+          'Failed to load pending recipes. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchPendingRecipes();
-  }, []); // Only run once on mount
+  }, [showToast]); // Only run once on mount
 
   const loadMoreRecipes = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -95,7 +85,11 @@ export function AdminRecipeApprovalPage() {
       setHasNextPage(result.pagination.hasNext);
     } catch (error) {
       console.error('Failed to load more recipes:', error);
-      showAlert('Error', 'Failed to load more recipes. Please try again.');
+      showToast(
+        'error',
+        'Error loading more recipes',
+        'Failed to load more recipes. Please try again.'
+      );
     } finally {
       setIsFetchingNextPage(false);
     }
@@ -116,10 +110,10 @@ export function AdminRecipeApprovalPage() {
       }));
 
       setSelectedRecipe(null);
-      showAlert('Success', result.message || 'Recipe approved successfully!');
+      showToast('success', 'Recipe approved', result.message || 'Recipe approved successfully!');
     } catch (error) {
       console.error('Failed to approve recipe:', error);
-      showAlert('Error', 'Failed to approve recipe. Please try again.');
+      showToast('error', 'Approval failed', 'Failed to approve recipe. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -129,12 +123,12 @@ export function AdminRecipeApprovalPage() {
     const reasonToUse = reason || rejectionReason;
 
     if (!reasonToUse.trim()) {
-      showAlert('Error', 'Rejection reason is required');
+      showToast('error', 'Rejection reason required', 'Please provide a reason for rejection');
       return;
     }
 
     if (reasonToUse.trim().length < 10) {
-      showAlert('Error', 'Rejection reason must be at least 10 characters');
+      showToast('error', 'Reason too short', 'Rejection reason must be at least 10 characters');
       return;
     }
 
@@ -153,10 +147,10 @@ export function AdminRecipeApprovalPage() {
 
       setSelectedRecipe(null);
       setRejectionReason('');
-      showAlert('Success', result.message || 'Recipe rejected successfully');
+      showToast('success', 'Recipe rejected', result.message || 'Recipe rejected successfully');
     } catch (error) {
       console.error('Failed to reject recipe:', error);
-      showAlert('Error', 'Failed to reject recipe. Please try again.');
+      showToast('error', 'Rejection failed', 'Failed to reject recipe. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -561,14 +555,6 @@ export function AdminRecipeApprovalPage() {
           }}
         />
       )}
-
-      {/* Alert Dialog - Outside Layout */}
-      <AlertDialog
-        open={alertDialog.open}
-        onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}
-        title={alertDialog.title}
-        description={alertDialog.description}
-      />
     </>
   );
 }

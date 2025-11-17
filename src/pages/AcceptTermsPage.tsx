@@ -17,7 +17,6 @@ export function AcceptTermsPage() {
   // Redirect if user has already accepted terms
   useEffect(() => {
     if (user && user.termsAccepted) {
-      console.log('✅ User already accepted terms, redirecting to home');
       const intendedPath = (location.state as { from?: string })?.from || '/';
       navigate(intendedPath, { replace: true });
     }
@@ -33,8 +32,7 @@ export function AcceptTermsPage() {
     setError(null);
 
     try {
-      const message = await authService.acceptTerms();
-      console.log('✅ Terms accepted:', message);
+      await authService.acceptTerms();
 
       // Refresh user data to update termsAccepted field
       await refreshUser();
@@ -57,8 +55,7 @@ export function AcceptTermsPage() {
     setError(null);
 
     try {
-      const message = await authService.declineTerms();
-      console.log('✅ Terms declined:', message);
+      await authService.declineTerms();
 
       // Redirect to auth page (user is already logged out by declineTerms)
       navigate('/auth', { replace: true });

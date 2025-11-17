@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChefHat, User, LogOut, Menu, X } from 'lucide-react'; // Removed Bell icon
+import { ChefHat, User, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-// import { useToast } from '@/hooks/useToast'; // DISABLED: Notification sidebar disabled
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,7 +13,6 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  // const { toggleSidebar, unreadCount } = useToast(); // DISABLED: Notification sidebar disabled
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
@@ -44,7 +43,7 @@ export function Layout({ children }: LayoutProps) {
             </Link>
 
             {/* Main Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center space-x-8">
               <Link
                 to="/"
                 className={`text-sm font-medium transition-colors ${
@@ -93,26 +92,14 @@ export function Layout({ children }: LayoutProps) {
 
             {/* User Menu */}
             <div className="flex items-center space-x-4">
-              {/* DISABLED: Notification Bell - Waiting for backend
-              <button
-                onClick={toggleSidebar}
-                className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs font-semibold rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-              */}
+              {/* Notification Bell */}
+              <NotificationBell />
 
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="lg:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -136,7 +123,13 @@ export function Layout({ children }: LayoutProps) {
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                title="Logout"
+                className="hidden lg:block"
+              >
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -149,12 +142,12 @@ export function Layout({ children }: LayoutProps) {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-25 z-40 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-25 z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Menu */}
-          <div className="relative z-50 md:hidden bg-white border-b shadow-lg">
+          <div className="relative z-50 lg:hidden bg-white border-b shadow-lg">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
               <Link
                 to="/"
