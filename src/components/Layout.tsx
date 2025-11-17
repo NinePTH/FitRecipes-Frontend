@@ -39,7 +39,7 @@ export function Layout({ children }: LayoutProps) {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <ChefHat className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-bold text-gray-900">FitRecipes</span>
+              <span className="hidden md:block text-xl font-bold text-gray-900">FitRecipes</span>
             </Link>
 
             {/* Main Navigation */}
