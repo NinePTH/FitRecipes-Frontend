@@ -36,23 +36,26 @@ A modern, fully-featured React + TypeScript frontend for the Healthy Recipes Web
 
 ### 🔐 Authentication System (Fully Integrated)- **Authentication Page**: Combined login/register with validation
 
-- ✅ **Registration & Login** with email/password validation- **Recipe Browse Page**: Search, filters, infinite scroll (placeholder)
-
-- ✅ **Google OAuth 2.0** integration (Sign in with Google)- **Recipe Detail Page**: Full recipe view with rating and comments
-
-- ✅ **Email Verification** with resend functionality- **Recipe Submission Page**: Form for chefs to submit recipes
-
-- ✅ **Password Reset** via email (forgot password flow)- **Admin Approval Page**: Admin interface for recipe approval
-
+- ✅ **Registration & Login** with email/password validation
+- ✅ **Google OAuth 2.0** integration (Sign in with Google)
+- ✅ **Email Verification** with resend functionality
+- ✅ **Password Reset** via email (forgot password flow)
 - ✅ **JWT Token Management** with secure localStorage
+- ✅ **Role-Based Access Control** (Customer, Chef, Admin)
+- ✅ **Protected Routes** with authentication guards
+- ✅ **OAuth Terms Acceptance** workflow for Google users
+- ✅ **Session Persistence** across page reloads
 
-- ✅ **Role-Based Access Control** (Customer, Chef, Admin)### 🚧 Placeholder Features (Not Yet Implemented)
+### 🔍 Smart Search (Vector Search Integration)
+- ✅ **Natural Language Search** - Understand user intent and context
+- ✅ **Auto-Filter Extraction** - Automatically detect cuisine, dietary restrictions, prep time from queries
+- ✅ **Multiple Search Modes** - Smart, Vector, Ingredient, and Hybrid search
+- ✅ **Real-time Results** - Fast semantic search with execution time display
+- ✅ **Extracted Filters Display** - Show auto-detected filters as visual badges
+- ✅ **Graceful Fallback** - Falls back to traditional browse if API unavailable
+- ✅ **Error Handling** - User-friendly error messages and recovery options
 
-- ✅ **Protected Routes** with authentication guards- **UI Components**: Label, Select, Dialog, Dropdown Menu, Tabs, Accordion, Alert Dialog, Toast, Badge, Avatar, Popover, Tooltip, Sheet, Separator
-
-- ✅ **OAuth Terms Acceptance** workflow for Google users- **Features**: Notifications system, Save Recipe functionality, Reporting features
-
-- ✅ **Session Persistence** across page reloads- **Advanced UI**: Infinite scroll implementation, Image upload handling, Advanced filtering
+**Example**: "quick vegan thai dinner under 30 minutes" → Auto-detects cuisine, diet, and time filters!
 
 - **Form Components**: Checkbox, Radio Group, Switch, Slider, Date Picker
 
@@ -396,6 +399,10 @@ VITE_API_BASE_URL=https://fitrecipes-backend.onrender.com
 # Frontend URL (required for OAuth redirects)
 VITE_FRONTEND_URL=http://localhost:5173
 
+# Vector Search API Configuration (optional - for smart search features)
+VITE_SEARCH_API_BASE_URL=http://localhost:8000
+VITE_SEARCH_API_KEY=your_search_api_key
+
 # Firebase Configuration (required for push notifications)
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -412,6 +419,10 @@ VITE_DEBUG=false
 - Never commit `.env.local` or expose Firebase keys in source code
 - The build process automatically injects Firebase config into the service worker
 - Service worker in `public/` uses placeholders, actual config injected at build time
+
+**🔍 Search API Note:**
+- Search API configuration is optional - app gracefully falls back to traditional browse if not configured
+- See [SEARCH_FEATURE.md](./docs/SEARCH_FEATURE.md) for detailed search setup and usage
 
 ## 🚀 Deployment
 
@@ -432,6 +443,8 @@ Or connect your GitHub repository to Vercel for automatic deployments.
 **Important:** Set environment variables in Vercel dashboard:
 - `VITE_API_BASE_URL` → Your backend URL
 - `VITE_FRONTEND_URL` → Your frontend URL
+- `VITE_SEARCH_API_BASE_URL` → Search API URL (optional)
+- `VITE_SEARCH_API_KEY` → Search API key (optional)
 - `VITE_FIREBASE_API_KEY` → Firebase API key
 - `VITE_FIREBASE_AUTH_DOMAIN` → Firebase auth domain
 - `VITE_FIREBASE_PROJECT_ID` → Firebase project ID
@@ -482,7 +495,8 @@ npm run build
 ## 📚 Documentation
 
 - **[TESTING.md](./TESTING.md)** - Comprehensive testing guide and best practices
-- **[AUTHENTICATION.md](./AUTHENTICATION.md)** - Complete authentication system documentation
+- **[AUTHENTICATION.md](./docs/AUTHENTICATION.md)** - Complete authentication system documentation
+- **[SEARCH_FEATURE.md](./docs/SEARCH_FEATURE.md)** - Vector Search API integration and usage guide
 - **[CHANGELOG.md](./CHANGELOG.md)** - Project changes and technical decisions
 - **[e2e/README.md](./e2e/README.md)** - E2E testing guide
 - **[.github/copilot-instructions.md](./.github/copilot-instructions.md)** - AI assistant instructions

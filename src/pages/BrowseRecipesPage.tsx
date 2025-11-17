@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Star, TrendingUp, X, Sparkles, ChefHat, Plus } from 'lucide-react';
+import { Search, Filter, Clock, Star, TrendingUp, X, Plus, ChefHat, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
+import { useSmartSearch, useVectorSearch, useIngredientSearch, useHybridSearch } from '@/hooks/useSearch';
 import {
   Command,
   CommandEmpty,
@@ -12,7 +13,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Layout } from '@/components/Layout';
 import {
   browseRecipes,
@@ -30,12 +30,21 @@ export function BrowseRecipesPage() {
   const [trendingRecipes, setTrendingRecipes] = useState<Recipe[]>([]);
   const [newRecipes, setNewRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({});
   const [sortBy, setSortBy] = useState<SortOption>('rating');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Search suggestions state (placeholder - not implemented yet)
+  // Search integration with multiple methods
+  const smartSearchApi = useSmartSearch({ limit: 20, autoSearch: false, debounceMs: 500 });
+  const vectorSearchApi = useVectorSearch({ limit: 20 });
+  const ingredientSearchApi = useIngredientSearch({ limit: 20 });
+  const hybridSearchApi = useHybridSearch({ limit: 20 });
+  
+  const [searchMethod, setSearchMethod] = useState<'smart' | 'vector' | 'ingredient' | 'hybrid'>('smart');
+  const [searchMode, setSearchMode] = useState<'browse' | 'search'>('browse');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Search suggestions state (placeholder - backend not implemented yet)
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions] = useState<{
     ingredients: string[];
@@ -137,25 +146,86 @@ export function BrowseRecipesPage() {
     fetchSpecialSections();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    // TODO: Implement search when backend is ready
-    console.log('Search not implemented yet:', searchTerm);
+    
+    const query = searchQuery.trim();
+    
+    if (!query) {
+      // Empty search - switch back to browse mode
+      setSearchMode('browse');
+      setRecipes([]);
+      return;
+    }
+
+    // Execute search based on selected method
+    setSearchMode('search');
+    setRecipes([]); // Clear old results immediately
+    
+    try {
+      switch (searchMethod) {
+        case 'smart':
+          if (smartSearchApi.isAvailable) {
+            await smartSearchApi.search(query, filters);
+            setRecipes(smartSearchApi.results);
+          }
+          break;
+        case 'vector':
+          await vectorSearchApi.search(query, filters);
+          setRecipes(vectorSearchApi.results);
+          break;
+        case 'ingredient':
+          await ingredientSearchApi.search([query], 'any', filters);
+          setRecipes(ingredientSearchApi.results);
+          break;
+        case 'hybrid':
+          await hybridSearchApi.search(query, filters);
+          setRecipes(hybridSearchApi.results);
+          break;
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      // Fallback: Use regular browse with mainIngredient filter
+      setSearchMode('browse');
+      setFilters(prev => ({ ...prev, mainIngredient: query }));
+    }
   };
 
   const handleSearchInputChange = (value: string) => {
-    setSearchTerm(value);
+    setSearchQuery(value);
+    
+    // Clear search results if input is empty
+    if (!value.trim() && searchMode === 'search') {
+      setSearchMode('browse');
+    }
+    
     // TODO: Implement search suggestions when backend is ready
     setShowSuggestions(false);
   };
 
   const handleSuggestionSelect = (suggestion: string) => {
-    setSearchTerm(suggestion);
+    // Just set the query, don't use search API
+    setSearchQuery(suggestion);
     setShowSuggestions(false);
-    // TODO: Trigger search when backend is ready
-    console.log('Selected suggestion:', suggestion);
+    // User must still click Search button to search
   };
+
+  // Get current search API for loading/error states
+  const currentSearchApi = {
+    smart: smartSearchApi,
+    vector: vectorSearchApi,
+    ingredient: ingredientSearchApi,
+    hybrid: hybridSearchApi,
+  }[searchMethod];
+
+  // Update recipes when search results change
+  useEffect(() => {
+    if (searchMode === 'search' && currentSearchApi.results.length > 0) {
+      setRecipes(currentSearchApi.results);
+      setLoading(false);
+    }
+  }, [currentSearchApi.results, searchMode]);
 
   const loadMoreRecipes = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -253,7 +323,9 @@ export function BrowseRecipesPage() {
               </div>
               <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
             </div>
-            <span className="text-xs">by {recipe.author.firstName}</span>
+            <span className="text-xs">
+              by {'authorFirstName' in recipe ? (recipe as unknown as { authorFirstName: string }).authorFirstName : recipe.author?.firstName || 'Unknown'}
+            </span>
           </div>
 
           <div className="flex flex-wrap gap-1 mt-3">
@@ -309,25 +381,34 @@ export function BrowseRecipesPage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <form onSubmit={handleSearch} className="flex gap-4 mb-4">
-            <div className="flex-1 relative">
-              <Popover open={showSuggestions} onOpenChange={setShowSuggestions}>
-                <PopoverTrigger className="w-full">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
-                    <Input
-                      type="text"
-                      placeholder="Search by ingredients, recipe name, or cuisine..."
-                      value={searchTerm}
-                      onChange={e => handleSearchInputChange(e.target.value)}
-                      onFocus={() => searchTerm.trim().length > 0 && setShowSuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                      className="pl-10 w-full"
-                    />
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+          <form onSubmit={handleSearch} className="space-y-3 md:space-y-0">
+            {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+              {/* Search Input */}
+              <div className="flex-1 relative order-2 md:order-1">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
+                  <Input
+                    type="text"
+                    placeholder="Search by ingredients, recipe name, or cuisine..."
+                    value={searchQuery}
+                    onChange={e => handleSearchInputChange(e.target.value)}
+                    onFocus={() => searchQuery.trim().length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onKeyDown={e => {
+                      // Prevent Enter from submitting form
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="pl-10 w-full"
+                    disabled={currentSearchApi.loading}
+                  />
+                </div>
+              {/* Suggestion Dropdown (placeholder - backend not implemented yet) */}
+              {showSuggestions && (suggestions.ingredients.length > 0 || suggestions.cuisines.length > 0 || suggestions.recipes.length > 0) && (
+                <div className="absolute z-50 w-full mt-1 bg-white rounded-md border shadow-lg">
                   <Command>
                     <CommandList className="max-h-[300px]">
                       {suggestions.ingredients.length === 0 &&
@@ -393,14 +474,39 @@ export function BrowseRecipesPage() {
                       )}
                     </CommandList>
                   </Command>
-                </PopoverContent>
-              </Popover>
+                </div>
+              )}
+              </div>
+              
+              {/* Search Method Selector */}
+              <select
+                value={searchMethod}
+                onChange={e => setSearchMethod(e.target.value as 'smart' | 'vector' | 'ingredient' | 'hybrid')}
+                className="w-full md:w-auto px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm appearance-none bg-no-repeat bg-right order-1 md:order-2"
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em" }}
+              >
+                <option value="smart">Smart Search</option>
+                <option value="vector">Vector Search</option>
+                <option value="ingredient">Ingredient</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+              
+            {/* Search and Filter Buttons */}
+            <div className="flex gap-3 md:gap-4 order-3">
+                <Button type="submit" className="flex-1 md:flex-none" disabled={currentSearchApi.loading}>
+                  {currentSearchApi.loading ? 'Searching...' : 'Search'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex-1 md:flex-none"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </div>
             </div>
-            <Button type="submit">Search</Button>
-            <Button type="button" variant="outline" onClick={() => setShowFilters(!showFilters)}>
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
           </form>
 
           {/* Filter Panel */}
@@ -630,7 +736,7 @@ export function BrowseRecipesPage() {
               {(filters.mealType?.length ||
                 filters.dietType?.length ||
                 filters.difficulty?.length ||
-                searchTerm ||
+                searchQuery ||
                 filters.mainIngredient ||
                 filters.cuisineType ||
                 filters.maxPrepTime) && (
@@ -733,11 +839,11 @@ export function BrowseRecipesPage() {
                         </button>
                       </span>
                     )}
-                    {searchTerm && (
+                    {searchQuery && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        Search: "{searchTerm}"
+                        Search: "{searchQuery}"
                         <button
-                          onClick={() => setSearchTerm('')}
+                          onClick={() => setSearchQuery('')}
                           className="ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center hover:bg-purple-200"
                         >
                           <X className="h-3 w-3" />
@@ -756,7 +862,8 @@ export function BrowseRecipesPage() {
                           cuisineType: undefined,
                           maxPrepTime: undefined,
                         });
-                        setSearchTerm('');
+                        setSearchQuery('');
+                        setSearchMode('browse');
                       }}
                       className="text-sm text-red-600 hover:text-red-800 font-medium"
                     >
@@ -769,36 +876,101 @@ export function BrowseRecipesPage() {
           )}
 
           {/* Search Results Header */}
-          {searchTerm && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          {searchMode === 'search' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Search className="h-5 w-5 text-blue-600" />
+                  {currentSearchApi.loading ? (
+                    <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full" />
+                  ) : (
+                    <Search className="h-5 w-5 text-blue-600" />
+                  )}
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-900">
-                      Search Results for "{searchTerm}"
-                    </h3>
-                    <p className="text-sm text-blue-700">
-                      Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
-                      {recipes.length === 0 ? ' - try adjusting your search or filters' : ''}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-blue-900">
+                        {currentSearchApi.loading ? 'Searching...' : `Search Results for "${searchQuery}"`}
+                      </h3>
+                      {/* Execution time - commented for cleaner UI, uncomment for debugging */}
+                      {/* {currentSearchApi.executionTime && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                          {currentSearchApi.executionTime}ms
+                        </span>
+                      )} */}
+                    </div>
+                    {!currentSearchApi.loading && searchMode === 'search' && recipes.length >= 0 && (
+                      <>
+                        <p className="text-sm text-blue-700">
+                          Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
+                          {recipes.length === 0 ? ' - try adjusting your search or filters' : ''}
+                        </p>
+                        {smartSearchApi.extractedFilters && Object.keys(smartSearchApi.extractedFilters).length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-blue-600 font-medium">Auto-detected filters:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(smartSearchApi.extractedFilters).map(([key, value]) => (
+                                <span key={key} className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                                  {key}: {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSearchTerm('')}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-100"
+                {!currentSearchApi.loading && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchMode('browse');
+                      setRecipes([]);
+                      // Trigger refetch by resetting filters (maintains current filters)
+                      setFilters(prev => ({ ...prev }));
+                    }}
+                    className="text-blue-600 border-blue-200 hover:bg-blue-100"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Search Error Display */}
+          {currentSearchApi.error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-red-800">Search Error</h3>
+                  <p className="mt-1 text-sm text-red-700">{currentSearchApi.error}</p>
+                  <p className="mt-2 text-xs text-red-600">
+                    Falling back to traditional browse mode. You can still use filters.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSearchMode('browse');
+                  }}
+                  className="flex-shrink-0 text-red-600 hover:text-red-800"
                 >
-                  <X className="h-4 w-4 mr-1" />
-                  Clear Search
-                </Button>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
             </div>
           )}
 
           {/* Sort Options */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-6">
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-gray-700">Sort by:</span>
               <select
@@ -812,174 +984,233 @@ export function BrowseRecipesPage() {
                 <option value="prep-time-desc">Prep Time (High to Low)</option>
               </select>
             </div>
-            <span className="text-sm text-gray-500">
-              {searchTerm ? `${recipes.length} search results` : `${recipes.length} recipes found`}
-            </span>
+            {(searchMode === 'search' || filters.cuisineType || filters.difficulty?.length || filters.maxPrepTime || filters.mealType?.length || filters.dietType?.length || filters.mainIngredient) && (
+              <span className="text-sm text-gray-500">
+                {searchMode === 'search' ? `${recipes.length} search results` : `${recipes.length} recipes found`}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Recipe Sections */}
         <div className="space-y-12">
-          {/* Recommended Recipes */}
-          {recommendedRecipes.length > 0 && (
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-2">
-                  <Star className="h-6 w-6 text-primary-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
-                </div>
-                {recommendedRecipes.length >= 4 && (
-                  <Button variant="outline" onClick={() => navigate('/recipes/recommended')}>
-                    View All
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {recommendedRecipes.map(recipe => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Trending Recipes - Only show if there are recipes */}
-          {trendingRecipes.length > 0 && (
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-6 w-6 text-primary-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">Trending This Week</h2>
-                </div>
-                {trendingRecipes.length >= 4 && (
-                  <Button variant="outline" onClick={() => navigate('/recipes/trending')}>
-                    View All
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {trendingRecipes.map(recipe => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* New Recipes */}
-          {newRecipes.length > 0 && (
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-6 w-6 text-primary-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">Newly Added</h2>
-                </div>
-                {newRecipes.length >= 4 && (
-                  <Button variant="outline" onClick={() => navigate('/recipes/new')}>
-                    View All
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {newRecipes.map(recipe => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* All Recipes (with filters applied) */}
-          <section>
-            <div className="flex items-center space-x-2 mb-6">
-              <Search className="h-6 w-6 text-blue-600" />
-              <h2 className="text-2xl font-bold text-gray-900">All Recipes</h2>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                  <div key={i} className="animate-pulse">
-                    <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+          {/* Only show browse sections when NOT in search mode */}
+          {searchMode === 'browse' && (
+            <>
+              {/* Recommended Recipes */}
+              {recommendedRecipes.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-2">
+                      <Star className="h-6 w-6 text-primary-600" />
+                      <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : recipes.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="max-w-md mx-auto">
-                  <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
-
-                  {/* Check if any filters are active */}
-                  {filters.mealType?.length ||
-                  filters.dietType?.length ||
-                  filters.difficulty?.length ||
-                  searchTerm ||
-                  filters.mainIngredient ||
-                  filters.cuisineType ||
-                  filters.maxPrepTime ? (
-                    // Filters are active - show filter-related message
-                    <>
-                      <p className="text-gray-600 mb-6">
-                        Try adjusting your filters to see more results.
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setFilters({});
-                          setSearchTerm('');
-                        }}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Clear All Filters
+                    {recommendedRecipes.length >= 4 && (
+                      <Button variant="outline" onClick={() => navigate('/recipes/recommended')}>
+                        View All
                       </Button>
-                    </>
-                  ) : (
-                    // No filters active - show role-based message
-                    <>
-                      {user?.role === 'USER' ? (
-                        <p className="text-gray-600 mb-6">
-                          Please give chefs a time to post new recipes.
-                        </p>
-                      ) : (
-                        <>
-                          <p className="text-gray-600 mb-6">
-                            No recipes available yet. Be the first to add one!
-                          </p>
-                          <Button onClick={() => navigate('/submit-recipe')}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add New Recipe
-                          </Button>
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {recommendedRecipes.map(recipe => (
+                      <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Trending Recipes - Only show if there are recipes */}
+              {trendingRecipes.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-2">
+                      <TrendingUp className="h-6 w-6 text-primary-600" />
+                      <h2 className="text-2xl font-bold text-gray-900">Trending This Week</h2>
+                    </div>
+                    {trendingRecipes.length >= 4 && (
+                      <Button variant="outline" onClick={() => navigate('/recipes/trending')}>
+                        View All
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {trendingRecipes.map(recipe => (
+                      <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* New Recipes */}
+              {newRecipes.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="h-6 w-6 text-primary-600" />
+                      <h2 className="text-2xl font-bold text-gray-900">Newly Added</h2>
+                    </div>
+                    {newRecipes.length >= 4 && (
+                      <Button variant="outline" onClick={() => navigate('/recipes/new')}>
+                        View All
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {newRecipes.map(recipe => (
+                      <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+
+          {/* Search Results Section - No Pagination */}
+          {searchMode === 'search' && (
+            <section>
+              <div className="flex items-center space-x-2 mb-6">
+                <Search className="h-6 w-6 text-blue-600" />
+                <h2 className="text-2xl font-bold text-gray-900">Search Results</h2>
               </div>
-            ) : (
-              <>
+
+              {currentSearchApi.loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recipes.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="max-w-md mx-auto">
+                    <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
+                    <p className="text-gray-600 mb-6">
+                      No recipes match your search query. Try different keywords or clear the search.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSearchMode('browse');
+                        setRecipes([]);
+                        // Trigger refetch by resetting filters
+                        setFilters(prev => ({ ...prev }));
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Clear Search
+                    </Button>
+                  </div>
+                </div>
+              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {recipes.map(recipe => (
                     <RecipeCard key={recipe.id} recipe={recipe} />
                   ))}
                 </div>
+              )}
+            </section>
+          )}
 
-                {/* Load More Button */}
-                {hasNextPage && (
-                  <div className="flex justify-center mt-8">
-                    <Button
-                      onClick={loadMoreRecipes}
-                      disabled={isFetchingNextPage}
-                      className="px-8"
-                    >
-                      {isFetchingNextPage ? 'Loading...' : 'Load More Recipes'}
-                    </Button>
+          {/* All Recipes Section - With Pagination (Browse Mode Only) */}
+          {searchMode === 'browse' && (
+            <section>
+              <div className="flex items-center space-x-2 mb-6">
+                <Search className="h-6 w-6 text-primary-600" />
+                <h2 className="text-2xl font-bold text-gray-900">All Recipes</h2>
+              </div>
+
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-gray-300 aspect-video rounded-lg mb-4"></div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recipes.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="max-w-md mx-auto">
+                    <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
+
+                    {filters.mealType?.length ||
+                    filters.dietType?.length ||
+                    filters.difficulty?.length ||
+                    filters.mainIngredient ||
+                    filters.cuisineType ||
+                    filters.maxPrepTime ? (
+                      // Browse mode with filters - show filter-related message
+                      <>
+                        <p className="text-gray-600 mb-6">
+                          Try adjusting your filters to see more results.
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setFilters({});
+                          }}
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Clear All Filters
+                        </Button>
+                      </>
+                    ) : (
+                      // No filters or search active - show role-based message
+                      <>
+                        {user?.role === 'USER' ? (
+                          <p className="text-gray-600 mb-6">
+                            Please give chefs a time to post new recipes.
+                          </p>
+                        ) : (
+                          <>
+                            <p className="text-gray-600 mb-6">
+                              No recipes available yet. Be the first to add one!
+                            </p>
+                            <Button onClick={() => navigate('/submit-recipe')}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add New Recipe
+                            </Button>
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
-                )}
-              </>
-            )}
-          </section>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {recipes.map(recipe => (
+                      <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))}
+                  </div>
+
+                  {/* Load More Button - Only in Browse Mode */}
+                  {hasNextPage && (
+                    <div className="flex justify-center mt-8">
+                      <Button
+                        onClick={loadMoreRecipes}
+                        disabled={isFetchingNextPage}
+                        className="px-8"
+                      >
+                        {isFetchingNextPage ? 'Loading...' : 'Load More Recipes'}
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          )}
         </div>
       </div>
     </Layout>
