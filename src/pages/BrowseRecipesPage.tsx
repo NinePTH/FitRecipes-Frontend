@@ -5,7 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { useSmartSearch, useVectorSearch, useIngredientSearch, useHybridSearch } from '@/hooks/useSearch';
+import {
+  useSmartSearch,
+  useVectorSearch,
+  useIngredientSearch,
+  useHybridSearch,
+} from '@/hooks/useSearch';
 import {
   Command,
   CommandEmpty,
@@ -39,8 +44,10 @@ export function BrowseRecipesPage() {
   const vectorSearchApi = useVectorSearch({ limit: 20 });
   const ingredientSearchApi = useIngredientSearch({ limit: 20 });
   const hybridSearchApi = useHybridSearch({ limit: 20 });
-  
-  const [searchMethod, setSearchMethod] = useState<'smart' | 'vector' | 'ingredient' | 'hybrid'>('smart');
+
+  const [searchMethod, setSearchMethod] = useState<'smart' | 'vector' | 'ingredient' | 'hybrid'>(
+    'smart'
+  );
   const [searchMode, setSearchMode] = useState<'browse' | 'search'>('browse');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -149,9 +156,9 @@ export function BrowseRecipesPage() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    
+
     const query = searchQuery.trim();
-    
+
     if (!query) {
       // Empty search - switch back to browse mode
       setSearchMode('browse');
@@ -162,7 +169,7 @@ export function BrowseRecipesPage() {
     // Execute search based on selected method
     setSearchMode('search');
     setRecipes([]); // Clear old results immediately
-    
+
     try {
       switch (searchMethod) {
         case 'smart':
@@ -194,12 +201,12 @@ export function BrowseRecipesPage() {
 
   const handleSearchInputChange = (value: string) => {
     setSearchQuery(value);
-    
+
     // Clear search results if input is empty
     if (!value.trim() && searchMode === 'search') {
       setSearchMode('browse');
     }
-    
+
     // TODO: Implement search suggestions when backend is ready
     setShowSuggestions(false);
   };
@@ -324,7 +331,10 @@ export function BrowseRecipesPage() {
               <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
             </div>
             <span className="text-xs">
-              by {'authorFirstName' in recipe ? (recipe as unknown as { authorFirstName: string }).authorFirstName : recipe.author?.firstName || 'Unknown'}
+              by{' '}
+              {'authorFirstName' in recipe
+                ? (recipe as unknown as { authorFirstName: string }).authorFirstName
+                : recipe.author?.firstName || 'Unknown'}
             </span>
           </div>
 
@@ -406,99 +416,115 @@ export function BrowseRecipesPage() {
                     disabled={currentSearchApi.loading}
                   />
                 </div>
-              {/* Suggestion Dropdown (placeholder - backend not implemented yet) */}
-              {showSuggestions && (suggestions.ingredients.length > 0 || suggestions.cuisines.length > 0 || suggestions.recipes.length > 0) && (
-                <div className="absolute z-50 w-full mt-1 bg-white rounded-md border shadow-lg">
-                  <Command>
-                    <CommandList className="max-h-[300px]">
-                      {suggestions.ingredients.length === 0 &&
-                      suggestions.cuisines.length === 0 &&
-                      suggestions.recipes.length === 0 ? (
-                        <CommandEmpty>No suggestions found.</CommandEmpty>
-                      ) : (
-                        <>
-                          {suggestions.ingredients.length > 0 && (
-                            <CommandGroup>
-                              <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
-                                <Sparkles className="h-3 w-3 mr-1" />
-                                Ingredients
-                              </div>
-                              {suggestions.ingredients.map(ingredient => (
-                                <CommandItem
-                                  key={ingredient}
-                                  onSelect={() => handleSuggestionSelect(ingredient)}
-                                  className="cursor-pointer"
-                                >
-                                  <span className="text-green-600 font-medium">{ingredient}</span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          )}
+                {/* Suggestion Dropdown (placeholder - backend not implemented yet) */}
+                {showSuggestions &&
+                  (suggestions.ingredients.length > 0 ||
+                    suggestions.cuisines.length > 0 ||
+                    suggestions.recipes.length > 0) && (
+                    <div className="absolute z-50 w-full mt-1 bg-white rounded-md border shadow-lg">
+                      <Command>
+                        <CommandList className="max-h-[300px]">
+                          {suggestions.ingredients.length === 0 &&
+                          suggestions.cuisines.length === 0 &&
+                          suggestions.recipes.length === 0 ? (
+                            <CommandEmpty>No suggestions found.</CommandEmpty>
+                          ) : (
+                            <>
+                              {suggestions.ingredients.length > 0 && (
+                                <CommandGroup>
+                                  <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
+                                    <Sparkles className="h-3 w-3 mr-1" />
+                                    Ingredients
+                                  </div>
+                                  {suggestions.ingredients.map(ingredient => (
+                                    <CommandItem
+                                      key={ingredient}
+                                      onSelect={() => handleSuggestionSelect(ingredient)}
+                                      className="cursor-pointer"
+                                    >
+                                      <span className="text-green-600 font-medium">
+                                        {ingredient}
+                                      </span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
 
-                          {suggestions.cuisines.length > 0 && (
-                            <CommandGroup>
-                              <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
-                                <TrendingUp className="h-3 w-3 mr-1" />
-                                Cuisines
-                              </div>
-                              {suggestions.cuisines.map(cuisine => (
-                                <CommandItem
-                                  key={cuisine}
-                                  onSelect={() => handleSuggestionSelect(cuisine)}
-                                  className="cursor-pointer"
-                                >
-                                  <span className="text-blue-600 font-medium">{cuisine}</span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          )}
+                              {suggestions.cuisines.length > 0 && (
+                                <CommandGroup>
+                                  <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
+                                    <TrendingUp className="h-3 w-3 mr-1" />
+                                    Cuisines
+                                  </div>
+                                  {suggestions.cuisines.map(cuisine => (
+                                    <CommandItem
+                                      key={cuisine}
+                                      onSelect={() => handleSuggestionSelect(cuisine)}
+                                      className="cursor-pointer"
+                                    >
+                                      <span className="text-blue-600 font-medium">{cuisine}</span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
 
-                          {suggestions.recipes.length > 0 && (
-                            <CommandGroup>
-                              <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
-                                <ChefHat className="h-3 w-3 mr-1" />
-                                Recipes
-                              </div>
-                              {suggestions.recipes.map(recipe => (
-                                <CommandItem
-                                  key={recipe}
-                                  onSelect={() => handleSuggestionSelect(recipe)}
-                                  className="cursor-pointer"
-                                >
-                                  <span className="text-purple-600 font-medium">{recipe}</span>
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
+                              {suggestions.recipes.length > 0 && (
+                                <CommandGroup>
+                                  <div className="px-2 py-1.5 text-xs font-medium text-slate-500 flex items-center">
+                                    <ChefHat className="h-3 w-3 mr-1" />
+                                    Recipes
+                                  </div>
+                                  {suggestions.recipes.map(recipe => (
+                                    <CommandItem
+                                      key={recipe}
+                                      onSelect={() => handleSuggestionSelect(recipe)}
+                                      className="cursor-pointer"
+                                    >
+                                      <span className="text-purple-600 font-medium">{recipe}</span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
+                            </>
                           )}
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </div>
-              )}
+                        </CommandList>
+                      </Command>
+                    </div>
+                  )}
               </div>
-              
+
               {/* Search Method Selector */}
               <select
                 value={searchMethod}
-                onChange={e => setSearchMethod(e.target.value as 'smart' | 'vector' | 'ingredient' | 'hybrid')}
+                onChange={e =>
+                  setSearchMethod(e.target.value as 'smart' | 'vector' | 'ingredient' | 'hybrid')
+                }
                 className="w-full md:w-auto px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm appearance-none bg-no-repeat bg-right order-1 md:order-2"
-                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em" }}
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundSize: '1.5em 1.5em',
+                }}
               >
                 <option value="smart">Smart Search</option>
                 <option value="vector">Vector Search</option>
                 <option value="ingredient">Ingredient</option>
                 <option value="hybrid">Hybrid</option>
               </select>
-              
-            {/* Search and Filter Buttons */}
-            <div className="flex gap-3 md:gap-4 order-3">
-                <Button type="submit" className="flex-1 md:flex-none" disabled={currentSearchApi.loading}>
+
+              {/* Search and Filter Buttons */}
+              <div className="flex gap-3 md:gap-4 order-3">
+                <Button
+                  type="submit"
+                  className="flex-1 md:flex-none"
+                  disabled={currentSearchApi.loading}
+                >
                   {currentSearchApi.loading ? 'Searching...' : 'Search'}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex-1 md:flex-none"
                 >
@@ -888,7 +914,9 @@ export function BrowseRecipesPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-semibold text-blue-900">
-                        {currentSearchApi.loading ? 'Searching...' : `Search Results for "${searchQuery}"`}
+                        {currentSearchApi.loading
+                          ? 'Searching...'
+                          : `Search Results for "${searchQuery}"`}
                       </h3>
                       {/* Execution time - commented for cleaner UI, uncomment for debugging */}
                       {/* {currentSearchApi.executionTime && (
@@ -897,26 +925,39 @@ export function BrowseRecipesPage() {
                         </span>
                       )} */}
                     </div>
-                    {!currentSearchApi.loading && searchMode === 'search' && recipes.length >= 0 && (
-                      <>
-                        <p className="text-sm text-blue-700">
-                          Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
-                          {recipes.length === 0 ? ' - try adjusting your search or filters' : ''}
-                        </p>
-                        {smartSearchApi.extractedFilters && Object.keys(smartSearchApi.extractedFilters).length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-xs text-blue-600 font-medium">Auto-detected filters:</p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {Object.entries(smartSearchApi.extractedFilters).map(([key, value]) => (
-                                <span key={key} className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
-                                  {key}: {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
+                    {!currentSearchApi.loading &&
+                      searchMode === 'search' &&
+                      recipes.length >= 0 && (
+                        <>
+                          <p className="text-sm text-blue-700">
+                            Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
+                            {recipes.length === 0 ? ' - try adjusting your search or filters' : ''}
+                          </p>
+                          {smartSearchApi.extractedFilters &&
+                            Object.keys(smartSearchApi.extractedFilters).length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs text-blue-600 font-medium">
+                                  Auto-detected filters:
+                                </p>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {Object.entries(smartSearchApi.extractedFilters).map(
+                                    ([key, value]) => (
+                                      <span
+                                        key={key}
+                                        className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800"
+                                      >
+                                        {key}:{' '}
+                                        {typeof value === 'object'
+                                          ? JSON.stringify(value)
+                                          : String(value)}
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                        </>
+                      )}
                   </div>
                 </div>
                 {!currentSearchApi.loading && (
@@ -946,7 +987,11 @@ export function BrowseRecipesPage() {
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="flex-1">
@@ -984,9 +1029,17 @@ export function BrowseRecipesPage() {
                 <option value="prep-time-desc">Prep Time (High to Low)</option>
               </select>
             </div>
-            {(searchMode === 'search' || filters.cuisineType || filters.difficulty?.length || filters.maxPrepTime || filters.mealType?.length || filters.dietType?.length || filters.mainIngredient) && (
+            {(searchMode === 'search' ||
+              filters.cuisineType ||
+              filters.difficulty?.length ||
+              filters.maxPrepTime ||
+              filters.mealType?.length ||
+              filters.dietType?.length ||
+              filters.mainIngredient) && (
               <span className="text-sm text-gray-500">
-                {searchMode === 'search' ? `${recipes.length} search results` : `${recipes.length} recipes found`}
+                {searchMode === 'search'
+                  ? `${recipes.length} search results`
+                  : `${recipes.length} recipes found`}
               </span>
             )}
           </div>
@@ -1091,7 +1144,8 @@ export function BrowseRecipesPage() {
                     <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">No recipes found</h3>
                     <p className="text-gray-600 mb-6">
-                      No recipes match your search query. Try different keywords or clear the search.
+                      No recipes match your search query. Try different keywords or clear the
+                      search.
                     </p>
                     <Button
                       variant="outline"

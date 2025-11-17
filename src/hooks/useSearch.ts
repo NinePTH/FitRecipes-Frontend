@@ -68,7 +68,8 @@ export function useSmartSearch(options: UseSearchOptions = {}) {
         setState(prev => ({
           ...prev,
           loading: false,
-          error: 'Search API not configured. Please set VITE_SEARCH_API_BASE_URL and VITE_SEARCH_API_KEY',
+          error:
+            'Search API not configured. Please set VITE_SEARCH_API_BASE_URL and VITE_SEARCH_API_KEY',
         }));
         return;
       }

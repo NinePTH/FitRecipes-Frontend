@@ -84,16 +84,14 @@ export interface HybridSearchResponse {
 /**
  * Smart Search - Automatically extracts filters from natural language queries
  * This is the recommended search method for user queries
- * 
+ *
  * @example
  * smartSearch('quick vegan thai dinner under 30 minutes')
  * // Auto-extracts: cuisineType=Thai, maxPrepTime=30, dietaryInfo.isVegan=true
  */
-export async function smartSearch(
-  request: SmartSearchRequest
-): Promise<SmartSearchResponse> {
+export async function smartSearch(request: SmartSearchRequest): Promise<SmartSearchResponse> {
   const searchApiUrl = import.meta.env.VITE_SEARCH_API_BASE_URL;
-  
+
   if (!searchApiUrl) {
     throw new Error('Search API URL not configured. Please set VITE_SEARCH_API_BASE_URL in .env');
   }
@@ -117,15 +115,13 @@ export async function smartSearch(
 
 /**
  * Vector Search - Semantic search using vector similarity
- * 
+ *
  * @example
  * vectorSearch({ query: 'spicy thai chicken curry', limit: 10 })
  */
-export async function vectorSearch(
-  request: VectorSearchRequest
-): Promise<VectorSearchResponse> {
+export async function vectorSearch(request: VectorSearchRequest): Promise<VectorSearchResponse> {
   const searchApiUrl = import.meta.env.VITE_SEARCH_API_BASE_URL;
-  
+
   if (!searchApiUrl) {
     throw new Error('Search API URL not configured');
   }
@@ -149,7 +145,7 @@ export async function vectorSearch(
 
 /**
  * Ingredient Search - Find recipes by specific ingredients
- * 
+ *
  * @example
  * ingredientSearch({ ingredients: ['chicken', 'garlic'], match_mode: 'any' })
  */
@@ -157,7 +153,7 @@ export async function ingredientSearch(
   request: IngredientSearchRequest
 ): Promise<IngredientSearchResponse> {
   const searchApiUrl = import.meta.env.VITE_SEARCH_API_BASE_URL;
-  
+
   if (!searchApiUrl) {
     throw new Error('Search API URL not configured');
   }
@@ -181,15 +177,13 @@ export async function ingredientSearch(
 
 /**
  * Hybrid Search - Combines keyword search and vector similarity
- * 
+ *
  * @example
  * hybridSearch({ query: 'authentic italian pasta carbonara', limit: 10 })
  */
-export async function hybridSearch(
-  request: HybridSearchRequest
-): Promise<HybridSearchResponse> {
+export async function hybridSearch(request: HybridSearchRequest): Promise<HybridSearchResponse> {
   const searchApiUrl = import.meta.env.VITE_SEARCH_API_BASE_URL;
-  
+
   if (!searchApiUrl) {
     throw new Error('Search API URL not configured');
   }
