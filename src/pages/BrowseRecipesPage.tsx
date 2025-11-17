@@ -169,6 +169,8 @@ export function BrowseRecipesPage() {
     // Execute search based on selected method
     setSearchMode('search');
     setRecipes([]); // Clear old results immediately
+    setFilters({}); // Clear filters - search API doesn't support filtering
+    setShowFilters(false)
 
     try {
       switch (searchMethod) {
@@ -205,6 +207,8 @@ export function BrowseRecipesPage() {
     // Clear search results if input is empty
     if (!value.trim() && searchMode === 'search') {
       setSearchMode('browse');
+      // Refetch browse recipes
+      setFilters(prev => ({ ...prev }));
     }
 
     // TODO: Implement search suggestions when backend is ready
@@ -216,6 +220,18 @@ export function BrowseRecipesPage() {
     setSearchQuery(suggestion);
     setShowSuggestions(false);
     // User must still click Search button to search
+  };
+
+  // Check if any filters are applied (excluding sortBy which is always set)
+  const hasAnyFilters = () => {
+    return (
+      (filters.mealType && filters.mealType.length > 0) ||
+      (filters.difficulty && filters.difficulty.length > 0) ||
+      (filters.dietType && filters.dietType.length > 0) ||
+      !!filters.cuisineType ||
+      !!filters.mainIngredient ||
+      !!filters.maxPrepTime
+    );
   };
 
   // Get current search API for loading/error states
@@ -406,12 +422,6 @@ export function BrowseRecipesPage() {
                     onChange={e => handleSearchInputChange(e.target.value)}
                     onFocus={() => searchQuery.trim().length > 0 && setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    onKeyDown={e => {
-                      // Prevent Enter from submitting form
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                      }
-                    }}
                     className="pl-10 w-full"
                     disabled={currentSearchApi.loading}
                   />
@@ -527,6 +537,8 @@ export function BrowseRecipesPage() {
                   variant="outline"
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex-1 md:flex-none"
+                  disabled={searchMode === 'search'}
+                  title={searchMode === 'search' ? 'Filters not available in search mode' : ''}
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
@@ -534,6 +546,18 @@ export function BrowseRecipesPage() {
               </div>
             </div>
           </form>
+
+          {/* Search Mode Info Message */}
+          {searchMode === 'search' && (
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+              <p className="flex items-center">
+                <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                Filters and sorting are currently not available in search mode. Filter search will be available in future updates.
+              </p>
+            </div>
+          )}
 
           {/* Filter Panel */}
           {showFilters && (
@@ -1021,7 +1045,9 @@ export function BrowseRecipesPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as SortOption)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={searchMode === 'search'}
+                title={searchMode === 'search' ? 'Sorting not available in search mode' : ''}
               >
                 <option value="rating">Highest Rating</option>
                 <option value="recent">Most Recent</option>
@@ -1029,17 +1055,14 @@ export function BrowseRecipesPage() {
                 <option value="prep-time-desc">Prep Time (High to Low)</option>
               </select>
             </div>
-            {(searchMode === 'search' ||
-              filters.cuisineType ||
+            {searchMode === 'browse' && (filters.cuisineType ||
               filters.difficulty?.length ||
               filters.maxPrepTime ||
               filters.mealType?.length ||
               filters.dietType?.length ||
               filters.mainIngredient) && (
               <span className="text-sm text-gray-500">
-                {searchMode === 'search'
-                  ? `${recipes.length} search results`
-                  : `${recipes.length} recipes found`}
+                {`${recipes.length} recipes found`}
               </span>
             )}
           </div>
@@ -1048,7 +1071,7 @@ export function BrowseRecipesPage() {
         {/* Recipe Sections */}
         <div className="space-y-12">
           {/* Only show browse sections when NOT in search mode */}
-          {searchMode === 'browse' && (
+          {searchMode === 'browse' && !hasAnyFilters() && (
             <>
               {/* Recommended Recipes */}
               {recommendedRecipes.length > 0 && (
