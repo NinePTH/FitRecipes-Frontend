@@ -1,14 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page, Response } from '@playwright/test';
 
 const email = process.env.TEST_EMAIL!;
 const password = process.env.TEST_PASSWORD!;
 
-async function loginAndWait(page: any, baseURL: string, email: string, password: string) {
+async function loginAndWait(page: Page, baseURL: string, email: string, password: string) {
   await page.goto(baseURL + 'auth');
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   const [resp] = await Promise.all([
-    page.waitForResponse((r: any) => r.url().includes('/auth/login'), { timeout: 15000 }),
+    page.waitForResponse((r: Response) => r.url().includes('/auth/login'), { timeout: 15000 }),
     page.click('button[type="submit"]'),
   ]);
   if (!resp.ok()) {

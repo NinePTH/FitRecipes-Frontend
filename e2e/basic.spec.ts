@@ -311,97 +311,6 @@ test.describe('FitRecipes - Submit New Recipe', () => {
     await login(page);
   });
 
-  interface PickResult {
-    fill: (value: string) => Promise<void>;
-    count: () => Promise<number>;
-  }
-
-  async function pick(page: Page, a: string, b: string): Promise<PickResult> {
-    const A = page.locator(a).first();
-    if (await A.count()) return A;
-    const B = page.locator(b).first();
-    if (await B.count()) return B;
-    throw new Error(`No field for ${a} | ${b}`);
-  }
-
-  // Remplit tous les champs vides plausibles dans le <form>
-  interface FormElement {
-    fill: (value: string) => Promise<void>;
-    inputValue: () => Promise<string>;
-    count: () => Promise<number>;
-    nth: (index: number) => FormElement;
-  }
-
-  interface SelectElement extends FormElement {
-    selectOption: (options: { index: number }) => Promise<void>;
-  }
-
-  interface CheckableElement extends FormElement {
-    isChecked: () => Promise<boolean>;
-    check: () => Promise<void>;
-  }
-
-  async function fillAllEmptyFields(page: Page): Promise<void> {
-    const form = page.locator('form').first();
-
-    // textes
-    const textInputs = form.locator('input[type="text"]:not([name="email"]):not([name="password"])');
-    for (let i = 0, n = await textInputs.count(); i < n; i++) {
-      const el = textInputs.nth(i);
-      const value: string = await el.inputValue().catch(() => '');
-      if (!value) await el.fill('E2E');
-    }
-
-    // numbers
-    const numberInputs = form.locator('input[type="number"]');
-    for (let i = 0, n = await numberInputs.count(); i < n; i++) {
-      const el = numberInputs.nth(i);
-      const value: string = await el.inputValue().catch(() => '');
-      if (!value) await el.fill('1');
-    }
-
-    // url
-    const urlInputs = form.locator('input[type="url"], input[placeholder*="http" i]');
-    for (let i = 0, n = await urlInputs.count(); i < n; i++) {
-      const el = urlInputs.nth(i);
-      const value: string = await el.inputValue().catch(() => '');
-      if (!value) await el.fill('https://example.com/e2e.jpg');
-    }
-
-    // textareas
-    const textareas = form.locator('textarea');
-    for (let i = 0, n = await textareas.count(); i < n; i++) {
-      const el = textareas.nth(i);
-      const value: string = await el.inputValue().catch(() => '');
-      if (!value) await el.fill('E2E content');
-    }
-
-    // selects
-    const selects = form.locator('select');
-    for (let i = 0, n = await selects.count(); i < n; i++) {
-      const sel = selects.nth(i);
-      await sel.selectOption({ index: 1 }).catch(() => {});
-    }
-
-    // au moins une checkbox/radio
-    const checkbox = form.locator('input[type="checkbox"]');
-    if (await checkbox.count()) {
-      for (let i = 0, n = await checkbox.count(); i < n; i++) {
-        const el = checkbox.nth(i);
-        const checked: boolean = await el.isChecked().catch(() => false);
-        if (!checked) { await el.check().catch(() => {}); break; }
-      }
-    }
-    const radios = form.locator('input[type="radio"]');
-    if (await radios.count()) {
-      for (let i = 0, n = await radios.count(); i < n; i++) {
-        const el = radios.nth(i);
-        const checked: boolean = await el.isChecked().catch(() => false);
-        if (!checked) { await el.check().catch(() => {}); break; }
-      }
-    }
-  }
-
   test('create a new recipe successfully', async ({ page }) => {
     test.slow();
   
@@ -424,22 +333,23 @@ test.describe('FitRecipes - Submit New Recipe', () => {
       // Mock XHR
       const origOpen = XMLHttpRequest.prototype.open;
       const origSend = XMLHttpRequest.prototype.send;
-      XMLHttpRequest.prototype.open = function(method: string, url: string) {
-        (this as any).__e2e = { method: String(method).toUpperCase(), url: String(url).toLowerCase() };
-        return origOpen.apply(this, arguments as any);
+      XMLHttpRequest.prototype.open = function(this: XMLHttpRequest, method: string, url: string) {
+        (this as unknown as Record<string, unknown>).__e2e = { method: String(method).toUpperCase(), url: String(url).toLowerCase() };
+        // eslint-disable-next-line prefer-rest-params
+        return origOpen.apply(this, arguments as unknown as Parameters<typeof origOpen>);
       };
-      XMLHttpRequest.prototype.send = function() {
-        const meta = (this as any).__e2e || {};
+      XMLHttpRequest.prototype.send = function(this: XMLHttpRequest, body?: Document | XMLHttpRequestBodyInit | null) {
+        const meta = (this as unknown as Record<string, unknown>).__e2e as { method: string; url: string } || {};
         if (meta.method === 'POST' && meta.url.includes('recipe')) {
           // Réponse 201 immédiate
           Object.defineProperty(this, 'readyState', { value: 4 });
           Object.defineProperty(this, 'status', { value: 201 });
           Object.defineProperty(this, 'responseText', { value: JSON.stringify({ ok: true, id: 'e2e-mocked-id' }) });
-          this.onreadystatechange && this.onreadystatechange(new Event(''));
-          this.onload && this.onload(new ProgressEvent('load'));
+          if (this.onreadystatechange) { this.onreadystatechange(new Event('')); }
+          if (this.onload) { this.onload(new ProgressEvent('load')); }
           return;
         }
-        return origSend.apply(this, arguments as any);
+        return origSend.call(this, body);
       };
     });
   
@@ -448,17 +358,17 @@ test.describe('FitRecipes - Submit New Recipe', () => {
     await expect(page.locator('form').first()).toBeVisible();
   
     // --- remplissage classique + valeurs sûres ---
-    const pick = async (p: any, a: string, b: string) => {
+    const pickField = async (p: Page, a: string, b: string) => {
       const A = p.locator(a).first(); if (await A.count()) return A;
       const B = p.locator(b).first(); if (await B.count()) return B;
       throw new Error(`No field for ${a} | ${b}`);
     };
   
     const unique = `Test E2E Pasta ${Date.now()}`;
-    const title = await pick(page, 'input[name="title"], #title, [placeholder*="title" i]', 'form input[type="text"]');
+    const title = await pickField(page, 'input[name="title"], #title, [placeholder*="title" i]', 'form input[type="text"]');
     await title.fill(unique);
   
-    const description = await pick(page, 'textarea[name="description"], #description, [placeholder*="description" i]', 'form textarea');
+    const description = await pickField(page, 'textarea[name="description"], #description, [placeholder*="description" i]', 'form textarea');
     await description.fill('Playwright test recipe to validate creation flow.');
   
     const ingredients = page.locator('textarea[name="ingredients"], #ingredients, [placeholder*="ingredient" i], input[name^="ingredients"]').first();
