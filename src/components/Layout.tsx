@@ -4,6 +4,7 @@ import { ChefHat, User, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/components/NotificationBell';
+import { SavedRecipesIcon } from '@/components/SavedRecipesIcon';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -94,6 +95,9 @@ export function Layout({ children }: LayoutProps) {
             <div className="flex items-center space-x-4">
               {/* Notification Bell */}
               <NotificationBell />
+
+              {/* Saved Recipes */}
+              <SavedRecipesIcon />
 
               {/* Mobile Menu Button */}
               <Button

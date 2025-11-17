@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Star, TrendingUp, X, Plus, ChefHat, Sparkles } from 'lucide-react';
+import { Search, Filter, Clock, Star, TrendingUp, X, Plus, ChefHat, Sparkles, Bookmark } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
+import { useSavedRecipes } from '@/hooks/useSavedRecipes';
 import {
   useSmartSearch,
   useVectorSearch,
@@ -309,91 +310,115 @@ export function BrowseRecipesPage() {
     }
   };
 
-  const RecipeCard = ({ recipe }: { recipe: Recipe }) => (
-    <Link to={`/recipe/${recipe.id}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer">
-        <div className="aspect-video relative bg-gray-200">
-          {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
-          recipe.imageUrl ||
-          (recipe.images && recipe.images.length > 0) ? (
-            <img
-              src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
-              alt={recipe.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={e => {
-                e.currentTarget.style.display = 'none';
+  const RecipeCard = ({ recipe }: { recipe: Recipe }) => {
+    const { isSaved, toggleSaveRecipe } = useSavedRecipes();
+    const saved = isSaved(recipe.id);
+
+    return (
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 relative group">
+        <Link to={`/recipe/${recipe.id}`} className="block">
+          <div className="aspect-video relative bg-gray-200">
+            {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
+            recipe.imageUrl ||
+            (recipe.images && recipe.images.length > 0) ? (
+              <img
+                src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
+                alt={recipe.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={e => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                <ChefHat className="h-12 w-12" />
+              </div>
+            )}
+          <div className="absolute top-2 right-2 flex items-center gap-2">
+            <button
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSaveRecipe(recipe);
               }}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-              <ChefHat className="h-12 w-12" />
+              className={`p-1.5 rounded-full transition-all duration-200 ${
+                saved
+                  ? 'bg-primary-600 text-white hover:bg-primary-700'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+              aria-label={saved ? 'Remove from saved' : 'Save recipe'}
+              title={saved ? 'Remove from saved' : 'Save recipe'}
+            >
+              <Bookmark className={`h-3 w-3 ${saved ? 'fill-current' : ''}`} />
+            </button>
+            <div className="bg-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+              <Star className="h-3 w-3 text-yellow-400 fill-current" />
+              <span>{recipe.averageRating}</span>
             </div>
-          )}
-          <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
-            <Star className="h-3 w-3 text-yellow-400 fill-current" />
-            <span>{recipe.averageRating}</span>
           </div>
         </div>
-        <CardContent className="p-4">
-          <h3 className="font-semibold text-lg mb-2 line-clamp-1">{recipe.title}</h3>
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
+      </Link>
 
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
-                <span>{recipe.prepTime + (recipe.cookingTime ?? 0)}m</span>
+      <CardContent className="p-4">
+        <h3 className="font-semibold text-lg mb-2 line-clamp-1">{recipe.title}</h3>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
+
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{recipe.prepTime + (recipe.cookingTime ?? 0)}m</span>
+                </div>
+                <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
               </div>
-              <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
+              <span className="text-xs">
+                by{' '}
+                {'authorFirstName' in recipe
+                  ? (recipe as unknown as { authorFirstName: string }).authorFirstName
+                  : recipe.author?.firstName || 'Unknown'}
+              </span>
             </div>
-            <span className="text-xs">
-              by{' '}
-              {'authorFirstName' in recipe
-                ? (recipe as unknown as { authorFirstName: string }).authorFirstName
-                : recipe.author?.firstName || 'Unknown'}
-            </span>
-          </div>
 
-          <div className="flex flex-wrap gap-1 mt-3">
-            {recipe.dietaryInfo && (
-              <>
-                {recipe.dietaryInfo.isVegan && (
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                    Vegan
-                  </span>
-                )}
-                {recipe.dietaryInfo.isVegetarian && (
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                    Vegetarian
-                  </span>
-                )}
-                {recipe.dietaryInfo.isGlutenFree && (
-                  <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
-                    Gluten-Free
-                  </span>
-                )}
-                {recipe.dietaryInfo.isDairyFree && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                    Dairy-Free
-                  </span>
-                )}
-                {recipe.dietaryInfo.isKeto && (
-                  <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                    Keto
-                  </span>
-                )}
-                {recipe.dietaryInfo.isPaleo && (
-                  <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                    Paleo
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
+            <div className="flex flex-wrap gap-1 mt-3">
+              {recipe.dietaryInfo && (
+                <>
+                  {recipe.dietaryInfo.isVegan && (
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      Vegan
+                    </span>
+                  )}
+                  {recipe.dietaryInfo.isVegetarian && (
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      Vegetarian
+                    </span>
+                  )}
+                  {recipe.dietaryInfo.isGlutenFree && (
+                    <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
+                      Gluten-Free
+                    </span>
+                  )}
+                  {recipe.dietaryInfo.isDairyFree && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                      Dairy-Free
+                    </span>
+                  )}
+                  {recipe.dietaryInfo.isKeto && (
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                      Keto
+                    </span>
+                  )}
+                  {recipe.dietaryInfo.isPaleo && (
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                      Paleo
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+      </CardContent>
+    </Card>
+    );
+  };
 
   return (
     <Layout>

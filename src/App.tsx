@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, ToastProvider } from '@/contexts';
+import { SavedRecipesProvider } from '@/hooks/useSavedRecipes';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PushNotificationPrompt } from '@/components/PushNotificationPrompt';
 import { useFcmListener } from '@/hooks/useFcmListener';
@@ -190,9 +191,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
+          <SavedRecipesProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </SavedRecipesProvider>
         </AuthProvider>
       </Router>
     </QueryClientProvider>

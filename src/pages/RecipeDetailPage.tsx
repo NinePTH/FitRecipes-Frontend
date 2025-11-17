@@ -4,7 +4,7 @@ import {
   Clock,
   Users,
   Star,
-  // Heart, // DISABLED: Save feature not yet implemented
+  Bookmark,
   Share2,
   MessageCircle,
   ChevronLeft,
@@ -20,6 +20,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { useSavedRecipes } from '@/hooks/useSavedRecipes';
 import {
   getRecipeById,
   submitRating,
@@ -53,6 +54,7 @@ export function RecipeDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const toast = useToast();
+  const { isSaved, toggleSaveRecipe } = useSavedRecipes();
 
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -495,12 +497,15 @@ export function RecipeDetailPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              {/* DISABLED: Save button - waiting for backend
-              <Button variant="outline" size="sm" onClick={handleSaveRecipe}>
-                <Heart className="h-4 w-4 mr-1" />
-                Save
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => recipe && toggleSaveRecipe(recipe)}
+                className={isSaved(recipe?.id || '') ? 'bg-primary-50 border-primary-300' : ''}
+              >
+                <Bookmark className={`h-4 w-4 mr-1 ${isSaved(recipe?.id || '') ? 'fill-current text-primary-600' : ''}`} />
+                {isSaved(recipe?.id || '') ? 'Saved' : 'Save'}
               </Button>
-              */}
               <Button variant="outline" size="sm" onClick={handleShareRecipe}>
                 <Share2 className="h-4 w-4 mr-1" />
                 Share
