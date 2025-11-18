@@ -1,6 +1,6 @@
 import { useNotifications } from '@/hooks/useNotifications';
 import { NotificationItem } from './NotificationItem';
-import { Loader2, Settings, X } from 'lucide-react';
+import { Loader2, Settings, X, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -76,6 +76,7 @@ export function NotificationDropdown({ onClose, isMobile = false }: Props) {
             </div>
           ) : displayNotifications.length === 0 ? (
             <div className="text-center p-8 text-gray-500">
+              <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium">No notifications</p>
               <p className="text-sm mt-1">You're all caught up!</p>
             </div>
@@ -170,6 +171,7 @@ export function NotificationDropdown({ onClose, isMobile = false }: Props) {
             </div>
           ) : displayNotifications.length === 0 ? (
             <div className="text-center p-12 text-gray-500">
+              <Bell className="h-16 w-16 mx-auto mb-4 text-gray-300" />
               <p className="font-medium text-lg">No notifications</p>
               <p className="text-sm mt-2">You're all caught up!</p>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Clock, Star, TrendingUp, X, Plus, ChefHat, Sparkles, Bookmark } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -315,29 +315,30 @@ export function BrowseRecipesPage() {
     const saved = isSaved(recipe.id);
 
     return (
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 relative group">
-        <Link to={`/recipe/${recipe.id}`} className="block">
-          <div className="aspect-video relative bg-gray-200">
-            {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
-            recipe.imageUrl ||
-            (recipe.images && recipe.images.length > 0) ? (
-              <img
-                src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
-                alt={recipe.title}
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={e => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                <ChefHat className="h-12 w-12" />
-              </div>
-            )}
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-shadow duration-200 relative group cursor-pointer"
+        onClick={() => navigate(`/recipe/${recipe.id}`)}
+      >
+        <div className="aspect-video relative bg-gray-200">
+          {(recipe.imageUrls && recipe.imageUrls.length > 0) ||
+          recipe.imageUrl ||
+          (recipe.images && recipe.images.length > 0) ? (
+            <img
+              src={recipe.imageUrls?.[0] || recipe.imageUrl || recipe.images?.[0] || ''}
+              alt={recipe.title}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={e => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+              <ChefHat className="h-12 w-12" />
+            </div>
+          )}
           <div className="absolute top-2 right-2 flex items-center gap-2">
             <button
               onClick={e => {
-                e.preventDefault();
                 e.stopPropagation();
                 toggleSaveRecipe(recipe);
               }}
@@ -357,11 +358,10 @@ export function BrowseRecipesPage() {
             </div>
           </div>
         </div>
-      </Link>
 
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-2 line-clamp-1">{recipe.title}</h3>
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-lg mb-2 line-clamp-1">{recipe.title}</h3>
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
 
             <div className="flex items-center justify-between text-sm text-gray-500">
               <div className="flex items-center space-x-4">
@@ -415,8 +415,8 @@ export function BrowseRecipesPage() {
                 </>
               )}
             </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
     );
   };
 
