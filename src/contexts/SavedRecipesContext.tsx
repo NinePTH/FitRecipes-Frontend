@@ -14,11 +14,11 @@ const mockSavedRecipes: Partial<Recipe>[] = [
     averageRating: 4.8,
     imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
     imageUrls: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'],
-    author: { 
-      id: 'chef1', 
-      firstName: 'Sarah', 
-      lastName: 'Chen', 
-      email: 'sarah@example.com', 
+    author: {
+      id: 'chef1',
+      firstName: 'Sarah',
+      lastName: 'Chen',
+      email: 'sarah@example.com',
       role: 'CHEF',
     } as Partial<Recipe['author']>,
     dietaryInfo: { isVegan: true, isGlutenFree: true },
@@ -33,11 +33,11 @@ const mockSavedRecipes: Partial<Recipe>[] = [
     averageRating: 4.9,
     imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400',
     imageUrls: ['https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400'],
-    author: { 
-      id: 'chef2', 
-      firstName: 'Marco', 
-      lastName: 'Rossi', 
-      email: 'marco@example.com', 
+    author: {
+      id: 'chef2',
+      firstName: 'Marco',
+      lastName: 'Rossi',
+      email: 'marco@example.com',
       role: 'CHEF',
     } as Partial<Recipe['author']>,
     dietaryInfo: { isGlutenFree: true, isPaleo: true },

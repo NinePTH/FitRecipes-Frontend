@@ -50,11 +50,7 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
               >
                 <div className="flex gap-3">
                   {/* Recipe Image */}
-                  <Link
-                    to={`/recipe/${recipe.id}`}
-                    onClick={onClose}
-                    className="flex-shrink-0"
-                  >
+                  <Link to={`/recipe/${recipe.id}`} onClick={onClose} className="flex-shrink-0">
                     <div className="w-20 h-20 bg-gray-200 rounded overflow-hidden">
                       {recipe.imageUrls?.[0] || recipe.imageUrl ? (
                         <img
@@ -159,17 +155,10 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
             </div>
           ) : (
             savedRecipes.map(recipe => (
-              <div
-                key={recipe.id}
-                className="p-4 border-b hover:bg-gray-50 transition-colors"
-              >
+              <div key={recipe.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
                 <div className="flex gap-3">
                   {/* Recipe Image */}
-                  <Link
-                    to={`/recipe/${recipe.id}`}
-                    onClick={onClose}
-                    className="flex-shrink-0"
-                  >
+                  <Link to={`/recipe/${recipe.id}`} onClick={onClose} className="flex-shrink-0">
                     <div className="w-24 h-24 bg-gray-200 rounded overflow-hidden">
                       {recipe.imageUrls?.[0] || recipe.imageUrl ? (
                         <img

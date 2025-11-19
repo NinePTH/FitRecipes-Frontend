@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Clock, Star, TrendingUp, X, Plus, ChefHat, Sparkles, Bookmark } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Clock,
+  Star,
+  TrendingUp,
+  X,
+  Plus,
+  ChefHat,
+  Sparkles,
+  Bookmark,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -171,7 +182,7 @@ export function BrowseRecipesPage() {
     setSearchMode('search');
     setRecipes([]); // Clear old results immediately
     setFilters({}); // Clear filters - search API doesn't support filtering
-    setShowFilters(false)
+    setShowFilters(false);
 
     try {
       switch (searchMethod) {
@@ -315,7 +326,7 @@ export function BrowseRecipesPage() {
     const saved = isSaved(recipe.id);
 
     return (
-      <Card 
+      <Card
         className="overflow-hidden hover:shadow-lg transition-shadow duration-200 relative group cursor-pointer"
         onClick={() => navigate(`/recipe/${recipe.id}`)}
       >
@@ -363,58 +374,58 @@ export function BrowseRecipesPage() {
           <h3 className="font-semibold text-lg mb-2 line-clamp-1">{recipe.title}</h3>
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
 
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{recipe.prepTime + (recipe.cookingTime ?? 0)}m</span>
-                </div>
-                <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
+                <Clock className="h-4 w-4" />
+                <span>{recipe.prepTime + (recipe.cookingTime ?? 0)}m</span>
               </div>
-              <span className="text-xs">
-                by{' '}
-                {'authorFirstName' in recipe
-                  ? (recipe as unknown as { authorFirstName: string }).authorFirstName
-                  : recipe.author?.firstName || 'Unknown'}
-              </span>
+              <span className="capitalize">{recipe.difficulty.toLowerCase()}</span>
             </div>
+            <span className="text-xs">
+              by{' '}
+              {'authorFirstName' in recipe
+                ? (recipe as unknown as { authorFirstName: string }).authorFirstName
+                : recipe.author?.firstName || 'Unknown'}
+            </span>
+          </div>
 
-            <div className="flex flex-wrap gap-1 mt-3">
-              {recipe.dietaryInfo && (
-                <>
-                  {recipe.dietaryInfo.isVegan && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      Vegan
-                    </span>
-                  )}
-                  {recipe.dietaryInfo.isVegetarian && (
-                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      Vegetarian
-                    </span>
-                  )}
-                  {recipe.dietaryInfo.isGlutenFree && (
-                    <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
-                      Gluten-Free
-                    </span>
-                  )}
-                  {recipe.dietaryInfo.isDairyFree && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      Dairy-Free
-                    </span>
-                  )}
-                  {recipe.dietaryInfo.isKeto && (
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                      Keto
-                    </span>
-                  )}
-                  {recipe.dietaryInfo.isPaleo && (
-                    <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                      Paleo
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
+          <div className="flex flex-wrap gap-1 mt-3">
+            {recipe.dietaryInfo && (
+              <>
+                {recipe.dietaryInfo.isVegan && (
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Vegan
+                  </span>
+                )}
+                {recipe.dietaryInfo.isVegetarian && (
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Vegetarian
+                  </span>
+                )}
+                {recipe.dietaryInfo.isGlutenFree && (
+                  <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
+                    Gluten-Free
+                  </span>
+                )}
+                {recipe.dietaryInfo.isDairyFree && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    Dairy-Free
+                  </span>
+                )}
+                {recipe.dietaryInfo.isKeto && (
+                  <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                    Keto
+                  </span>
+                )}
+                {recipe.dietaryInfo.isPaleo && (
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                    Paleo
+                  </span>
+                )}
+              </>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -577,9 +588,14 @@ export function BrowseRecipesPage() {
             <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
               <p className="flex items-center">
                 <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                Filters and sorting are currently not available in search mode. Filter search will be available in future updates.
+                Filters and sorting are currently not available in search mode. Filter search will
+                be available in future updates.
               </p>
             </div>
           )}
@@ -1080,16 +1096,15 @@ export function BrowseRecipesPage() {
                 <option value="prep-time-desc">Prep Time (High to Low)</option>
               </select>
             </div>
-            {searchMode === 'browse' && (filters.cuisineType ||
-              filters.difficulty?.length ||
-              filters.maxPrepTime ||
-              filters.mealType?.length ||
-              filters.dietType?.length ||
-              filters.mainIngredient) && (
-              <span className="text-sm text-gray-500">
-                {`${recipes.length} recipes found`}
-              </span>
-            )}
+            {searchMode === 'browse' &&
+              (filters.cuisineType ||
+                filters.difficulty?.length ||
+                filters.maxPrepTime ||
+                filters.mealType?.length ||
+                filters.dietType?.length ||
+                filters.mainIngredient) && (
+                <span className="text-sm text-gray-500">{`${recipes.length} recipes found`}</span>
+              )}
           </div>
         </div>
 

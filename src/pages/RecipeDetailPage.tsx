@@ -497,13 +497,15 @@ export function RecipeDetailPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => recipe && toggleSaveRecipe(recipe)}
                 className={isSaved(recipe?.id || '') ? 'bg-primary-50 border-primary-300' : ''}
               >
-                <Bookmark className={`h-4 w-4 mr-1 ${isSaved(recipe?.id || '') ? 'fill-current text-primary-600' : ''}`} />
+                <Bookmark
+                  className={`h-4 w-4 mr-1 ${isSaved(recipe?.id || '') ? 'fill-current text-primary-600' : ''}`}
+                />
                 {isSaved(recipe?.id || '') ? 'Saved' : 'Save'}
               </Button>
               <Button variant="outline" size="sm" onClick={handleShareRecipe}>
