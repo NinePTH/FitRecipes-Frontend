@@ -34,47 +34,50 @@ export function useSearchSuggestions(debounceMs: number = 300): UseSearchSuggest
     };
   }, []);
 
-  const fetchSuggestions = useCallback(async (query: string, limit: number = 10) => {
-    // Clear previous debounce timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Don't fetch if query is too short
-    if (query.trim().length < 2) {
-      setSuggestions([]);
-      setError(null);
-      setLoading(false);
-      return;
-    }
-
-    // Check if Search API is available
-    if (!isSearchApiAvailable()) {
-      setSuggestions([]);
-      setError(null);
-      setLoading(false);
-      return;
-    }
-
-    // Set loading immediately for better UX
-    setLoading(true);
-    setError(null);
-
-    // Debounce the actual API call
-    debounceTimerRef.current = setTimeout(async () => {
-      try {
-        const response = await getSearchSuggestions({ query, limit });
-        // API returns suggestions directly with correct structure
-        setSuggestions(response.suggestions);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch suggestions';
-        setError(errorMessage);
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
+  const fetchSuggestions = useCallback(
+    async (query: string, limit: number = 10) => {
+      // Clear previous debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
-    }, debounceMs);
-  }, [debounceMs]);
+
+      // Don't fetch if query is too short
+      if (query.trim().length < 2) {
+        setSuggestions([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Check if Search API is available
+      if (!isSearchApiAvailable()) {
+        setSuggestions([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Set loading immediately for better UX
+      setLoading(true);
+      setError(null);
+
+      // Debounce the actual API call
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          const response = await getSearchSuggestions({ query, limit });
+          // API returns suggestions directly with correct structure
+          setSuggestions(response.suggestions);
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Failed to fetch suggestions';
+          setError(errorMessage);
+          setSuggestions([]);
+        } finally {
+          setLoading(false);
+        }
+      }, debounceMs);
+    },
+    [debounceMs]
+  );
 
   const clearSuggestions = useCallback(() => {
     // Clear debounce timer

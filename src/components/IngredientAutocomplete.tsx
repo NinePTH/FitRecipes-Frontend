@@ -2,7 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useIngredientSuggestions } from '@/hooks/useSearchSuggestions';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 
 interface IngredientAutocompleteProps {
   value?: string[];
@@ -64,12 +70,12 @@ export function IngredientAutocomplete({
     const newIngredients = [...selectedIngredients, ingredientName];
     setSelectedIngredients(newIngredients);
     onChange?.(newIngredients);
-    
+
     // Clear input and hide suggestions
     setInputValue('');
     setShowSuggestions(false);
     suggestionApi.clearSuggestions();
-    
+
     // Focus back on input
     inputRef.current?.focus();
   };
@@ -81,13 +87,16 @@ export function IngredientAutocomplete({
   };
 
   // Group suggestions by category
-  const groupedSuggestions = suggestionApi.suggestions.reduce((acc, suggestion) => {
-    if (!acc[suggestion.category]) {
-      acc[suggestion.category] = [];
-    }
-    acc[suggestion.category].push(suggestion);
-    return acc;
-  }, {} as Record<string, typeof suggestionApi.suggestions>);
+  const groupedSuggestions = suggestionApi.suggestions.reduce(
+    (acc, suggestion) => {
+      if (!acc[suggestion.category]) {
+        acc[suggestion.category] = [];
+      }
+      acc[suggestion.category].push(suggestion);
+      return acc;
+    },
+    {} as Record<string, typeof suggestionApi.suggestions>
+  );
 
   const categories = Object.keys(groupedSuggestions);
 
@@ -134,7 +143,9 @@ export function IngredientAutocomplete({
             onFocus={() => inputValue.trim().length > 0 && setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             className="pl-10"
-            disabled={disabled || (maxSelections ? selectedIngredients.length >= maxSelections : false)}
+            disabled={
+              disabled || (maxSelections ? selectedIngredients.length >= maxSelections : false)
+            }
           />
         </div>
 
@@ -169,18 +180,24 @@ export function IngredientAutocomplete({
                           return (
                             <CommandItem
                               key={suggestion.name}
-                              onSelect={() => !isSelected && !isDisabled && handleSelectIngredient(suggestion.name)}
+                              onSelect={() =>
+                                !isSelected &&
+                                !isDisabled &&
+                                handleSelectIngredient(suggestion.name)
+                              }
                               className={`cursor-pointer ${
                                 isSelected ? 'opacity-50 cursor-not-allowed' : ''
                               } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                             >
                               <div className="flex items-center justify-between w-full">
                                 <span className="font-medium">{suggestion.name}</span>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                  suggestion.match_type === 'exact'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-blue-100 text-blue-700'
-                                }`}>
+                                <span
+                                  className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                    suggestion.match_type === 'exact'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-blue-100 text-blue-700'
+                                  }`}
+                                >
                                   {suggestion.match_type}
                                 </span>
                               </div>

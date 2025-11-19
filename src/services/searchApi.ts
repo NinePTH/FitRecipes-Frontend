@@ -32,7 +32,7 @@ export interface SearchSuggestionsResponse {
 // Ingredient Suggestions Types
 export interface IngredientSuggestion {
   name: string;
-  category: 
+  category:
     | 'Vegetables'
     | 'Fruits'
     | 'Proteins'

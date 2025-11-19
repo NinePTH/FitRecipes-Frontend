@@ -294,10 +294,9 @@ export function BrowseRecipesPage() {
         // For ingredient search, only suggest based on the current ingredient being typed
         // (text after the last comma)
         const lastCommaIndex = value.lastIndexOf(',');
-        const currentIngredient = lastCommaIndex === -1 
-          ? value.trim() 
-          : value.substring(lastCommaIndex + 1).trim();
-        
+        const currentIngredient =
+          lastCommaIndex === -1 ? value.trim() : value.substring(lastCommaIndex + 1).trim();
+
         // Only fetch if current ingredient has at least 2 characters
         if (currentIngredient.length >= 2) {
           ingredientSuggestionApi.fetchSuggestions(currentIngredient);
@@ -327,7 +326,7 @@ export function BrowseRecipesPage() {
     // Replace only the current ingredient being typed (after last comma)
     const currentQuery = searchQuery.trim();
     const lastCommaIndex = currentQuery.lastIndexOf(',');
-    
+
     let newQuery: string;
     if (lastCommaIndex === -1) {
       // No comma found - replace entire query
@@ -337,10 +336,10 @@ export function BrowseRecipesPage() {
       const beforeLastComma = currentQuery.substring(0, lastCommaIndex + 1);
       newQuery = `${beforeLastComma} ${ingredientName}`;
     }
-    
+
     setSearchQuery(newQuery);
     setShowSuggestions(false);
-    
+
     // Optionally trigger search immediately
     // handleSearch(new Event('submit') as any);
   };
@@ -591,123 +590,138 @@ export function BrowseRecipesPage() {
                   />
                 </div>
                 {/* Search Suggestions Dropdown */}
-                {showSuggestions && (
-                  searchMethod === 'ingredient' 
-                    ? (ingredientSuggestionApi.loading || ingredientSuggestionApi.suggestions.length > 0)
-                    : (suggestionApi.loading || suggestionApi.suggestions.length > 0)
-                ) && (
-                  <div className="absolute z-50 w-full mt-1 bg-white rounded-md border shadow-lg">
-                    <Command>
-                      <CommandList className="max-h-[300px]">
-                        {(searchMethod === 'ingredient' ? ingredientSuggestionApi.loading : suggestionApi.loading) ? (
-                          <div className="px-4 py-8 text-center text-sm text-gray-500">
-                            <Sparkles className="h-5 w-5 mx-auto mb-2 animate-pulse" />
-                            Loading suggestions...
-                          </div>
-                        ) : (searchMethod === 'ingredient' ? ingredientSuggestionApi.error : suggestionApi.error) ? (
-                          <div className="px-4 py-4 text-center text-sm text-red-500">
-                            {searchMethod === 'ingredient' ? ingredientSuggestionApi.error : suggestionApi.error}
-                          </div>
-                        ) : (searchMethod === 'ingredient' 
-                            ? ingredientSuggestionApi.suggestions.length === 0 
-                            : suggestionApi.suggestions.length === 0) ? (
-                          <CommandEmpty>No suggestions found.</CommandEmpty>
-                        ) : searchMethod === 'ingredient' ? (
-                          <CommandGroup>
-                            {ingredientSuggestionApi.suggestions.map((suggestion, index) => {
-                              return (
-                                <CommandItem
-                                  key={`${suggestion.name}-${index}`}
-                                  onClick={() => handleIngredientSelect(suggestion.name)}
-                                  className="cursor-pointer flex items-center justify-between py-2"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-green-600" />
-                                    <div>
-                                      <div className="font-medium text-green-600">
-                                        {suggestion.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500">
-                                        {suggestion.category}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                      suggestion.match_type === 'exact' 
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-blue-100 text-blue-700'
-                                    }`}>
-                                      {suggestion.match_type}
-                                    </span>
-                                  </div>
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        ) : (
-                          <CommandGroup>
-                            {suggestionApi.suggestions.map(suggestion => {
-                              return (
-                                <CommandItem
-                                  key={suggestion.id}
-                                  onClick={() => handleSuggestionSelect(suggestion.id)}
-                                  className="cursor-pointer flex items-center justify-between py-2"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <ChefHat className="h-4 w-4 text-purple-600" />
-                                    <div>
-                                      <div className="font-medium text-purple-600">
-                                        {suggestion.title}
-                                      </div>
-                                      <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
-                                        {suggestion.cuisineType && (
-                                          <span>{suggestion.cuisineType}</span>
-                                        )}
-                                        {suggestion.mainIngredient && (
-                                          <span>• {suggestion.mainIngredient}</span>
-                                        )}
-                                        {suggestion.averageRating > 0 && (
-                                          <span className="flex items-center gap-1">
-                                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                            {suggestion.averageRating.toFixed(1)}
-                                          </span>
-                                        )}
+                {showSuggestions &&
+                  (searchMethod === 'ingredient'
+                    ? ingredientSuggestionApi.loading ||
+                      ingredientSuggestionApi.suggestions.length > 0
+                    : suggestionApi.loading || suggestionApi.suggestions.length > 0) && (
+                    <div className="absolute z-50 w-full mt-1 bg-white rounded-md border shadow-lg">
+                      <Command>
+                        <CommandList className="max-h-[300px]">
+                          {(
+                            searchMethod === 'ingredient'
+                              ? ingredientSuggestionApi.loading
+                              : suggestionApi.loading
+                          ) ? (
+                            <div className="px-4 py-8 text-center text-sm text-gray-500">
+                              <Sparkles className="h-5 w-5 mx-auto mb-2 animate-pulse" />
+                              Loading suggestions...
+                            </div>
+                          ) : (
+                              searchMethod === 'ingredient'
+                                ? ingredientSuggestionApi.error
+                                : suggestionApi.error
+                            ) ? (
+                            <div className="px-4 py-4 text-center text-sm text-red-500">
+                              {searchMethod === 'ingredient'
+                                ? ingredientSuggestionApi.error
+                                : suggestionApi.error}
+                            </div>
+                          ) : (
+                              searchMethod === 'ingredient'
+                                ? ingredientSuggestionApi.suggestions.length === 0
+                                : suggestionApi.suggestions.length === 0
+                            ) ? (
+                            <CommandEmpty>No suggestions found.</CommandEmpty>
+                          ) : searchMethod === 'ingredient' ? (
+                            <CommandGroup>
+                              {ingredientSuggestionApi.suggestions.map((suggestion, index) => {
+                                return (
+                                  <CommandItem
+                                    key={`${suggestion.name}-${index}`}
+                                    onClick={() => handleIngredientSelect(suggestion.name)}
+                                    className="cursor-pointer flex items-center justify-between py-2"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Plus className="h-4 w-4 text-green-600" />
+                                      <div>
+                                        <div className="font-medium text-green-600">
+                                          {suggestion.name}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {suggestion.category}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                      suggestion.match_type === 'title' 
-                                        ? 'bg-green-100 text-green-700'
-                                        : suggestion.match_type === 'description'
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'bg-gray-100 text-gray-600'
-                                    }`}>
-                                      {suggestion.match_type}
-                                    </span>
-                                  </div>
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        )}
-                      </CommandList>
-                    </Command>
-                  </div>
-                )}
+                                    <div className="flex items-center gap-1">
+                                      <span
+                                        className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                          suggestion.match_type === 'exact'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-blue-100 text-blue-700'
+                                        }`}
+                                      >
+                                        {suggestion.match_type}
+                                      </span>
+                                    </div>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          ) : (
+                            <CommandGroup>
+                              {suggestionApi.suggestions.map(suggestion => {
+                                return (
+                                  <CommandItem
+                                    key={suggestion.id}
+                                    onClick={() => handleSuggestionSelect(suggestion.id)}
+                                    className="cursor-pointer flex items-center justify-between py-2"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <ChefHat className="h-4 w-4 text-purple-600" />
+                                      <div>
+                                        <div className="font-medium text-purple-600">
+                                          {suggestion.title}
+                                        </div>
+                                        <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                          {suggestion.cuisineType && (
+                                            <span>{suggestion.cuisineType}</span>
+                                          )}
+                                          {suggestion.mainIngredient && (
+                                            <span>• {suggestion.mainIngredient}</span>
+                                          )}
+                                          {suggestion.averageRating > 0 && (
+                                            <span className="flex items-center gap-1">
+                                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                              {suggestion.averageRating.toFixed(1)}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span
+                                        className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                          suggestion.match_type === 'title'
+                                            ? 'bg-green-100 text-green-700'
+                                            : suggestion.match_type === 'description'
+                                              ? 'bg-blue-100 text-blue-700'
+                                              : 'bg-gray-100 text-gray-600'
+                                        }`}
+                                      >
+                                        {suggestion.match_type}
+                                      </span>
+                                    </div>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </div>
+                  )}
                 {/* Show error if suggestions API fails but don't block search */}
-                {showSuggestions && (
-                  searchMethod === 'ingredient' 
-                    ? ingredientSuggestionApi.error 
-                    : suggestionApi.error
-                ) && (
-                  <div className="absolute z-50 w-full mt-1 bg-yellow-50 border border-yellow-200 rounded-md p-2">
-                    <p className="text-xs text-yellow-700">
-                      Suggestions unavailable. You can still search using the button below.
-                    </p>
-                  </div>
-                )}
+                {showSuggestions &&
+                  (searchMethod === 'ingredient'
+                    ? ingredientSuggestionApi.error
+                    : suggestionApi.error) && (
+                    <div className="absolute z-50 w-full mt-1 bg-yellow-50 border border-yellow-200 rounded-md p-2">
+                      <p className="text-xs text-yellow-700">
+                        Suggestions unavailable. You can still search using the button below.
+                      </p>
+                    </div>
+                  )}
               </div>
 
               {/* Search Method Selector */}
