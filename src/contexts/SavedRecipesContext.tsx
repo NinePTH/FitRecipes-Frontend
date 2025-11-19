@@ -91,8 +91,6 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
       } else {
         setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
       }
-
-      setError(err.message || 'Failed to update saved status');
     }
   };
 

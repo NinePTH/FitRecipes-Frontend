@@ -1,58 +1,41 @@
 import { get, post, deleteRequest } from './api';
 import type { Recipe } from '@/types';
 
-// API Response Types
+// API Response Types (unwrapped by api.ts - these are the actual return types)
 interface SaveRecipeResponse {
-  status: 'success';
-  data: {
-    id: string;
-    userId: string;
-    recipeId: string;
-    savedAt: string;
-    alreadySaved: boolean;
-  };
-  message: string;
+  id: string;
+  userId: string;
+  recipeId: string;
+  savedAt: string;
+  alreadySaved: boolean;
 }
 
 interface UnsaveRecipeResponse {
-  status: 'success';
-  data: {
-    success: boolean;
-  };
-  message: string;
+  success: boolean;
 }
 
 interface CheckSavedResponse {
-  status: 'success';
-  data: {
-    isSaved: boolean;
-    savedAt: string | null;
-  };
+  isSaved: boolean;
+  savedAt: string | null;
 }
 
 interface BulkCheckSavedResponse {
-  status: 'success';
-  data: {
-    savedRecipes: Array<{
-      recipeId: string;
-      isSaved: boolean;
-      savedAt: string | null;
-    }>;
-  };
+  savedRecipes: Array<{
+    recipeId: string;
+    isSaved: boolean;
+    savedAt: string | null;
+  }> | Record<string, boolean>; // Support both array and object formats
 }
 
 interface SavedRecipesResponse {
-  status: 'success';
-  data: {
-    recipes: Recipe[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-      hasNext: boolean;
-      hasPrev: boolean;
-    };
+  recipes: Recipe[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 

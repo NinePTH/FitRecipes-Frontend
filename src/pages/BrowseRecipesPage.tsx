@@ -193,7 +193,7 @@ export function BrowseRecipesPage() {
         if (response && response.savedRecipes) {
           if (Array.isArray(response.savedRecipes)) {
             // Array format: [{ recipeId: "123", isSaved: true }, ...]
-            response.savedRecipes.forEach(item => {
+            response.savedRecipes.forEach((item: { recipeId: string; isSaved: boolean }) => {
               statusMap[item.recipeId] = item.isSaved;
             });
           } else if (typeof response.savedRecipes === 'object') {
