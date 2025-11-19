@@ -14,6 +14,8 @@
    - [Smart Search (Recommended)](#smart-search-recommended)
    - [Vector Search](#vector-search)
    - [Ingredient Search](#ingredient-search)
+   - [Search Suggestions](#search-suggestions)
+   - [Ingredient Suggestions](#ingredient-suggestions)
    - [Hybrid Search](#hybrid-search)
    - [Generate Embedding](#generate-embedding)
 4. [Data Models](#data-models)
@@ -366,6 +368,356 @@ Semantic search endpoint using vector similarity without NLP parsing.
 
 ---
 
+### Search Suggestions
+
+**POST** `/search/menu/suggestions`
+
+🔍 **Ultra-fast autocomplete** for search input - optimized for real-time suggestions as users type.
+
+#### Features
+
+- ⚡ Optimized for speed (< 50ms typical response)
+- 🎯 Smart ranking by relevance + popularity
+- 📝 Multiple match types: title, ingredient, cuisine, description
+- ⭐ Boosted by ratings and popularity
+- 🚀 No database queries needed for common suggestions
+
+#### Request Body
+
+```json
+{
+  "query": "chic",
+  "limit": 10
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | ✅ Yes | Partial search term (1-100 chars) |
+| `limit` | integer | No | Maximum suggestions (1-20, default: 10) |
+
+#### Example Queries
+
+```javascript
+// Query: "chic" → Suggests chicken dishes
+{ "query": "chic", "limit": 10 }
+
+// Query: "thai" → Suggests Thai recipes
+{ "query": "thai", "limit": 10 }
+
+// Query: "spa" → Suggests spaghetti, Spanish dishes
+{ "query": "spa", "limit": 10 }
+
+// Query: "veg" → Suggests vegetable dishes, vegan recipes
+{ "query": "veg", "limit": 10 }
+```
+
+#### Response
+
+```json
+{
+  "status": "success",
+  "suggestions": [
+    {
+      "id": "recipe_123",
+      "title": "Thai Chicken Curry",
+      "mainIngredient": "Chicken",
+      "cuisineType": "Thai",
+      "mealType": ["DINNER"],
+      "imageUrls": ["https://example.com/curry.jpg"],
+      "averageRating": 4.8,
+      "totalRatings": 156,
+      "match_type": "title",
+      "relevance_score": 950
+    },
+    {
+      "id": "recipe_124",
+      "title": "Spicy Chicken Pad Thai",
+      "mainIngredient": "Chicken",
+      "cuisineType": "Thai",
+      "mealType": ["LUNCH", "DINNER"],
+      "imageUrls": ["https://example.com/padthai.jpg"],
+      "averageRating": 4.7,
+      "totalRatings": 203,
+      "match_type": "ingredient",
+      "relevance_score": 920
+    }
+  ],
+  "total": 2,
+  "query": "chic",
+  "execution_time_ms": 23.45
+}
+```
+
+#### Match Types
+
+| Type | Description | Example |
+|------|-------------|----------|
+| `title` | Query matches recipe title | "chic" → "**Chic**ken Curry" |
+| `ingredient` | Query matches main ingredient | "chic" → Main: "**Chic**ken" |
+| `cuisine` | Query matches cuisine type | "thai" → Cuisine: "**Thai**" |
+| `description` | Query matches description | "spicy" → "A **spicy** Thai curry" |
+
+#### Relevance Scoring
+
+Suggestions are ranked by:
+1. **Match Quality** (800-1000 points)
+   - Exact title match: 1000
+   - Title starts with query: 900
+   - Title contains query: 800
+   - Ingredient/cuisine match: 400-700
+
+2. **Popularity Boost** (0-100 points)
+   - Rating boost: up to +100 (based on averageRating)
+   - Popularity boost: up to +50 (based on totalRatings)
+
+#### Use Cases
+
+```javascript
+// 1. Search bar autocomplete
+const handleSearchInput = debounce(async (query) => {
+  if (query.length < 2) return;
+  
+  const { suggestions } = await fetch('/search/suggestions', {
+    method: 'POST',
+    headers: { 'X-API-Key': API_KEY },
+    body: JSON.stringify({ query, limit: 10 })
+  }).then(r => r.json());
+  
+  displaySuggestions(suggestions);
+}, 300);
+
+// 2. "Did you mean..." suggestions
+if (searchResults.length === 0) {
+  const { suggestions } = await getSuggestions(query);
+  showDidYouMean(suggestions);
+}
+
+// 3. Popular searches
+const popularSearches = await getSuggestions('', { limit: 5 });
+```
+
+---
+
+### Ingredient Suggestions
+
+**POST** `/ingredients/suggestions`
+
+🥗 **Lightning-fast ingredient autocomplete** - no database queries needed!
+
+#### Features
+
+- ⚡ Ultra-fast (< 10ms) - pure in-memory lookup
+- 🎯 Smart matching: exact, prefix, substring, word boundary
+- 🏷️ Auto-categorization: protein, vegetable, fruit, dairy, etc.
+- 🌍 Multi-cuisine support: 589+ ingredients
+- 📊 Database fallback for recipe-specific ingredients
+
+#### Request Body
+
+```json
+{
+  "query": "eg",
+  "limit": 10
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | ✅ Yes | Partial ingredient name (1-50 chars) |
+| `limit` | integer | No | Maximum suggestions (1-30, default: 10) |
+
+#### Example Queries
+
+```javascript
+// Query: "eg" → Egg, Eggplant
+{ "query": "eg", "limit": 10 }
+
+// Query: "chic" → Chicken, Chickpea
+{ "query": "chic", "limit": 10 }
+
+// Query: "tom" → Tomato, Tomato Sauce
+{ "query": "tom", "limit": 10 }
+
+// Query: "milk" → Milk, Almond Milk, Coconut Milk
+{ "query": "milk", "limit": 10 }
+
+// Query: "bas" → Basil, Thai Basil
+{ "query": "bas", "limit": 10 }
+```
+
+#### Response
+
+```json
+{
+  "status": "success",
+  "suggestions": [
+    {
+      "name": "Egg",
+      "match_type": "prefix",
+      "category": "protein"
+    },
+    {
+      "name": "Eggplant",
+      "match_type": "prefix",
+      "category": "vegetable"
+    },
+    {
+      "name": "Egg White",
+      "match_type": "prefix",
+      "category": "protein"
+    },
+    {
+      "name": "Egg Yolk",
+      "match_type": "prefix",
+      "category": "protein"
+    }
+  ],
+  "total": 4,
+  "query": "eg",
+  "execution_time_ms": 2.34
+}
+```
+
+#### Match Types
+
+| Type | Description | Example |
+|------|-------------|----------|
+| `exact` | Exact match with ingredient | "egg" → "Egg" |
+| `prefix` | Ingredient starts with query | "chic" → "**Chic**ken" |
+| `word` | Query matches word start | "milk" → "Almond **Milk**" |
+| `substring` | Query within ingredient | "rlic" → "Ga**rlic**" |
+
+#### Categories
+
+| Category | Examples |
+|----------|----------|
+| `protein` | Chicken, Beef, Fish, Egg, Tofu, Shrimp |
+| `vegetable` | Tomato, Onion, Spinach, Carrot, Broccoli |
+| `fruit` | Apple, Banana, Lemon, Mango, Avocado |
+| `dairy` | Milk, Cheese, Butter, Yogurt, Cream |
+| `grain` | Rice, Pasta, Bread, Quinoa, Oats |
+| `herb_spice` | Basil, Oregano, Cumin, Paprika, Thyme |
+| `condiment` | Soy Sauce, Olive Oil, Vinegar, Ketchup |
+| `other` | Miscellaneous items |
+
+#### Ingredient Database
+
+The service includes **589+ common ingredients**:
+
+**Proteins (60+)**
+- Poultry: Chicken, Turkey, Duck, Quail
+- Meat: Beef, Pork, Lamb, Veal, Venison
+- Seafood: Salmon, Tuna, Shrimp, Crab, Lobster
+- Plant-based: Tofu, Tempeh, Seitan, Edamame
+
+**Vegetables (100+)**
+- Leafy Greens: Spinach, Kale, Lettuce, Arugula
+- Root Vegetables: Potato, Carrot, Beet, Turnip
+- Alliums: Onion, Garlic, Shallot, Leek
+- Cruciferous: Broccoli, Cauliflower, Brussels Sprouts
+
+**International Ingredients**
+- Thai: Galangal, Lemongrass, Kaffir Lime, Thai Basil
+- Japanese: Miso, Wasabi, Dashi, Nori, Panko
+- Indian: Ghee, Paneer, Garam Masala, Curry Leaf
+- Korean: Kimchi, Gochugaru, Gochujang
+
+#### Database Fallback
+
+If enabled, the service also searches actual recipe ingredients:
+
+```json
+{
+  "name": "Thai Red Curry Paste",
+  "match_type": "word",
+  "category": "condiment",
+  "usage_count": 47  // Found in 47 recipes
+}
+```
+
+#### Use Cases
+
+```javascript
+// 1. Ingredient input autocomplete
+const handleIngredientInput = async (query) => {
+  if (query.length < 2) return;
+  
+  const { suggestions } = await fetch('/ingredients/suggestions', {
+    method: 'POST',
+    headers: { 'X-API-Key': API_KEY },
+    body: JSON.stringify({ query, limit: 10 })
+  }).then(r => r.json());
+  
+  displayIngredientSuggestions(suggestions);
+};
+
+// 2. Recipe creation - ingredient picker
+const IngredientPicker = () => {
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  
+  useEffect(() => {
+    if (query.length >= 2) {
+      getSuggestions(query).then(setSuggestions);
+    }
+  }, [query]);
+  
+  return (
+    <Autocomplete
+      options={suggestions}
+      getOptionLabel={(option) => option.name}
+      groupBy={(option) => option.category}
+    />
+  );
+};
+
+// 3. Shopping list builder
+const addToShoppingList = async (partialName) => {
+  const { suggestions } = await getIngredientSuggestions(partialName);
+  const selected = suggestions[0]; // Best match
+  shoppingList.add(selected.name);
+};
+
+// 4. Dietary filter with ingredient selection
+const allergenFilter = await getIngredientSuggestions('milk');
+// Returns: ["Milk", "Almond Milk", "Coconut Milk", ...]
+```
+
+#### Performance Tips
+
+```javascript
+// No debouncing needed - it's that fast!
+const handleInput = async (e) => {
+  const query = e.target.value;
+  if (query.length >= 2) {
+    const suggestions = await getIngredientSuggestions(query);
+    showSuggestions(suggestions);
+  }
+};
+
+// Group suggestions by category for better UX
+const groupedSuggestions = suggestions.reduce((acc, item) => {
+  const category = item.category;
+  if (!acc[category]) acc[category] = [];
+  acc[category].push(item);
+  return acc;
+}, {});
+
+// Display with icons
+const categoryIcons = {
+  protein: '🍖',
+  vegetable: '🥬',
+  fruit: '🍎',
+  dairy: '🥛',
+  grain: '🌾',
+  herb_spice: '🌿',
+  condiment: '🧂'
+};
+```
+
+---
+
 ### Hybrid Search
 
 **POST** `/search/hybrid`
@@ -497,6 +849,8 @@ interface Recipe {
   imageUrls: string[];           // Array of image URLs
   status: string;                // Recipe status (always "APPROVED" in search results)
   authorId: string;              // Author ID
+  authorFirstName?: string;      // Author first name (from users table)
+  authorLastName?: string;       // Author last name (from users table)
   similarity?: number;           // Similarity score (0-1, vector/hybrid search only)
   match_score?: number;          // Match score (ingredient search only)
   matched_count?: number;        // Matched ingredients count (ingredient search only)
@@ -734,6 +1088,194 @@ function useRecipeSearch() {
   return { results, loading, error, searchRecipes, searchByIngredients };
 }
 
+// Component usage with autocomplete
+function SearchComponentWithSuggestions() {
+  const { results, loading, error, searchRecipes } = useRecipeSearch();
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Debounced search suggestions
+  const fetchSuggestions = useMemo(
+    () =>
+      debounce(async (searchQuery) => {
+        if (searchQuery.length < 2) {
+          setSuggestions([]);
+          return;
+        }
+
+        try {
+          const response = await api.post('/search/suggestions', {
+            query: searchQuery,
+            limit: 8
+          });
+          setSuggestions(response.data.suggestions);
+          setShowSuggestions(true);
+        } catch (err) {
+          console.error('Suggestions failed:', err);
+        }
+      }, 300),
+    []
+  );
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    fetchSuggestions(value);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setQuery(suggestion.title);
+    setShowSuggestions(false);
+    searchRecipes(suggestion.title);
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setShowSuggestions(false);
+    await searchRecipes(query);
+  };
+
+  return (
+    <div className="search-container">
+      <form onSubmit={handleSearch}>
+        <div className="search-input-wrapper">
+          <input
+            type="text"
+            value={query}
+            onChange={handleInputChange}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            placeholder="Search recipes... (e.g., 'thai chicken curry')"
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="suggestions-dropdown">
+              {suggestions.map((suggestion, idx) => (
+                <div
+                  key={idx}
+                  className="suggestion-item"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  <img src={suggestion.imageUrls[0]} alt={suggestion.title} />
+                  <div>
+                    <strong>{suggestion.title}</strong>
+                    <span className="match-type">{suggestion.match_type}</span>
+                    <div className="meta">
+                      {suggestion.cuisineType} • ⭐ {suggestion.averageRating}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </form>
+
+      {error && <div className="error">{error}</div>}
+
+      <div className="results">
+        {results.map(recipe => (
+          <div key={recipe.id} className="recipe-card">
+            <h3>{recipe.title}</h3>
+            <p>{recipe.description}</p>
+            <div className="author">
+              By {recipe.authorFirstName} {recipe.authorLastName}
+            </div>
+            <span>Rating: {recipe.averageRating}/5</span>
+            <span>Time: {recipe.prepTime + recipe.cookingTime} min</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Ingredient autocomplete component
+function IngredientAutocomplete({ onSelect }) {
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+
+  const fetchIngredientSuggestions = async (searchQuery) => {
+    if (searchQuery.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await api.post('/ingredients/suggestions', {
+        query: searchQuery,
+        limit: 12
+      });
+      setSuggestions(response.data.suggestions);
+    } catch (err) {
+      console.error('Ingredient suggestions failed:', err);
+    }
+  };
+
+  // Group suggestions by category
+  const groupedSuggestions = useMemo(() => {
+    return suggestions.reduce((acc, item) => {
+      if (!acc[item.category]) acc[item.category] = [];
+      acc[item.category].push(item);
+      return acc;
+    }, {});
+  }, [suggestions]);
+
+  const categoryNames = {
+    protein: 'Proteins',
+    vegetable: 'Vegetables',
+    fruit: 'Fruits',
+    dairy: 'Dairy',
+    grain: 'Grains',
+    herb_spice: 'Herbs & Spices',
+    condiment: 'Condiments',
+    other: 'Other'
+  };
+
+  return (
+    <div className="ingredient-autocomplete">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          fetchIngredientSuggestions(e.target.value);
+        }}
+        placeholder="Add ingredient..."
+      />
+
+      {Object.keys(groupedSuggestions).length > 0 && (
+        <div className="ingredient-suggestions">
+          {Object.entries(groupedSuggestions).map(([category, items]) => (
+            <div key={category} className="category-group">
+              <div className="category-header">
+                {categoryNames[category] || category}
+              </div>
+              {items.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="suggestion-item"
+                  onClick={() => {
+                    onSelect(item.name);
+                    setQuery('');
+                    setSuggestions([]);
+                  }}
+                >
+                  <span className="ingredient-name">{item.name}</span>
+                  <span className="match-badge">{item.match_type}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Component usage
 function SearchComponent() {
   const { results, loading, error, searchRecipes } = useRecipeSearch();
@@ -964,7 +1506,16 @@ For API support, integration help, or bug reports:
 
 ## Changelog
 
-### Version 1.0.0 (Current)
+### Version 1.1.0 (Current)
+- ✨ **NEW:** Search Suggestions endpoint for autocomplete
+- ✨ **NEW:** Ingredient Suggestions endpoint (589+ ingredients)
+- ✨ **NEW:** Author name fields (firstName, lastName) in recipe responses
+- 🚀 Ultra-fast autocomplete with < 50ms response time
+- 🏷️ Auto-categorization for ingredients
+- 🌍 Multi-cuisine ingredient support (Thai, Japanese, Indian, Korean)
+- 🔧 CORS policy updated for production deployment
+
+### Version 1.0.0
 - Initial release
 - Smart search with NLP
 - Vector search
@@ -975,4 +1526,4 @@ For API support, integration help, or bug reports:
 
 ---
 
-**Last Updated:** November 16, 2025
+**Last Updated:** November 18, 2025

@@ -2,6 +2,68 @@ import type { Recipe, MealType } from '@/types';
 
 // Search API Types based on Vector Search API Documentation
 
+// Search Suggestions Types
+export interface SearchSuggestion {
+  id: string;
+  title: string;
+  mainIngredient: string;
+  cuisineType: string;
+  mealType: string;
+  imageUrls: string[];
+  averageRating: number;
+  totalRatings: number;
+  match_type: 'title' | 'description' | 'exact' | 'prefix' | 'fuzzy';
+  relevance_score: number;
+}
+
+export interface SearchSuggestionsRequest {
+  query: string;
+  limit?: number;
+}
+
+export interface SearchSuggestionsResponse {
+  status: string;
+  suggestions: SearchSuggestion[];
+  query: string;
+  total: number;
+  execution_time_ms: number;
+}
+
+// Ingredient Suggestions Types
+export interface IngredientSuggestion {
+  name: string;
+  category: 
+    | 'Vegetables'
+    | 'Fruits'
+    | 'Proteins'
+    | 'Grains'
+    | 'Dairy'
+    | 'Spices & Herbs'
+    | 'Oils & Fats'
+    | 'Condiments'
+    | 'Nuts & Seeds'
+    | 'Legumes'
+    | 'Seafood'
+    | 'Beverages'
+    | 'Baking'
+    | 'Other';
+  match_type: 'exact' | 'prefix';
+}
+
+export interface IngredientSuggestionsRequest {
+  query: string;
+  limit?: number;
+  category?: string;
+}
+
+export interface IngredientSuggestionsResponse {
+  status: string;
+  suggestions: IngredientSuggestion[];
+  query: string;
+  total: number;
+  execution_time_ms: number;
+}
+
 export interface SearchFilters {
   mealType?: MealType[];
   difficulty?: Array<'EASY' | 'MEDIUM' | 'HARD'>;
@@ -252,4 +314,73 @@ export function convertFiltersToSearchFormat(uiFilters: {
   }
 
   return searchFilters;
+}
+
+/**
+ * Get search suggestions (recipes and cuisines) based on query
+ * Ultra-fast autocomplete for search input (< 50ms response time)
+ *
+ * @example
+ * getSearchSuggestions({ query: 'chi', limit: 10 })
+ * // Returns: [{ name: 'Chicken Curry', type: 'recipe' }, { name: 'Chinese', type: 'cuisine' }, ...]
+ */
+export async function getSearchSuggestions(
+  request: SearchSuggestionsRequest
+): Promise<SearchSuggestionsResponse> {
+  const searchApiUrl = import.meta.env.VITE_SEARCH_API_BASE_URL;
+
+  if (!searchApiUrl) {
+    throw new Error('Search API URL not configured');
+  }
+
+  const response = await fetch(`${searchApiUrl}/search/menu/suggestions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': import.meta.env.VITE_SEARCH_API_KEY || '',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to fetch search suggestions');
+  }
+
+  return await response.json();
+}
+
+/**
+ * Get ingredient suggestions based on query
+ * Ultra-fast autocomplete for ingredient input (< 10ms response time)
+ * Database contains 589+ ingredients with categories
+ *
+ * @example
+ * getIngredientSuggestions({ query: 'tom', limit: 5 })
+ * // Returns: [{ name: 'Tomato', category: 'Vegetables' }, { name: 'Tomato Paste', category: 'Condiments' }, ...]
+ */
+export async function getIngredientSuggestions(
+  request: IngredientSuggestionsRequest
+): Promise<IngredientSuggestionsResponse> {
+  const searchApiUrl = import.meta.env.VITE_SEARCH_API_BASE_URL;
+
+  if (!searchApiUrl) {
+    throw new Error('Search API URL not configured');
+  }
+
+  const response = await fetch(`${searchApiUrl}/ingredients/suggestions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': import.meta.env.VITE_SEARCH_API_KEY || '',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to fetch ingredient suggestions');
+  }
+
+  return await response.json();
 }
