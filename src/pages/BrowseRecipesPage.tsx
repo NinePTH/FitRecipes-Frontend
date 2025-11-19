@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useSavedRecipes } from '@/hooks/useSavedRecipes';
+import { savedRecipesApi } from '@/services/savedRecipesApi';
 import {
   useSmartSearch,
   useVectorSearch,
@@ -48,6 +49,7 @@ export function BrowseRecipesPage() {
   const [newRecipes, setNewRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<RecipeFilters>({});
+  const [savedStatusMap, setSavedStatusMap] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<SortOption>('rating');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -164,6 +166,56 @@ export function BrowseRecipesPage() {
 
     fetchSpecialSections();
   }, []);
+
+  // Bulk check saved status for all visible recipes
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (!user) {
+        setSavedStatusMap({});
+        return;
+      }
+
+      // Collect all recipe IDs from all sections
+      const allRecipeIds = [
+        ...recipes.map(r => r.id),
+        ...recommendedRecipes.map(r => r.id),
+        ...trendingRecipes.map(r => r.id),
+        ...newRecipes.map(r => r.id),
+      ].filter((id, index, arr) => arr.indexOf(id) === index); // Remove duplicates
+
+      if (allRecipeIds.length === 0) return;
+
+      try {
+        const response = await savedRecipesApi.bulkCheckSaved(allRecipeIds);
+        const statusMap: Record<string, boolean> = {};
+        
+        // Handle both array and object formats
+        if (response && response.savedRecipes) {
+          if (Array.isArray(response.savedRecipes)) {
+            // Array format: [{ recipeId: "123", isSaved: true }, ...]
+            response.savedRecipes.forEach(item => {
+              statusMap[item.recipeId] = item.isSaved;
+            });
+          } else if (typeof response.savedRecipes === 'object') {
+            // Object/Map format: { "123": true, "456": false, ... }
+            Object.entries(response.savedRecipes).forEach(([recipeId, isSaved]) => {
+              statusMap[recipeId] = isSaved as boolean;
+            });
+          }
+          setSavedStatusMap(statusMap);
+        } else {
+          console.warn('Bulk check API returned unexpected format:', response);
+          setSavedStatusMap({});
+        }
+      } catch (error) {
+        console.error('Error checking saved status:', error);
+        // Graceful degradation: just don't show saved status
+        setSavedStatusMap({});
+      }
+    };
+
+    checkSavedStatus();
+  }, [recipes, recommendedRecipes, trendingRecipes, newRecipes, user]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -322,8 +374,28 @@ export function BrowseRecipesPage() {
   };
 
   const RecipeCard = ({ recipe }: { recipe: Recipe }) => {
-    const { isSaved, toggleSaveRecipe } = useSavedRecipes();
-    const saved = isSaved(recipe.id);
+    const { toggleSaveRecipe } = useSavedRecipes();
+    const saved = savedStatusMap[recipe.id] || false;
+
+    const handleToggleSave = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      
+      // Optimistic update
+      setSavedStatusMap(prev => ({
+        ...prev,
+        [recipe.id]: !saved,
+      }));
+
+      try {
+        await toggleSaveRecipe(recipe);
+      } catch (error) {
+        // Revert on error
+        setSavedStatusMap(prev => ({
+          ...prev,
+          [recipe.id]: saved,
+        }));
+      }
+    };
 
     return (
       <Card
@@ -349,10 +421,7 @@ export function BrowseRecipesPage() {
           )}
           <div className="absolute top-2 right-2 flex items-center gap-2">
             <button
-              onClick={e => {
-                e.stopPropagation();
-                toggleSaveRecipe(recipe);
-              }}
+              onClick={handleToggleSave}
               className={`p-1.5 rounded-full transition-all duration-200 ${
                 saved
                   ? 'bg-primary-600 text-white hover:bg-primary-700'

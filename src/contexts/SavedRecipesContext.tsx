@@ -1,83 +1,96 @@
 import { useState, useEffect } from 'react';
 import type { Recipe } from '@/types';
 import { SavedRecipesContext } from './SavedRecipesContext';
-
-// Mock saved recipes for demonstration
-const mockSavedRecipes: Partial<Recipe>[] = [
-  {
-    id: 'mock-saved-1',
-    title: 'Quinoa Buddha Bowl',
-    description: 'A nutritious and colorful bowl packed with protein and vegetables',
-    prepTime: 15,
-    cookingTime: 20,
-    difficulty: 'EASY',
-    averageRating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
-    imageUrls: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'],
-    author: {
-      id: 'chef1',
-      firstName: 'Sarah',
-      lastName: 'Chen',
-      email: 'sarah@example.com',
-      role: 'CHEF',
-    } as Partial<Recipe['author']>,
-    dietaryInfo: { isVegan: true, isGlutenFree: true },
-  },
-  {
-    id: 'mock-saved-2',
-    title: 'Mediterranean Grilled Salmon',
-    description: 'Fresh salmon with herbs and lemon, served with roasted vegetables',
-    prepTime: 10,
-    cookingTime: 15,
-    difficulty: 'MEDIUM',
-    averageRating: 4.9,
-    imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400',
-    imageUrls: ['https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400'],
-    author: {
-      id: 'chef2',
-      firstName: 'Marco',
-      lastName: 'Rossi',
-      email: 'marco@example.com',
-      role: 'CHEF',
-    } as Partial<Recipe['author']>,
-    dietaryInfo: { isGlutenFree: true, isPaleo: true },
-  },
-] as Recipe[];
+import { savedRecipesApi } from '@/services/savedRecipesApi';
+import { useAuth } from '@/hooks/useAuth';
 
 export function SavedRecipesProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load saved recipes from localStorage on mount
+  // Load saved recipes from API on mount and when user changes
   useEffect(() => {
-    const saved = localStorage.getItem('fitrecipes_saved');
-    if (saved) {
-      try {
-        setSavedRecipes(JSON.parse(saved));
-      } catch (error) {
-        console.error('Failed to load saved recipes:', error);
-        // Initialize with mock data if loading fails
-        setSavedRecipes(mockSavedRecipes as Recipe[]);
-      }
+    if (user) {
+      loadSavedRecipes();
     } else {
-      // Initialize with mock data if nothing saved
-      setSavedRecipes(mockSavedRecipes as Recipe[]);
+      // Clear saved recipes when user logs out
+      setSavedRecipes([]);
     }
-  }, []);
+  }, [user]);
 
-  // Save to localStorage whenever savedRecipes changes
-  useEffect(() => {
-    localStorage.setItem('fitrecipes_saved', JSON.stringify(savedRecipes));
-  }, [savedRecipes]);
+  const loadSavedRecipes = async () => {
+    if (!user) return;
 
-  const toggleSaveRecipe = (recipe: Recipe) => {
-    setSavedRecipes(prev => {
-      const exists = prev.some(r => r.id === recipe.id);
-      if (exists) {
-        return prev.filter(r => r.id !== recipe.id);
-      } else {
-        return [...prev, recipe];
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await savedRecipesApi.getSavedRecipes({ limit: 100 });
+      setSavedRecipes(response.recipes);
+
+      // Cache to localStorage as backup
+      localStorage.setItem('fitrecipes_saved_cache', JSON.stringify(response.recipes));
+    } catch (err: any) {
+      console.error('Failed to load saved recipes:', err);
+      setError(err.message || 'Failed to load saved recipes');
+
+      // Try to load from localStorage cache as fallback
+      const cached = localStorage.getItem('fitrecipes_saved_cache');
+      if (cached) {
+        try {
+          setSavedRecipes(JSON.parse(cached));
+        } catch {
+          // Ignore cache parse errors
+        }
       }
-    });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSaveRecipe = async (recipe: Recipe) => {
+    if (!user) {
+      // User not logged in - could show login prompt
+      console.warn('User must be logged in to save recipes');
+      return;
+    }
+
+    const isCurrentlySaved = savedRecipes.some(r => r.id === recipe.id);
+
+    // Optimistic update - update UI immediately
+    if (isCurrentlySaved) {
+      setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
+    } else {
+      setSavedRecipes(prev => [...prev, recipe]);
+    }
+
+    try {
+      // Make API call in background
+      if (isCurrentlySaved) {
+        await savedRecipesApi.unsaveRecipe(recipe.id);
+      } else {
+        await savedRecipesApi.saveRecipe(recipe.id);
+      }
+
+      // Update localStorage cache
+      const newSavedRecipes = isCurrentlySaved
+        ? savedRecipes.filter(r => r.id !== recipe.id)
+        : [...savedRecipes, recipe];
+      localStorage.setItem('fitrecipes_saved_cache', JSON.stringify(newSavedRecipes));
+    } catch (err: any) {
+      console.error('Failed to toggle save:', err);
+
+      // Revert optimistic update on error
+      if (isCurrentlySaved) {
+        setSavedRecipes(prev => [...prev, recipe]);
+      } else {
+        setSavedRecipes(prev => prev.filter(r => r.id !== recipe.id));
+      }
+
+      setError(err.message || 'Failed to update saved status');
+    }
   };
 
   const isSaved = (recipeId: string) => {
@@ -85,7 +98,9 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
   };
 
   return (
-    <SavedRecipesContext.Provider value={{ savedRecipes, toggleSaveRecipe, isSaved }}>
+    <SavedRecipesContext.Provider
+      value={{ savedRecipes, toggleSaveRecipe, isSaved, loading, error, refreshSavedRecipes: loadSavedRecipes }}
+    >
       {children}
     </SavedRecipesContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { X, Bookmark, Clock, Star } from 'lucide-react';
+import { X, Bookmark, Clock, Star, Loader2, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSavedRecipes } from '@/hooks/useSavedRecipes';
 import { Button } from './ui/button';
@@ -9,7 +9,7 @@ interface SavedRecipesSidebarProps {
 }
 
 export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarProps) {
-  const { savedRecipes, toggleSaveRecipe } = useSavedRecipes();
+  const { savedRecipes, toggleSaveRecipe, loading, error, refreshSavedRecipes } = useSavedRecipes();
 
   // Desktop dropdown
   if (!isMobile) {
@@ -22,12 +22,16 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
           </h3>
           {savedRecipes.length > 0 && (
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (window.confirm('Remove all saved recipes?')) {
-                  savedRecipes.forEach(recipe => toggleSaveRecipe(recipe));
+                  for (const recipe of savedRecipes) {
+                    await toggleSaveRecipe(recipe);
+                  }
+                  await refreshSavedRecipes();
                 }
               }}
-              className="text-sm text-gray-600 hover:text-gray-700 font-medium"
+              disabled={loading}
+              className="text-sm text-gray-600 hover:text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Clear all
             </button>
@@ -36,13 +40,42 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
 
         {/* Recipes List */}
         <div className="max-h-96 overflow-y-auto">
-          {savedRecipes.length === 0 ? (
+          {/* Loading State */}
+          {loading && savedRecipes.length === 0 && (
+            <div className="text-center p-8 text-gray-500">
+              <Loader2 className="h-12 w-12 mx-auto mb-3 text-primary-500 animate-spin" />
+              <p className="font-medium">Loading saved recipes...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="text-center p-8 text-red-600">
+              <AlertCircle className="h-12 w-12 mx-auto mb-3" />
+              <p className="font-medium">Failed to load saved recipes</p>
+              <p className="text-sm mt-1 text-gray-600">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshSavedRecipes}
+                className="mt-3"
+              >
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && savedRecipes.length === 0 && (
             <div className="text-center p-8 text-gray-500">
               <Bookmark className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium">No saved recipes</p>
               <p className="text-sm mt-1">Save recipes to view them later</p>
             </div>
-          ) : (
+          )}
+
+          {/* Recipes List */}
+          {!loading && !error && savedRecipes.length > 0 && (
             savedRecipes.map(recipe => (
               <div
                 key={recipe.id}
@@ -133,11 +166,15 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 if (window.confirm('Remove all saved recipes?')) {
-                  savedRecipes.forEach(recipe => toggleSaveRecipe(recipe));
+                  for (const recipe of savedRecipes) {
+                    await toggleSaveRecipe(recipe);
+                  }
+                  await refreshSavedRecipes();
                 }
               }}
+              disabled={loading}
               className="text-sm"
             >
               Clear all
@@ -147,13 +184,42 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
 
         {/* Recipes List - Scrollable */}
         <div className="flex-1 overflow-y-auto">
-          {savedRecipes.length === 0 ? (
+          {/* Loading State */}
+          {loading && savedRecipes.length === 0 && (
+            <div className="text-center p-12 text-gray-500">
+              <Loader2 className="h-16 w-16 mx-auto mb-4 text-primary-500 animate-spin" />
+              <p className="font-medium text-lg">Loading saved recipes...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="text-center p-12 text-red-600">
+              <AlertCircle className="h-16 w-16 mx-auto mb-4" />
+              <p className="font-medium text-lg">Failed to load saved recipes</p>
+              <p className="text-sm mt-2 text-gray-600">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshSavedRecipes}
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && savedRecipes.length === 0 && (
             <div className="text-center p-12 text-gray-500">
               <Bookmark className="h-16 w-16 mx-auto mb-4 text-gray-300" />
               <p className="font-medium text-lg">No saved recipes</p>
               <p className="text-sm mt-2">Save recipes to view them later</p>
             </div>
-          ) : (
+          )}
+
+          {/* Recipes List */}
+          {!loading && !error && savedRecipes.length > 0 && (
             savedRecipes.map(recipe => (
               <div key={recipe.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
                 <div className="flex gap-3">
