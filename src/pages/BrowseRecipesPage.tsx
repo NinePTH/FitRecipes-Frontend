@@ -207,8 +207,8 @@ export function BrowseRecipesPage() {
           console.warn('Bulk check API returned unexpected format:', response);
           setSavedStatusMap({});
         }
-      } catch (error) {
-        console.error('Error checking saved status:', error);
+      } catch (_error) {
+        console.error('Error checking saved status:', _error);
         // Graceful degradation: just don't show saved status
         setSavedStatusMap({});
       }
@@ -388,7 +388,7 @@ export function BrowseRecipesPage() {
 
       try {
         await toggleSaveRecipe(recipe);
-      } catch (error) {
+      } catch {
         // Revert on error
         setSavedStatusMap(prev => ({
           ...prev,

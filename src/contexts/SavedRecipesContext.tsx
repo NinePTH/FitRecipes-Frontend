@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Recipe } from '@/types';
 import { SavedRecipesContext } from './SavedRecipesContext';
 import { savedRecipesApi } from '@/services/savedRecipesApi';
@@ -10,17 +10,7 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved recipes from API on mount and when user changes
-  useEffect(() => {
-    if (user) {
-      loadSavedRecipes();
-    } else {
-      // Clear saved recipes when user logs out
-      setSavedRecipes([]);
-    }
-  }, [user]);
-
-  const loadSavedRecipes = async () => {
+  const loadSavedRecipes = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -32,9 +22,10 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
 
       // Cache to localStorage as backup
       localStorage.setItem('fitrecipes_saved_cache', JSON.stringify(response.recipes));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load saved recipes:', err);
-      setError(err.message || 'Failed to load saved recipes');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load saved recipes';
+      setError(errorMessage);
 
       // Try to load from localStorage cache as fallback
       const cached = localStorage.getItem('fitrecipes_saved_cache');
@@ -48,7 +39,17 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Load saved recipes from API on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      loadSavedRecipes();
+    } else {
+      // Clear saved recipes when user logs out
+      setSavedRecipes([]);
+    }
+  }, [user, loadSavedRecipes]);
 
   const toggleSaveRecipe = async (recipe: Recipe) => {
     if (!user) {
@@ -79,8 +80,10 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
         ? savedRecipes.filter(r => r.id !== recipe.id)
         : [...savedRecipes, recipe];
       localStorage.setItem('fitrecipes_saved_cache', JSON.stringify(newSavedRecipes));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to toggle save:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save recipe';
+      setError(errorMessage);
 
       // Revert optimistic update on error
       if (isCurrentlySaved) {
