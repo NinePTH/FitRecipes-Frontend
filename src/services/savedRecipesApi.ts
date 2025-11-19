@@ -20,11 +20,13 @@ interface CheckSavedResponse {
 }
 
 interface BulkCheckSavedResponse {
-  savedRecipes: Array<{
-    recipeId: string;
-    isSaved: boolean;
-    savedAt: string | null;
-  }> | Record<string, boolean>; // Support both array and object formats
+  savedRecipes:
+    | Array<{
+        recipeId: string;
+        isSaved: boolean;
+        savedAt: string | null;
+      }>
+    | Record<string, boolean>; // Support both array and object formats
 }
 
 interface SavedRecipesResponse {
