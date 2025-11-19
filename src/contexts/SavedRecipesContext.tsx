@@ -102,7 +102,14 @@ export function SavedRecipesProvider({ children }: { children: React.ReactNode }
 
   return (
     <SavedRecipesContext.Provider
-      value={{ savedRecipes, toggleSaveRecipe, isSaved, loading, error, refreshSavedRecipes: loadSavedRecipes }}
+      value={{
+        savedRecipes,
+        toggleSaveRecipe,
+        isSaved,
+        loading,
+        error,
+        refreshSavedRecipes: loadSavedRecipes,
+      }}
     >
       {children}
     </SavedRecipesContext.Provider>

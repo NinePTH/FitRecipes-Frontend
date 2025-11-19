@@ -54,12 +54,7 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
               <AlertCircle className="h-12 w-12 mx-auto mb-3" />
               <p className="font-medium">Failed to load saved recipes</p>
               <p className="text-sm mt-1 text-gray-600">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refreshSavedRecipes}
-                className="mt-3"
-              >
+              <Button variant="outline" size="sm" onClick={refreshSavedRecipes} className="mt-3">
                 Try Again
               </Button>
             </div>
@@ -75,7 +70,9 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
           )}
 
           {/* Recipes List */}
-          {!loading && !error && savedRecipes.length > 0 && (
+          {!loading &&
+            !error &&
+            savedRecipes.length > 0 &&
             savedRecipes.map(recipe => (
               <div
                 key={recipe.id}
@@ -127,8 +124,7 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
                   </div>
                 </div>
               </div>
-            ))
-          )}
+            ))}
         </div>
       </div>
     );
@@ -198,12 +194,7 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
               <AlertCircle className="h-16 w-16 mx-auto mb-4" />
               <p className="font-medium text-lg">Failed to load saved recipes</p>
               <p className="text-sm mt-2 text-gray-600">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refreshSavedRecipes}
-                className="mt-4"
-              >
+              <Button variant="outline" size="sm" onClick={refreshSavedRecipes} className="mt-4">
                 Try Again
               </Button>
             </div>
@@ -219,7 +210,9 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
           )}
 
           {/* Recipes List */}
-          {!loading && !error && savedRecipes.length > 0 && (
+          {!loading &&
+            !error &&
+            savedRecipes.length > 0 &&
             savedRecipes.map(recipe => (
               <div key={recipe.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
                 <div className="flex gap-3">
@@ -270,8 +263,7 @@ export function SavedRecipesSidebar({ onClose, isMobile }: SavedRecipesSidebarPr
                   </div>
                 </div>
               </div>
-            ))
-          )}
+            ))}
         </div>
       </div>
     </>

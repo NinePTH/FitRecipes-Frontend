@@ -188,7 +188,7 @@ export function BrowseRecipesPage() {
       try {
         const response = await savedRecipesApi.bulkCheckSaved(allRecipeIds);
         const statusMap: Record<string, boolean> = {};
-        
+
         // Handle both array and object formats
         if (response && response.savedRecipes) {
           if (Array.isArray(response.savedRecipes)) {
@@ -379,7 +379,7 @@ export function BrowseRecipesPage() {
 
     const handleToggleSave = async (e: React.MouseEvent) => {
       e.stopPropagation();
-      
+
       // Optimistic update
       setSavedStatusMap(prev => ({
         ...prev,
