@@ -167,7 +167,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                     <p className="text-sm text-gray-600 mt-1">Ratings</p>
                   </div>
                 </div>
-                {userDetails.statistics.averageRecipeRating &&
+                {userDetails.statistics.averageRecipeRating != null &&
                   userDetails.statistics.averageRecipeRating > 0 && (
                     <div className="mt-4 text-center">
                       <p className="text-sm text-gray-600">Average Recipe Rating</p>
