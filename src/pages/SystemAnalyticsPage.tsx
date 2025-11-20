@@ -234,7 +234,7 @@ const SystemAnalyticsPage = () => {
                       backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     },
                     {
-                      label: 'New Customers',
+                      label: 'New Users',
                       data: userGrowthTrends.trends.map(t => t.newUsers),
                       borderColor: 'rgb(16, 185, 129)',
                       backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -244,6 +244,12 @@ const SystemAnalyticsPage = () => {
                       data: userGrowthTrends.trends.map(t => t.newChefs),
                       borderColor: 'rgb(245, 158, 11)',
                       backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    },
+                    {
+                      label: 'New Admins',
+                      data: userGrowthTrends.trends.map(t => t.newAdmins),
+                      borderColor: 'rgb(147, 51, 234)',
+                      backgroundColor: 'rgba(147, 51, 234, 0.1)',
                     },
                   ]}
                   height={400}
