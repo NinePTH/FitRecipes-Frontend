@@ -27,6 +27,14 @@ import { TrendingRecipesPage } from '@/pages/TrendingRecipesPage';
 import { NewRecipesPage } from '@/pages/NewRecipesPage';
 import { NotificationSettingsPage } from '@/pages/NotificationSettingsPage';
 import { AllNotificationsPage } from '@/pages/AllNotificationsPage';
+import AdminDashboardPage from '@/pages/AdminDashboardPage';
+import ChefDashboardPage from '@/pages/ChefDashboardPage';
+import UserManagementPage from '@/pages/UserManagementPage';
+import ContentModerationPage from '@/pages/ContentModerationPage';
+import SystemAnalyticsPage from '@/pages/SystemAnalyticsPage';
+import ChefAnalyticsPage from '@/pages/ChefAnalyticsPage';
+import ChefPerformancePage from '@/pages/ChefPerformancePage';
+import AuditLogsPage from '@/pages/AuditLogsPage';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -135,7 +143,7 @@ function AppContent() {
 
         {/* Protected Routes - Chef and Admin only */}
         <Route
-          path="/submit-recipe"
+          path="/chef/submit-recipe"
           element={
             <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
               <RecipeSubmissionPage />
@@ -143,10 +151,44 @@ function AppContent() {
           }
         />
         <Route
-          path="/my-recipes"
+          path="/chef/my-recipes"
           element={
             <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
               <MyRecipesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Chef Dashboard Routes */}
+        <Route
+          path="/chef/dashboard"
+          element={
+            <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
+              <ChefDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chef/analytics"
+          element={
+            <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
+              <ChefAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chef/analytics/:recipeId"
+          element={
+            <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
+              <ChefAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chef/performance"
+          element={
+            <ProtectedRoute requiredRoles={['CHEF', 'ADMIN']}>
+              <ChefPerformancePage />
             </ProtectedRoute>
           }
         />
@@ -157,6 +199,56 @@ function AppContent() {
           element={
             <ProtectedRoute requiredRoles={['ADMIN']}>
               <AdminRecipeApprovalPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Dashboard Routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <UserManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/recipes"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <AdminRecipeApprovalPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/moderation"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <ContentModerationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <SystemAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']}>
+              <AuditLogsPage />
             </ProtectedRoute>
           }
         />

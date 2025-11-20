@@ -31,6 +31,7 @@ import {
   updateComment,
   deleteComment,
 } from '@/services/recipe';
+import { trackRecipeView } from '@/services/analytics';
 import type { Recipe } from '@/types';
 
 type CommentItem = {
@@ -113,6 +114,11 @@ export function RecipeDetailPage() {
       try {
         const fetchedRecipe = await getRecipeById(id);
         setRecipe(fetchedRecipe);
+
+        // Track recipe view (fire and forget, don't block UI)
+        trackRecipeView(id).catch(() => {
+          // Silently fail - view tracking is not critical
+        });
       } catch (err: unknown) {
         console.error('Error fetching recipe:', err);
 

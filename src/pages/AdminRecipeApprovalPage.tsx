@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, X, Eye, Clock, User, MessageCircle, ChefHat } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Check, X, Eye, Clock, User, MessageCircle, ChefHat, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -444,6 +444,15 @@ export function AdminRecipeApprovalPage() {
     <>
       <Layout>
         <div className="space-y-8">
+          {/* Back Button */}
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center text-primary-600 hover:text-primary-700"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Link>
+
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Recipe Approval</h1>

@@ -294,3 +294,17 @@ export const adminApi = {
   // Get recipe by ID (admin view - any status)
   getRecipeById: (recipeId: string) => get<{ recipe: Recipe }>(`/api/v1/admin/recipes/${recipeId}`),
 };
+
+// Export apiClient for direct axios-like usage
+export const apiClient = {
+  get: <T>(url: string, config?: { params?: unknown }) => {
+    const queryString = config?.params
+      ? `?${new URLSearchParams(config.params as Record<string, string>).toString()}`
+      : '';
+    return get<T>(url + queryString);
+  },
+  post: <T>(url: string, data?: unknown) => post<T>(url, data),
+  put: <T>(url: string, data?: unknown) => put<T>(url, data),
+  patch: <T>(url: string, data?: unknown) => patch<T>(url, data),
+  delete: <T>(url: string, config?: { data?: unknown }) => deleteRequest<T>(url, config?.data),
+};

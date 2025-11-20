@@ -55,38 +55,28 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               {(user.role === 'CHEF' || user.role === 'ADMIN') && (
-                <>
-                  <Link
-                    to="/submit-recipe"
-                    className={`text-sm font-medium transition-colors ${
-                      isActive('/submit-recipe')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    Submit Recipe
-                  </Link>
-                  <Link
-                    to="/my-recipes"
-                    className={`text-sm font-medium transition-colors ${
-                      isActive('/my-recipes')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    My Recipes
-                  </Link>
-                </>
+                <Link
+                  to="/chef/dashboard"
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname.startsWith('/chef')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  Chef Dashboard
+                </Link>
               )}
 
               {user.role === 'ADMIN' && (
                 <Link
-                  to="/admin"
+                  to="/admin/dashboard"
                   className={`text-sm font-medium transition-colors ${
-                    isActive('/admin') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                    location.pathname.startsWith('/admin')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
-                  Recipe Approval
+                  Admin Dashboard
                 </Link>
               )}
             </nav>
@@ -164,41 +154,30 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               {(user.role === 'CHEF' || user.role === 'ADMIN') && (
-                <>
-                  <Link
-                    to="/submit-recipe"
-                    className={`block text-base font-medium transition-colors ${
-                      isActive('/submit-recipe')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Submit Recipe
-                  </Link>
-                  <Link
-                    to="/my-recipes"
-                    className={`block text-base font-medium transition-colors ${
-                      isActive('/my-recipes')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    My Recipes
-                  </Link>
-                </>
+                <Link
+                  to="/chef/dashboard"
+                  className={`block text-base font-medium transition-colors ${
+                    location.pathname.startsWith('/chef')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Chef Dashboard
+                </Link>
               )}
 
               {user.role === 'ADMIN' && (
                 <Link
-                  to="/admin"
+                  to="/admin/dashboard"
                   className={`block text-base font-medium transition-colors ${
-                    isActive('/admin') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                    location.pathname.startsWith('/admin')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Recipe Approval
+                  Admin Dashboard
                 </Link>
               )}
 

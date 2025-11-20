@@ -88,7 +88,7 @@ export function RecipeSubmissionPage() {
               'Approved recipes cannot be edited. Please contact an admin if you need to make changes.'
             );
             setTimeout(() => {
-              window.location.href = '/my-recipes';
+              window.location.href = '/chef/my-recipes';
             }, 2000);
             return;
           }
@@ -477,7 +477,7 @@ export function RecipeSubmissionPage() {
       setImageUploadStatus('idle');
 
       // Redirect to My Recipes if editing, home if creating new
-      window.location.href = isEditing ? '/my-recipes' : '/';
+      window.location.href = isEditing ? '/chef/my-recipes' : '/';
     } catch (error) {
       console.error('Error submitting recipe:', error);
 
@@ -876,11 +876,11 @@ export function RecipeSubmissionPage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="space-y-2">
             <Link
-              to={isEditing ? '/my-recipes' : '/'}
+              to={isEditing ? '/chef/my-recipes' : '/chef/dashboard'}
               className="inline-flex items-center text-primary-600 hover:text-primary-700"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              {isEditing ? 'Back to My Recipes' : 'Back to Browse Recipes'}
+              {isEditing ? 'Back to My Recipes' : 'Back to Dashboard'}
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">
               {isEditing ? 'Edit Recipe' : 'Submit New Recipe'}

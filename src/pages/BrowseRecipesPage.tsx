@@ -1479,7 +1479,7 @@ export function BrowseRecipesPage() {
                             <p className="text-gray-600 mb-6">
                               No recipes available yet. Be the first to add one!
                             </p>
-                            <Button onClick={() => navigate('/submit-recipe')}>
+                            <Button onClick={() => navigate('/chef/submit-recipe')}>
                               <Plus className="h-4 w-4 mr-2" />
                               Add New Recipe
                             </Button>
