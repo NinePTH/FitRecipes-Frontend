@@ -31,6 +31,7 @@ import {
   updateComment,
   deleteComment,
 } from '@/services/recipe';
+import { adminDeleteRecipe } from '@/services/analytics';
 import { trackRecipeView } from '@/services/analytics';
 import type { Recipe } from '@/types';
 
@@ -81,6 +82,9 @@ export function RecipeDetailPage() {
   const [ratingToDelete, setRatingToDelete] = useState(0);
   const [deleteCommentDialog, setDeleteCommentDialog] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [showAdminDeleteDialog, setShowAdminDeleteDialog] = useState(false);
+  const [adminDeleteReason, setAdminDeleteReason] = useState('');
+  const [isDeletingRecipe, setIsDeletingRecipe] = useState(false);
 
   // DISABLED: Demo notifications removed (notification system disabled)
   // useEffect(() => {
@@ -368,6 +372,46 @@ export function RecipeDetailPage() {
     }
   };
 
+  const handleAdminDeleteRecipe = () => {
+    setShowAdminDeleteDialog(true);
+  };
+
+  const confirmAdminDeleteRecipe = async () => {
+    if (!id || !adminDeleteReason.trim()) {
+      toast.error('Reason required', 'Please provide a reason for deletion');
+      return;
+    }
+
+    if (adminDeleteReason.trim().length < 10) {
+      toast.error('Reason too short', 'Deletion reason must be at least 10 characters');
+      return;
+    }
+
+    setIsDeletingRecipe(true);
+
+    try {
+      await adminDeleteRecipe(id, adminDeleteReason);
+      toast.success('Recipe deleted', 'Recipe has been permanently deleted');
+      
+      // Navigate to browse recipes after deletion
+      setTimeout(() => {
+        navigate('/browse');
+      }, 1500);
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      toast.error('Deletion failed', 'Failed to delete recipe. Please try again.');
+    } finally {
+      setIsDeletingRecipe(false);
+      setShowAdminDeleteDialog(false);
+      setAdminDeleteReason('');
+    }
+  };
+
+  const cancelAdminDeleteRecipe = () => {
+    setShowAdminDeleteDialog(false);
+    setAdminDeleteReason('');
+  };
+
   // DISABLED: Save feature - waiting for backend implementation
   // const handleSaveRecipe = () => {
   //   if (!user) {
@@ -463,8 +507,9 @@ export function RecipeDetailPage() {
   }
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto space-y-8">
+    <>
+      <Layout>
+        <div className="max-w-4xl mx-auto space-y-8">
         {/* Back Button */}
         <Link to="/" className="inline-flex items-center text-primary-600 hover:text-primary-700">
           <ChevronLeft className="h-4 w-4 mr-1" />
@@ -518,6 +563,20 @@ export function RecipeDetailPage() {
                 <Share2 className="h-4 w-4 mr-1" />
                 Share
               </Button>
+              
+              {/* Admin Delete Button */}
+              {user && user.role === 'ADMIN' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAdminDeleteRecipe}
+                  disabled={isDeletingRecipe}
+                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -993,5 +1052,63 @@ export function RecipeDetailPage() {
         />
       </div>
     </Layout>
+
+      {/* Admin Delete Recipe Dialog - Rendered outside main container for full-screen overlay */}
+      {showAdminDeleteDialog && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Recipe</h3>
+                <p className="text-sm text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-gray-700 mb-2">
+                Are you sure you want to permanently delete "{recipe?.title}"?
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                This will remove the recipe from the system permanently.
+              </p>
+
+              <label htmlFor="adminDeleteReason" className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for deletion <span className="text-red-600">*</span>
+              </label>
+              <Textarea
+                id="adminDeleteReason"
+                value={adminDeleteReason}
+                onChange={e => setAdminDeleteReason(e.target.value)}
+                placeholder="Explain why this recipe is being deleted (min 10 characters)..."
+                rows={3}
+                className="w-full"
+              />
+              {adminDeleteReason.trim() && adminDeleteReason.trim().length < 10 && (
+                <p className="text-sm text-red-600 mt-1">
+                  Reason must be at least 10 characters
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={cancelAdminDeleteRecipe} disabled={isDeletingRecipe}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmAdminDeleteRecipe}
+                disabled={isDeletingRecipe || !adminDeleteReason.trim() || adminDeleteReason.trim().length < 10}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {isDeletingRecipe ? 'Deleting...' : 'Delete Recipe'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
