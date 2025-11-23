@@ -320,8 +320,13 @@ export function BrowseRecipesPage() {
     setShowSuggestions(false);
     // Complete the search query with the selected recipe title
     setSearchQuery(recipeTitle);
-    // Trigger search with the completed query
-    handleSearch(recipeTitle);
+    // Trigger search programmatically
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) {
+        form.requestSubmit();
+      }
+    }, 0);
   };
 
   const handleIngredientSelect = (ingredientName: string) => {
