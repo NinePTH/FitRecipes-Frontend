@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Check, X, Eye, Clock, User, MessageCircle, ChefHat, ChevronLeft, Trash2 } from 'lucide-react';
+import {
+  Check,
+  X,
+  Eye,
+  Clock,
+  User,
+  MessageCircle,
+  ChefHat,
+  ChevronLeft,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -650,7 +660,10 @@ export function AdminRecipeApprovalPage() {
                 This will remove the recipe from the system permanently.
               </p>
 
-              <label htmlFor="deleteReason" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="deleteReason"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Reason for deletion <span className="text-red-600">*</span>
               </label>
               <Textarea
@@ -662,9 +675,7 @@ export function AdminRecipeApprovalPage() {
                 className="w-full"
               />
               {deleteReason.trim() && deleteReason.trim().length < 10 && (
-                <p className="text-sm text-red-600 mt-1">
-                  Reason must be at least 10 characters
-                </p>
+                <p className="text-sm text-red-600 mt-1">Reason must be at least 10 characters</p>
               )}
             </div>
 

@@ -122,7 +122,7 @@ export function Layout({ children }: LayoutProps) {
                 size="icon"
                 onClick={handleLogout}
                 title="Logout"
-                className="hidden lg:block"
+                className="hidden lg:flex items-center justify-center"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
