@@ -316,10 +316,17 @@ export function BrowseRecipesPage() {
     }
   };
 
-  const handleSuggestionSelect = (recipeId: string) => {
+  const handleSuggestionSelect = (recipeTitle: string) => {
     setShowSuggestions(false);
-    // Navigate directly to recipe detail page
-    navigate(`/recipes/${recipeId}`);
+    // Complete the search query with the selected recipe title
+    setSearchQuery(recipeTitle);
+    // Trigger search programmatically
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) {
+        form.requestSubmit();
+      }
+    }, 0);
   };
 
   const handleIngredientSelect = (ingredientName: string) => {
@@ -664,7 +671,7 @@ export function BrowseRecipesPage() {
                                 return (
                                   <CommandItem
                                     key={suggestion.id}
-                                    onClick={() => handleSuggestionSelect(suggestion.id)}
+                                    onClick={() => handleSuggestionSelect(suggestion.title)}
                                     className="cursor-pointer flex items-center justify-between py-2"
                                   >
                                     <div className="flex items-center gap-2">
