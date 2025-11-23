@@ -287,7 +287,7 @@ export const getRecipeAnalytics = async (
  * @public Accessible to all users (authenticated or not)
  */
 export const trackRecipeView = async (recipeId: string): Promise<void> => {
-  await apiClient.post(`/recipes/${recipeId}/view`);
+  await apiClient.post(`/api/v1/recipes/${recipeId}/view`);
 };
 
 // ============================================================================
