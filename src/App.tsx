@@ -25,6 +25,7 @@ import { MyRecipesPage } from '@/pages/MyRecipesPage';
 import { RecommendedRecipesPage } from '@/pages/RecommendedRecipesPage';
 import { TrendingRecipesPage } from '@/pages/TrendingRecipesPage';
 import { NewRecipesPage } from '@/pages/NewRecipesPage';
+import LandingPage from '@/pages/LandingPage';
 import { NotificationSettingsPage } from '@/pages/NotificationSettingsPage';
 import { AllNotificationsPage } from '@/pages/AllNotificationsPage';
 import AdminDashboardPage from '@/pages/AdminDashboardPage';
@@ -82,6 +83,7 @@ function AppContent() {
 
       <Routes>
         {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -93,13 +95,14 @@ function AppContent() {
 
         {/* Protected Routes - All authenticated users */}
         <Route
-          path="/"
+          path="/browse"
           element={
             <ProtectedRoute>
               <BrowseRecipesPage />
             </ProtectedRoute>
           }
         />
+        {/* Redirect old route to new route */}
         <Route
           path="/browse-recipes"
           element={

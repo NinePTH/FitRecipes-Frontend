@@ -38,7 +38,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/browse" className="flex items-center space-x-2">
               <ChefHat className="h-8 w-8 text-primary-600" />
               <span className="hidden md:block text-xl font-bold text-gray-900">FitRecipes</span>
             </Link>
@@ -46,9 +46,11 @@ export function Layout({ children }: LayoutProps) {
             {/* Main Navigation */}
             <nav className="hidden lg:flex items-center space-x-8">
               <Link
-                to="/"
+                to="/browse"
                 className={`text-sm font-medium transition-colors ${
-                  isActive('/') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                  isActive('/browse') || isActive('/')
+                    ? 'text-primary-600'
+                    : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 Browse Recipes
@@ -144,9 +146,9 @@ export function Layout({ children }: LayoutProps) {
           <div className="relative z-50 lg:hidden bg-white border-b shadow-lg">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
               <Link
-                to="/"
+                to="/browse"
                 className={`block text-base font-medium transition-colors ${
-                  isActive('/') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                  isActive('/browse') || isActive('/') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -233,17 +235,17 @@ export function Layout({ children }: LayoutProps) {
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Recipes</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <Link to="/" className="hover:text-gray-900">
+                  <Link to="/browse" className="hover:text-gray-900">
                     Browse All
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="hover:text-gray-900">
+                  <Link to="/recipes/trending" className="hover:text-gray-900">
                     Trending
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="hover:text-gray-900">
+                  <Link to="/recipes/new" className="hover:text-gray-900">
                     New Recipes
                   </Link>
                 </li>
