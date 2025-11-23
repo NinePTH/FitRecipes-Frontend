@@ -12,6 +12,7 @@ import {
   CheckCircle,
   XCircle,
   Plus,
+  ChevronLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -197,6 +198,15 @@ export function MyRecipesPage() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Back Button */}
+        <Link
+          to="/chef/dashboard"
+          className="inline-flex items-center text-primary-600 hover:text-primary-700"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back to Dashboard
+        </Link>
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
@@ -395,7 +405,7 @@ export function MyRecipesPage() {
                           )}
 
                           {(recipe.status === 'PENDING' || recipe.status === 'REJECTED') && (
-                            <Link to={`/submit-recipe?edit=${recipe.id}`}>
+                            <Link to={`/chef/submit-recipe?edit=${recipe.id}`}>
                               <Button variant="outline" size="sm">
                                 <Edit className="h-4 w-4 mr-1" />
                                 Edit

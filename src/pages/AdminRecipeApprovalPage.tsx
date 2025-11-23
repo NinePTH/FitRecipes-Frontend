@@ -1,13 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, X, Eye, Clock, User, MessageCircle, ChefHat } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  Check,
+  X,
+  Eye,
+  Clock,
+  User,
+  MessageCircle,
+  ChefHat,
+  ChevronLeft,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertDialog } from '@/components/ui/alert-dialog';
 import { Layout } from '@/components/Layout';
 import { adminApi } from '@/services/api';
+import { adminDeleteRecipe } from '@/services/analytics';
 import type { Recipe } from '@/types';
+import { useToast } from '@/hooks/useToast';
 
 export function AdminRecipeApprovalPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -15,6 +26,10 @@ export function AdminRecipeApprovalPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+  const { showToast } = useToast();
 
   // Statistics state
   const [stats, setStats] = useState({ pending: 0, approvedToday: 0, rejectedToday: 0 });
@@ -23,21 +38,6 @@ export function AdminRecipeApprovalPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-
-  // Alert dialog state
-  const [alertDialog, setAlertDialog] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-  }>({
-    open: false,
-    title: '',
-    description: '',
-  });
-
-  const showAlert = (title: string, description: string) => {
-    setAlertDialog({ open: true, title, description });
-  };
 
   // Fetch statistics
   useEffect(() => {
@@ -69,14 +69,18 @@ export function AdminRecipeApprovalPage() {
         setHasNextPage(result.pagination.hasNext);
       } catch (error) {
         console.error('Failed to fetch pending recipes:', error);
-        showAlert('Error', 'Failed to load pending recipes. Please try again.');
+        showToast(
+          'error',
+          'Error loading recipes',
+          'Failed to load pending recipes. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchPendingRecipes();
-  }, []); // Only run once on mount
+  }, [showToast]); // Only run once on mount
 
   const loadMoreRecipes = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -95,7 +99,11 @@ export function AdminRecipeApprovalPage() {
       setHasNextPage(result.pagination.hasNext);
     } catch (error) {
       console.error('Failed to load more recipes:', error);
-      showAlert('Error', 'Failed to load more recipes. Please try again.');
+      showToast(
+        'error',
+        'Error loading more recipes',
+        'Failed to load more recipes. Please try again.'
+      );
     } finally {
       setIsFetchingNextPage(false);
     }
@@ -116,10 +124,10 @@ export function AdminRecipeApprovalPage() {
       }));
 
       setSelectedRecipe(null);
-      showAlert('Success', result.message || 'Recipe approved successfully!');
+      showToast('success', 'Recipe approved', result.message || 'Recipe approved successfully!');
     } catch (error) {
       console.error('Failed to approve recipe:', error);
-      showAlert('Error', 'Failed to approve recipe. Please try again.');
+      showToast('error', 'Approval failed', 'Failed to approve recipe. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -129,12 +137,12 @@ export function AdminRecipeApprovalPage() {
     const reasonToUse = reason || rejectionReason;
 
     if (!reasonToUse.trim()) {
-      showAlert('Error', 'Rejection reason is required');
+      showToast('error', 'Rejection reason required', 'Please provide a reason for rejection');
       return;
     }
 
     if (reasonToUse.trim().length < 10) {
-      showAlert('Error', 'Rejection reason must be at least 10 characters');
+      showToast('error', 'Reason too short', 'Rejection reason must be at least 10 characters');
       return;
     }
 
@@ -153,13 +161,62 @@ export function AdminRecipeApprovalPage() {
 
       setSelectedRecipe(null);
       setRejectionReason('');
-      showAlert('Success', result.message || 'Recipe rejected successfully');
+      showToast('success', 'Recipe rejected', result.message || 'Recipe rejected successfully');
     } catch (error) {
       console.error('Failed to reject recipe:', error);
-      showAlert('Error', 'Failed to reject recipe. Please try again.');
+      showToast('error', 'Rejection failed', 'Failed to reject recipe. Please try again.');
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleDeleteClick = (recipe: Recipe) => {
+    setRecipeToDelete(recipe);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!recipeToDelete) return;
+
+    if (!deleteReason.trim()) {
+      showToast('error', 'Delete reason required', 'Please provide a reason for deletion');
+      return;
+    }
+
+    if (deleteReason.trim().length < 10) {
+      showToast('error', 'Reason too short', 'Deletion reason must be at least 10 characters');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      await adminDeleteRecipe(recipeToDelete.id, deleteReason);
+
+      // Remove from list and update stats
+      setRecipes(prev => prev.filter(recipe => recipe.id !== recipeToDelete.id));
+      setStats(prev => ({
+        ...prev,
+        pending: prev.pending - 1,
+      }));
+
+      setShowDeleteDialog(false);
+      setRecipeToDelete(null);
+      setDeleteReason('');
+      setSelectedRecipe(null);
+      showToast('success', 'Recipe deleted', 'Recipe has been permanently deleted');
+    } catch (error) {
+      console.error('Failed to delete recipe:', error);
+      showToast('error', 'Deletion failed', 'Failed to delete recipe. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+    setRecipeToDelete(null);
+    setDeleteReason('');
   };
 
   const formatDate = (dateString: string) => {
@@ -411,33 +468,43 @@ export function AdminRecipeApprovalPage() {
                 />
               </div>
 
-              <div className="flex justify-end space-x-4">
-                <Button variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                {/* View full details - navigate to public recipe detail page */}
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    onClose();
-                    navigate(`/recipe/${recipe.id}`);
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Full Details
-                </Button>
+              <div className="flex justify-between items-center">
                 <Button
                   variant="destructive"
-                  onClick={() => handleReject(recipe.id, localRejectionReason)}
-                  disabled={isProcessing || !localRejectionReason.trim()}
+                  onClick={() => handleDeleteClick(recipe)}
+                  disabled={isProcessing}
                 >
-                  <X className="h-4 w-4 mr-2" />
-                  {isProcessing ? 'Rejecting...' : 'Reject'}
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Recipe
                 </Button>
-                <Button onClick={() => handleApprove(recipe.id)} disabled={isProcessing}>
-                  <Check className="h-4 w-4 mr-2" />
-                  {isProcessing ? 'Approving...' : 'Approve'}
-                </Button>
+                <div className="flex space-x-4">
+                  <Button variant="outline" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  {/* View full details - navigate to public recipe detail page */}
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      onClose();
+                      navigate(`/recipe/${recipe.id}`);
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Full Details
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleReject(recipe.id, localRejectionReason)}
+                    disabled={isProcessing || !localRejectionReason.trim()}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    {isProcessing ? 'Rejecting...' : 'Reject'}
+                  </Button>
+                  <Button onClick={() => handleApprove(recipe.id)} disabled={isProcessing}>
+                    <Check className="h-4 w-4 mr-2" />
+                    {isProcessing ? 'Approving...' : 'Approve'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -450,6 +517,15 @@ export function AdminRecipeApprovalPage() {
     <>
       <Layout>
         <div className="space-y-8">
+          {/* Back Button */}
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center text-primary-600 hover:text-primary-700"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Link>
+
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Recipe Approval</h1>
@@ -562,13 +638,63 @@ export function AdminRecipeApprovalPage() {
         />
       )}
 
-      {/* Alert Dialog - Outside Layout */}
-      <AlertDialog
-        open={alertDialog.open}
-        onOpenChange={open => setAlertDialog(prev => ({ ...prev, open }))}
-        title={alertDialog.title}
-        description={alertDialog.description}
-      />
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && recipeToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Recipe</h3>
+                <p className="text-sm text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-gray-700 mb-2">
+                Are you sure you want to permanently delete "{recipeToDelete.title}"?
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                This will remove the recipe from the system permanently.
+              </p>
+
+              <label
+                htmlFor="deleteReason"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Reason for deletion <span className="text-red-600">*</span>
+              </label>
+              <Textarea
+                id="deleteReason"
+                value={deleteReason}
+                onChange={e => setDeleteReason(e.target.value)}
+                placeholder="Explain why this recipe is being deleted (min 10 characters)..."
+                rows={3}
+                className="w-full"
+              />
+              {deleteReason.trim() && deleteReason.trim().length < 10 && (
+                <p className="text-sm text-red-600 mt-1">Reason must be at least 10 characters</p>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={handleDeleteCancel} disabled={isProcessing}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isProcessing || !deleteReason.trim() || deleteReason.trim().length < 10}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {isProcessing ? 'Deleting...' : 'Delete Recipe'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

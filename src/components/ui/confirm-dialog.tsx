@@ -12,6 +12,8 @@ interface ConfirmDialogProps {
   cancelText?: string;
   variant?: 'default' | 'destructive';
   icon?: React.ReactNode;
+  children?: React.ReactNode;
+  isLoading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -24,6 +26,8 @@ export function ConfirmDialog({
   cancelText = 'Cancel',
   variant = 'default',
   icon,
+  children,
+  isLoading = false,
 }: ConfirmDialogProps) {
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -90,6 +94,9 @@ export function ConfirmDialog({
           >
             {description}
           </p>
+
+          {/* Optional children content */}
+          {children && <div className="pt-2">{children}</div>}
         </div>
 
         {/* Actions */}
@@ -98,11 +105,17 @@ export function ConfirmDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             className="flex-1 min-w-[80px]"
+            disabled={isLoading}
           >
             {cancelText}
           </Button>
-          <Button variant={variant} onClick={handleConfirm} className="flex-1 min-w-[80px]">
-            {confirmText}
+          <Button
+            variant={variant}
+            onClick={handleConfirm}
+            className="flex-1 min-w-[80px]"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Processing...' : confirmText}
           </Button>
         </div>
       </div>

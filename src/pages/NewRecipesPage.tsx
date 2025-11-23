@@ -176,7 +176,7 @@ export function NewRecipesPage() {
             <p className="text-gray-600">
               Be the first to contribute! Share your recipe with the community.
             </p>
-            <Link to="/submit-recipe">
+            <Link to="/chef/submit-recipe">
               <Button className="mt-4">Submit a Recipe</Button>
             </Link>
           </div>

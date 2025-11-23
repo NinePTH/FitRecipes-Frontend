@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChefHat, User, LogOut, Menu, X } from 'lucide-react'; // Removed Bell icon
+import { ChefHat, User, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-// import { useToast } from '@/hooks/useToast'; // DISABLED: Notification sidebar disabled
+import { NotificationBell } from '@/components/NotificationBell';
+import { SavedRecipesIcon } from '@/components/SavedRecipesIcon';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,7 +14,6 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  // const { toggleSidebar, unreadCount } = useToast(); // DISABLED: Notification sidebar disabled
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
@@ -40,11 +40,11 @@ export function Layout({ children }: LayoutProps) {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <ChefHat className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-bold text-gray-900">FitRecipes</span>
+              <span className="hidden md:block text-xl font-bold text-gray-900">FitRecipes</span>
             </Link>
 
             {/* Main Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center space-x-8">
               <Link
                 to="/"
                 className={`text-sm font-medium transition-colors ${
@@ -55,64 +55,45 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               {(user.role === 'CHEF' || user.role === 'ADMIN') && (
-                <>
-                  <Link
-                    to="/submit-recipe"
-                    className={`text-sm font-medium transition-colors ${
-                      isActive('/submit-recipe')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    Submit Recipe
-                  </Link>
-                  <Link
-                    to="/my-recipes"
-                    className={`text-sm font-medium transition-colors ${
-                      isActive('/my-recipes')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    My Recipes
-                  </Link>
-                </>
+                <Link
+                  to="/chef/dashboard"
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname.startsWith('/chef')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  Chef Dashboard
+                </Link>
               )}
 
               {user.role === 'ADMIN' && (
                 <Link
-                  to="/admin"
+                  to="/admin/dashboard"
                   className={`text-sm font-medium transition-colors ${
-                    isActive('/admin') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                    location.pathname.startsWith('/admin')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
-                  Recipe Approval
+                  Admin Dashboard
                 </Link>
               )}
             </nav>
 
             {/* User Menu */}
             <div className="flex items-center space-x-4">
-              {/* DISABLED: Notification Bell - Waiting for backend
-              <button
-                onClick={toggleSidebar}
-                className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs font-semibold rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-              */}
+              {/* Notification Bell */}
+              <NotificationBell />
+
+              {/* Saved Recipes */}
+              <SavedRecipesIcon />
 
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="lg:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -136,7 +117,13 @@ export function Layout({ children }: LayoutProps) {
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                title="Logout"
+                className="hidden lg:flex items-center justify-center"
+              >
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -149,12 +136,12 @@ export function Layout({ children }: LayoutProps) {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-25 z-40 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-25 z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
           {/* Menu */}
-          <div className="relative z-50 md:hidden bg-white border-b shadow-lg">
+          <div className="relative z-50 lg:hidden bg-white border-b shadow-lg">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
               <Link
                 to="/"
@@ -167,41 +154,30 @@ export function Layout({ children }: LayoutProps) {
               </Link>
 
               {(user.role === 'CHEF' || user.role === 'ADMIN') && (
-                <>
-                  <Link
-                    to="/submit-recipe"
-                    className={`block text-base font-medium transition-colors ${
-                      isActive('/submit-recipe')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Submit Recipe
-                  </Link>
-                  <Link
-                    to="/my-recipes"
-                    className={`block text-base font-medium transition-colors ${
-                      isActive('/my-recipes')
-                        ? 'text-primary-600'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    My Recipes
-                  </Link>
-                </>
+                <Link
+                  to="/chef/dashboard"
+                  className={`block text-base font-medium transition-colors ${
+                    location.pathname.startsWith('/chef')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Chef Dashboard
+                </Link>
               )}
 
               {user.role === 'ADMIN' && (
                 <Link
-                  to="/admin"
+                  to="/admin/dashboard"
                   className={`block text-base font-medium transition-colors ${
-                    isActive('/admin') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+                    location.pathname.startsWith('/admin')
+                      ? 'text-primary-600'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Recipe Approval
+                  Admin Dashboard
                 </Link>
               )}
 
