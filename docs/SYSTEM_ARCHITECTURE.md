@@ -4,252 +4,149 @@
 
 ```mermaid
 graph TB
-    subgraph "Presentation Layer"
-        WEB_APP[Web Application<br/>React 19 + TypeScript<br/>Vite 6]
-        ADMIN_PANEL[Admin Dashboard<br/>React Components]
-        CHEF_PANEL[Chef Dashboard<br/>React Components]
+    subgraph "Client Layer"
+        USERS[End Users<br/>Web Browsers<br/>Mobile Devices]
     end
-
-    subgraph "Frontend Components"
-        subgraph "Public Pages"
-            LANDING[Landing Page<br/>Framer Motion]
-            AUTH_PAGE[Auth Page<br/>Login/Register/OAuth]
-            TERMS_PAGE[Terms & Verification]
-        end
-        
-        subgraph "Protected Pages"
-            BROWSE[Browse Recipes<br/>Vector Search]
-            RECIPE_DETAIL[Recipe Details<br/>Ratings & Comments]
-            MY_RECIPES[My Recipes<br/>Chef Dashboard]
-            SUBMIT_RECIPE[Recipe Submission<br/>Image Upload]
-        end
-        
-        subgraph "Admin Features"
-            USER_MGMT_UI[User Management]
-            RECIPE_APPROVAL[Recipe Approval]
-            CONTENT_MOD[Content Moderation]
-            SYSTEM_ANALYTICS[System Analytics]
-        end
-    end
-
-    subgraph "State Management"
-        AUTH_CONTEXT[Auth Context<br/>JWT + User State]
-        REACT_QUERY[TanStack React Query<br/>Server State Cache]
-        SAVED_RECIPES_CTX[Saved Recipes Context]
-    end
-
-    subgraph "Frontend Services"
-        API_CLIENT[API Client<br/>Axios Wrapper]
-        AUTH_SERVICE[Auth Service<br/>Token Management]
-        RECIPE_SERVICE[Recipe Service]
-        NOTIFICATION_CLIENT[Notification Service]
-        PUSH_SERVICE[Push Notifications<br/>FCM Web]
-    end
-
-    subgraph "API Layer"
-        subgraph "Load Balancing"
-            NGINX[Nginx Load Balancer]
-        end
-        
-        subgraph "Application Servers"
-            APP1[Hono Server 1<br/>Port 3001]
-            APP2[Hono Server 2<br/>Port 3002]
-            APP3[Hono Server 3<br/>Port 3003]
-        end
-    end
-
-    subgraph "Business Logic Layer"
-        subgraph "Core Services"
-            AUTH[Authentication Service<br/>JWT + OAuth]
-            RECIPE_MGT[Recipe Management<br/>CRUD + Approval]
-            USER_MGT[User Management<br/>Roles & Permissions]
-            COMMUNITY[Community Service<br/>Ratings & Comments]
-        end
-        
-        subgraph "Supporting Services"
-            ANALYTICS[Analytics Service<br/>Charts & Metrics]
-            NOTIFICATION[Notification Service<br/>Real-time Updates]
-            MODERATION[Content Moderation<br/>Comment Management]
-            WORKFLOW[Approval Workflow<br/>Chef → Admin]
-        end
-        
-        subgraph "Advanced Features"
-            VECTOR_SEARCH[Vector Search API<br/>Semantic Search]
-            SEARCH_SUGGESTIONS[Search Suggestions<br/>Auto-complete]
-        end
-    end
-
-    subgraph "Data Layer"
-        subgraph "Primary Database"
-            POSTGRES[(PostgreSQL<br/>Supabase)]
-            PRISMA_CLIENT[Prisma Client<br/>ORM]
-        end
-        
-        subgraph "File Storage"
-            SUPABASE_STORAGE[Supabase Storage<br/>CDN]
-            RECIPE_IMAGES[Recipe Images<br/>WebP/JPEG]
-            USER_AVATARS[User Avatars]
-        end
-    end
-
-    subgraph "External Integration Layer"
-        GOOGLE_AUTH[Google OAuth 2.0]
-        RESEND[Resend Email Service<br/>Verification & Reset]
-        FCM_SERVICE[Firebase Cloud Messaging<br/>Push Notifications]
-        IMAGE_PROCESSOR[Sharp Image Processing<br/>Resize & Optimize]
-    end
-
-    subgraph "Infrastructure Layer"
-        subgraph "Frontend Deployment"
-            VERCEL[Vercel Platform<br/>Auto Deploy]
-            CDN[Global CDN<br/>Static Assets]
-            DOMAIN[Custom Domain<br/>SSL/TLS]
-        end
-        
-        subgraph "Monitoring & Logging"
-            HEALTH_CHECK[Health Monitoring]
-            ERROR_LOG[Error Logging]
-            METRICS_COL[Metrics Collection]
-        end
-        
-        subgraph "Security"
-            RATE_LIMITER[Rate Limiting]
-            DDOS_PROTECT[DDoS Protection]
-            SSL_CERT[SSL/TLS Certificates]
-            CORS[CORS Configuration]
-        end
-        
-        subgraph "CI/CD Pipeline"
-            GITHUB_ACTIONS[GitHub Actions<br/>Workflow Triggers]
-            LINT_CHECK[ESLint + Prettier<br/>Code Quality]
-            TYPE_CHECK[TypeScript<br/>Type Validation]
-            UNIT_TESTS[Vitest<br/>Unit Tests]
-            E2E_TESTS[Playwright<br/>E2E Tests]
-            BUILD_STEP[Vite Build<br/>Production Bundle]
-            AUTO_DEPLOY[Vercel Deploy<br/>Preview + Production]
-        end
-    end
-
-    %% Frontend to State Management
-    LANDING --> AUTH_CONTEXT
-    AUTH_PAGE --> AUTH_CONTEXT
-    BROWSE --> REACT_QUERY
-    RECIPE_DETAIL --> REACT_QUERY
-    MY_RECIPES --> AUTH_CONTEXT
-    SUBMIT_RECIPE --> AUTH_CONTEXT
-    USER_MGMT_UI --> AUTH_CONTEXT
-    RECIPE_APPROVAL --> AUTH_CONTEXT
-    CONTENT_MOD --> AUTH_CONTEXT
-    SYSTEM_ANALYTICS --> AUTH_CONTEXT
     
-    %% State to Services
-    AUTH_CONTEXT --> AUTH_SERVICE
+    subgraph "Frontend Hosting - Vercel"
+        VERCEL[Vercel Edge Network<br/>Global CDN<br/>SSL/TLS]
+        
+        subgraph "React Application"
+            FRONTEND[React 19 + TypeScript<br/>Vite 6 Build<br/>Tailwind CSS v3]
+            
+            subgraph "State Management"
+                AUTH_CTX[Auth Context<br/>JWT + User State]
+                REACT_QUERY[React Query<br/>Server Cache]
+            end
+            
+            subgraph "Core Pages"
+                PUBLIC[Auth + OAuth<br/>Terms & Verification<br/>Browse Recipes]
+                PROTECTED[Recipe Detail<br/>Submit Recipe<br/>My Recipes]
+                ADMIN[User Management<br/>Recipe Approval<br/>Content Moderation]
+            end
+            
+            subgraph "Services Layer"
+                API_CLIENT[API Client<br/>Axios + JWT]
+                AUTH_SVC[Auth Service<br/>Token Management]
+                PUSH_SVC[Push Service<br/>FCM Web SDK]
+            end
+        end
+    end
+    
+    subgraph "Backend Hosting - Render"
+        RENDER_LB[Render Load Balancer<br/>SSL/TLS Termination<br/>Managed Platform]
+        APP[Hono.js Server<br/>Bun Runtime<br/>Docker Container<br/>Port 3000]
+        HEALTH[Health Check<br/>/health endpoint<br/>30s intervals]
+    end
+    
+    subgraph "Database Layer - Supabase"
+        POSTGRES[(PostgreSQL 15<br/>Prisma ORM<br/>Connection Pooling<br/>Daily Backups)]
+        STORAGE[Supabase Storage<br/>Recipe Images<br/>CDN Enabled]
+    end
+    
+    subgraph "External Services"
+        GOOGLE[Google OAuth 2.0<br/>Social Login]
+        RESEND[Resend API<br/>Email Verification<br/>Password Reset]
+        FCM[Firebase Cloud Messaging<br/>Push Notifications]
+    end
+    
+    subgraph "CI/CD Pipeline - GitHub Actions"
+        GIT[Git Repository<br/>GitHub<br/>main, develop branch]
+        
+        subgraph "Frontend Pipeline"
+            FE_LINT[ESLint + Prettier<br/>Format Check]
+            FE_TYPE[TypeScript Check<br/>Type Validation]
+            FE_TEST[Vitest Tests<br/>Coverage Report]
+            FE_BUILD[Vite Build<br/>Node 18.x & 20.x]
+            FE_DEPLOY[Vercel Deploy<br/>Staging: develop<br/>Production: main]
+        end
+        
+        subgraph "Backend Pipeline"
+            BE_TEST[Unit Tests<br/>ESLint + TypeScript<br/>59 tests passing]
+            BE_BUILD[Docker Build<br/>Multi-stage<br/>Bun + Prisma]
+            SECURITY[Trivy Scanner<br/>Vulnerability Check]
+            BE_DEPLOY[Render Deploy<br/>DB Migrations<br/>Health Verification]
+        end
+    end
+    
+    subgraph "Monitoring"
+        LOGS[Application Logs<br/>Hono Logger<br/>Error Tracking]
+        METRICS[Performance Metrics<br/>Request/Response Time<br/>API Analytics]
+    end
+
+    %% User Flow
+    USERS -->|HTTPS| VERCEL
+    VERCEL --> FRONTEND
+    
+    %% Frontend Internal Flow
+    FRONTEND --> PUBLIC
+    FRONTEND --> PROTECTED
+    FRONTEND --> ADMIN
+    
+    PUBLIC --> AUTH_CTX
+    PROTECTED --> AUTH_CTX
+    PROTECTED --> REACT_QUERY
+    ADMIN --> AUTH_CTX
+    
+    AUTH_CTX --> AUTH_SVC
     REACT_QUERY --> API_CLIENT
-    SAVED_RECIPES_CTX --> RECIPE_SERVICE
+    AUTH_SVC --> API_CLIENT
     
-    %% Services to API Client
-    AUTH_SERVICE --> API_CLIENT
-    RECIPE_SERVICE --> API_CLIENT
-    NOTIFICATION_CLIENT --> API_CLIENT
-    PUSH_SERVICE --> FCM_SERVICE
+    %% Frontend to Backend
+    API_CLIENT -->|REST API<br/>JWT Auth| RENDER_LB
+    PUSH_SVC -->|Web Push| FCM
     
-    %% API Client to Backend
-    API_CLIENT --> NGINX
+    %% Load Balancing
+    RENDER_LB -->|Route| APP
     
-    %% Load Balancer to Servers
-    NGINX --> APP1
-    NGINX --> APP2
-    NGINX --> APP3
+    %% Backend to Data
+    APP --> POSTGRES
+    APP --> STORAGE
     
-    %% App Servers to Core Services
-    APP1 --> AUTH
-    APP1 --> RECIPE_MGT
-    APP1 --> USER_MGT
-    APP1 --> COMMUNITY
+    %% External Services
+    APP --> GOOGLE
+    APP --> RESEND
+    APP --> FCM
     
-    APP2 --> AUTH
-    APP2 --> RECIPE_MGT
-    APP2 --> USER_MGT
-    APP2 --> COMMUNITY
+    %% Health Monitoring
+    APP --> HEALTH
+    RENDER_LB --> HEALTH
     
-    APP3 --> AUTH
-    APP3 --> RECIPE_MGT
-    APP3 --> USER_MGT
-    APP3 --> COMMUNITY
+    %% CI/CD Flow - Frontend
+    GIT -->|Push Frontend| FE_LINT
+    FE_LINT -->|Pass| FE_TYPE
+    FE_TYPE -->|Pass| FE_TEST
+    FE_TEST -->|Pass| FE_BUILD
+    FE_BUILD -->|Success| FE_DEPLOY
+    FE_DEPLOY --> VERCEL
     
-    %% Core to Supporting Services
-    AUTH --> ANALYTICS
-    RECIPE_MGT --> ANALYTICS
-    COMMUNITY --> ANALYTICS
-    
-    RECIPE_MGT --> NOTIFICATION
-    COMMUNITY --> NOTIFICATION
-    MODERATION --> NOTIFICATION
-    WORKFLOW --> NOTIFICATION
-    
-    %% Advanced Features Integration
-    RECIPE_MGT --> VECTOR_SEARCH
-    RECIPE_MGT --> SEARCH_SUGGESTIONS
-    
-    %% Services to Database
-    AUTH --> PRISMA_CLIENT
-    RECIPE_MGT --> PRISMA_CLIENT
-    USER_MGT --> PRISMA_CLIENT
-    COMMUNITY --> PRISMA_CLIENT
-    ANALYTICS --> PRISMA_CLIENT
-    NOTIFICATION --> PRISMA_CLIENT
-    MODERATION --> PRISMA_CLIENT
-    WORKFLOW --> PRISMA_CLIENT
-    
-    PRISMA_CLIENT --> POSTGRES
-    
-    %% File Storage
-    RECIPE_MGT --> SUPABASE_STORAGE
-    USER_MGT --> SUPABASE_STORAGE
-    SUPABASE_STORAGE --> RECIPE_IMAGES
-    SUPABASE_STORAGE --> USER_AVATARS
-    
-    %% External Integrations
-    AUTH --> GOOGLE_AUTH
-    NOTIFICATION --> RESEND
-    NOTIFICATION --> FCM_SERVICE
-    RECIPE_MGT --> IMAGE_PROCESSOR
-    
-    %% Frontend Deployment
-    WEB_APP --> VERCEL
-    VERCEL --> CDN
-    VERCEL --> DOMAIN
+    %% CI/CD Flow - Backend
+    GIT -->|Push Backend| BE_TEST
+    BE_TEST -->|Pass| BE_BUILD
+    BE_BUILD -->|Success| SECURITY
+    SECURITY -->|Pass| BE_DEPLOY
+    BE_DEPLOY --> APP
     
     %% Monitoring
-    APP1 --> HEALTH_CHECK
-    APP1 --> ERROR_LOG
-    APP1 --> RATE_LIMITER
-    APP1 --> CORS
-    
-    %% CI/CD Pipeline Flow
-    GITHUB_ACTIONS --> LINT_CHECK
-    LINT_CHECK --> TYPE_CHECK
-    TYPE_CHECK --> UNIT_TESTS
-    UNIT_TESTS --> E2E_TESTS
-    E2E_TESTS --> BUILD_STEP
-    BUILD_STEP --> AUTO_DEPLOY
-    AUTO_DEPLOY --> VERCEL
+    APP --> LOGS
+    APP --> METRICS
+    VERCEL --> METRICS
 
-    classDef frontend fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    classDef state fill:#bbdefb,stroke:#0d47a1,stroke-width:2px
-    classDef backend fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
+    classDef client fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef frontend fill:#bbdefb,stroke:#0d47a1,stroke-width:3px
+    classDef backend fill:#ffe0b2,stroke:#e65100,stroke-width:3px
     classDef database fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
     classDef external fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
-    classDef infra fill:#fce4ec,stroke:#c2185b,stroke-width:3px
-    classDef deployment fill:#e0f2f1,stroke:#00796b,stroke-width:3px
+    classDef cicd fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    classDef monitoring fill:#fce4ec,stroke:#c2185b,stroke-width:2px
     
-    class WEB_APP,LANDING,AUTH_PAGE,TERMS_PAGE,BROWSE,RECIPE_DETAIL,MY_RECIPES,SUBMIT_RECIPE,USER_MGMT_UI,RECIPE_APPROVAL,CONTENT_MOD,SYSTEM_ANALYTICS frontend
-    class AUTH_CONTEXT,REACT_QUERY,SAVED_RECIPES_CTX,API_CLIENT,AUTH_SERVICE,RECIPE_SERVICE,NOTIFICATION_CLIENT,PUSH_SERVICE state
-    class NGINX,APP1,APP2,APP3,AUTH,RECIPE_MGT,USER_MGT,COMMUNITY,ANALYTICS,NOTIFICATION,MODERATION,WORKFLOW,VECTOR_SEARCH,SEARCH_SUGGESTIONS backend
-    class POSTGRES,PRISMA_CLIENT,SUPABASE_STORAGE,RECIPE_IMAGES,USER_AVATARS database
-    class GOOGLE_AUTH,RESEND,FCM_SERVICE,IMAGE_PROCESSOR external
-    class HEALTH_CHECK,ERROR_LOG,METRICS_COL,RATE_LIMITER,DDOS_PROTECT,SSL_CERT,CORS,GITHUB_ACTIONS,LINT_CHECK,TYPE_CHECK,UNIT_TESTS,E2E_TESTS,BUILD_STEP infra
-    class VERCEL,CDN,DOMAIN,AUTO_DEPLOY deployment
+    class USERS client
+    class VERCEL,FRONTEND,AUTH_CTX,REACT_QUERY,PUBLIC,PROTECTED,ADMIN,API_CLIENT,AUTH_SVC,PUSH_SVC frontend
+    class RENDER_LB,APP,HEALTH backend
+    class POSTGRES,STORAGE database
+    class GOOGLE,RESEND,FCM external
+    class GIT,FE_LINT,FE_TYPE,FE_TEST,FE_BUILD,FE_DEPLOY,BE_TEST,BE_BUILD,SECURITY,BE_DEPLOY cicd
+    class LOGS,METRICS monitoring
 ```
 
 ## Architecture Overview
@@ -265,9 +162,9 @@ graph TB
 
 **Key Pages:**
 1. **Public Pages** (Unauthenticated)
-   - Landing Page: Animated hero, features, stats, CTA
    - Auth Page: Combined login/register with Google OAuth
    - Terms & Verification Pages
+   - Browse Recipes: Search, filters, pagination
 
 2. **Protected Pages** (Authenticated)
    - Browse Recipes: Vector search, filters, pagination
@@ -311,7 +208,7 @@ graph TB
 ### Routing Architecture
 
 **Public Routes:**
-- `/` - Landing Page (new!)
+- `/` - Browse Recipes (Home)
 - `/auth` - Authentication
 - `/terms` - Terms of Service
 - `/verify-email/:token` - Email verification
@@ -369,9 +266,9 @@ Authorization: Bearer <JWT_TOKEN>
 ### Deployment Architecture
 
 **Vercel Platform:**
-- Auto-deployment from GitHub (feat/landing-page branch)
-- Preview deployments for PRs
-- Production deployment on main branch merge
+- Auto-deployment from GitHub (develop and main branches)
+- Staging deployment: `develop` branch → Vercel staging project
+- Production deployment: `main` branch → Vercel production project
 - Global CDN for static assets
 
 **Environment Variables (Vercel):**
@@ -412,25 +309,22 @@ VITE_FIREBASE_VAPID_KEY=...
    - Prettier: Verify code formatting consistency
    
 2. **Type Validation**
-   - TypeScript compiler: Strict mode type checking
+   - TypeScript compiler: Strict mode type checking (`tsc --noEmit`)
    - Ensure no type errors before testing
    
 3. **Unit Tests**
-   - Vitest: Run component and service tests
+   - Vitest: Run component and service tests with coverage
    - React Testing Library: DOM interaction testing
+   - Matrix testing: Node.js 18.x and 20.x
    
-4. **E2E Tests**
-   - Playwright: Cross-browser testing
-   - Test all critical user flows
-   
-5. **Production Build**
+4. **Production Build**
    - Vite: Bundle application for production
    - Optimize assets, minify code
    
-6. **Automated Deployment**
-   - Vercel: Deploy to preview (PR) or production (main)
-   - Generate deployment URL
-   - Update deployment status
+5. **Automated Deployment**
+   - Staging: Vercel deploy on `develop` branch push
+   - Production: Vercel deploy on `main` branch push
+   - Coverage upload to Codecov (Node 20.x only)
 
 **Build Artifacts:**
 - Production bundle in `dist/` directory
@@ -502,5 +396,5 @@ VITE_FIREBASE_VAPID_KEY=...
 
 ---
 
-**Last Updated**: November 22, 2025
-**Current Status**: Landing page complete, authentication system production-ready, recipe features in development
+**Last Updated**: November 24, 2025
+**Current Status**: Authentication system complete, recipe features production-ready, admin features operational
