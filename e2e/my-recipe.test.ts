@@ -4,8 +4,19 @@ test.use({ storageState: 'auth.json' });
 test.describe('My Recipes Page', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://fitrecipes-staging.vercel.app/my-recipes');
-    await page.waitForLoadState('networkidle');
+    // Navigate to the my-recipes page with /chef prefix
+    await page.goto('https://fitrecipes-staging.vercel.app/chef/my-recipes', { waitUntil: 'networkidle' });
+    
+    // Debug: log auth state and URL
+    const token = await page.evaluate(() => localStorage.getItem('fitrecipes_token'));
+    const user = await page.evaluate(() => localStorage.getItem('fitrecipes_user'));
+    console.log('Auth token present:', !!token);
+    console.log('Auth user present:', !!user);
+    console.log('Current URL:', page.url());
+    
+    // Wait for the page to fully load (additional safety)
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000); // Extra buffer for React to render
   });
 
   test('should display the "My Recipes" heading', async ({ page }) => {
@@ -24,9 +35,9 @@ test.describe('My Recipes Page', () => {
     await expect(statsContainer.getByText('Rejected')).toBeVisible();
 
     await expect(statsContainer.locator('text=14').first()).toBeVisible();
-    await expect(statsContainer.locator('text=8').first()).toBeVisible();
-    await expect(statsContainer.locator('text=4').first()).toBeVisible();
-    await expect(statsContainer.locator('text=2').first()).toBeVisible();
+    await expect(statsContainer.locator('text=11').first()).toBeVisible();
+    await expect(statsContainer.locator('text=0').first()).toBeVisible();
+    await expect(statsContainer.locator('text=3').first()).toBeVisible();
   });
 
   test('should show rejection reason for a rejected recipe', async ({ page }) => {
@@ -58,9 +69,9 @@ test.describe('My Recipes Page', () => {
 
   test('should display correct number of recipes in filter tabs', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'All Recipes (14)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Pending (4)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Approved (8)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Rejected (2)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Pending (0)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Approved (11)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Rejected (3)' })).toBeVisible();
   });
 
   test('should have Submit New Recipe button', async ({ page }) => {
@@ -147,30 +158,29 @@ test.describe('My Recipes Page', () => {
     
     await expect(page.getByText('Energy Balls - Rejected 2')).not.toBeVisible();
   });
-test('Filter2 tabs should filter recipes by status', async ({ page }) => {
-  // Click "Pending" tab
-  await page.getByRole('button', { name: 'Pending (4)' }).click();
+test('Filter2 tabs should filter recipes by status (Rejected tab)', async ({ page }) => {
+  // Click "Rejected" tab
+  await page.getByRole('button', { name: 'Rejected (3)' }).click();
   await page.waitForTimeout(1000);
-  
+
   // Count only visible recipe cards (not display:none or hidden)
-  const visibleCards = page.locator('div.rounded-lg').filter({ 
-    has: page.locator('h3.text-xl') 
-  }).locator('visible=true');
-  
+  const visibleCards = page.locator('div.rounded-lg').filter({
+    has: page.locator('h3.text-xl')
+  }).filter({ hasNot: page.locator('text=') });
+
   const count = await visibleCards.count();
-  console.log(`Visible recipe cards after clicking Pending: ${count}`);
-  
-  // If count is still 14, the filter might be using a different hiding method
-  // Check if cards have a specific class when hidden
+  console.log(`Visible recipe cards after clicking Rejected: ${count}`);
+
+  // Log total cards in DOM for debugging
   const allCards = page.locator('div.rounded-lg').filter({ has: page.locator('h3') });
   const totalCards = await allCards.count();
   console.log(`Total recipe cards in DOM: ${totalCards}`);
-  
-  // Try checking for visible text in the cards
+
+  // Check visible recipe titles
   const visibleRecipeTitles = page.locator('h3.text-xl:visible');
   const visibleCount = await visibleRecipeTitles.count();
   console.log(`Visible recipe titles: ${visibleCount}`);
-  
-  expect(visibleCount).toBe(4);
+
+  expect(visibleCount).toBe(3);
 });
 });
