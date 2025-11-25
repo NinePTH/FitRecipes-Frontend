@@ -396,5 +396,278 @@ VITE_FIREBASE_VAPID_KEY=...
 
 ---
 
+## Use Case Diagram
+
+This diagram illustrates the complete user interactions across all roles in the FitRecipes system.
+
+```mermaid
+graph TB
+    %% Actors
+    GUEST((Guest User))
+    CUSTOMER((Customer))
+    CHEF((Chef))
+    ADMIN((Admin))
+    SYSTEM((System))
+    
+    %% Guest User Use Cases
+    subgraph "Public Access"
+        UC1[Browse Recipes]
+        UC2[Search Recipes]
+        UC3[View Recipe Details]
+        UC4[Register Account]
+        UC5[Login via Email]
+        UC6[Login via Google OAuth]
+        UC7[View Terms of Service]
+        UC8[Request Password Reset]
+        UC9[Reset Password]
+        UC10[Verify Email]
+        UC11[Resend Verification Email]
+    end
+    
+    %% Customer Use Cases
+    subgraph "Customer Features"
+        UC12[Rate Recipes]
+        UC13[Edit Own Rating]
+        UC14[Delete Own Rating]
+        UC15[Comment on Recipes]
+        UC16[Edit Own Comment]
+        UC17[Delete Own Comment]
+        UC18[Save/Bookmark Recipes]
+        UC19[View Saved Recipes]
+        UC20[Remove Saved Recipes]
+        UC21[Receive Notifications]
+        UC22[Enable Push Notifications]
+        UC23[View Notification History]
+        UC24[Logout]
+    end
+    
+    %% Chef Use Cases
+    subgraph "Chef Features"
+        UC25[Submit New Recipe]
+        UC26[Upload Recipe Images]
+        UC27[View My Recipes]
+        UC28[Edit Own Recipe]
+        UC29[Update Recipe Images]
+        UC30[View Recipe Status]
+        UC31[Receive Approval Notifications]
+        UC32[View Recipe Analytics]
+    end
+    
+    %% Admin Use Cases
+    subgraph "Admin Features"
+        UC33[Review Pending Recipes]
+        UC34[Approve Recipe]
+        UC35[Reject Recipe with Reason]
+        UC36[Delete Any Recipe]
+        UC37[View All Users]
+        UC38[Manage User Roles]
+        UC39[Delete User Account]
+        UC40[View System Dashboard]
+        UC41[Moderate Comments]
+        UC42[View Analytics Reports]
+    end
+    
+    %% System Automated Use Cases
+    subgraph "System Operations"
+        UC43[Send Email Verification]
+        UC44[Send Password Reset Email]
+        UC45[Track Recipe Views]
+        UC46[Send Push Notifications]
+        UC47[Generate Recipe Suggestions]
+        UC48[Calculate Recipe Ratings]
+        UC49[Update User Statistics]
+    end
+    
+    %% Guest User Connections
+    GUEST --> UC1
+    GUEST --> UC2
+    GUEST --> UC3
+    GUEST --> UC4
+    GUEST --> UC5
+    GUEST --> UC6
+    GUEST --> UC7
+    GUEST --> UC8
+    GUEST --> UC9
+    GUEST --> UC10
+    GUEST --> UC11
+    
+    %% Customer Connections (inherits all Guest capabilities)
+    CUSTOMER --> UC1
+    CUSTOMER --> UC2
+    CUSTOMER --> UC3
+    CUSTOMER --> UC12
+    CUSTOMER --> UC13
+    CUSTOMER --> UC14
+    CUSTOMER --> UC15
+    CUSTOMER --> UC16
+    CUSTOMER --> UC17
+    CUSTOMER --> UC18
+    CUSTOMER --> UC19
+    CUSTOMER --> UC20
+    CUSTOMER --> UC21
+    CUSTOMER --> UC22
+    CUSTOMER --> UC23
+    CUSTOMER --> UC24
+    
+    %% Chef Connections (inherits all Customer capabilities)
+    CHEF --> UC1
+    CHEF --> UC2
+    CHEF --> UC3
+    CHEF --> UC12
+    CHEF --> UC15
+    CHEF --> UC18
+    CHEF --> UC21
+    CHEF --> UC24
+    CHEF --> UC25
+    CHEF --> UC26
+    CHEF --> UC27
+    CHEF --> UC28
+    CHEF --> UC29
+    CHEF --> UC30
+    CHEF --> UC31
+    CHEF --> UC32
+    
+    %% Admin Connections (inherits all Chef capabilities)
+    ADMIN --> UC1
+    ADMIN --> UC2
+    ADMIN --> UC3
+    ADMIN --> UC12
+    ADMIN --> UC15
+    ADMIN --> UC18
+    ADMIN --> UC21
+    ADMIN --> UC24
+    ADMIN --> UC25
+    ADMIN --> UC27
+    ADMIN --> UC33
+    ADMIN --> UC34
+    ADMIN --> UC35
+    ADMIN --> UC36
+    ADMIN --> UC37
+    ADMIN --> UC38
+    ADMIN --> UC39
+    ADMIN --> UC40
+    ADMIN --> UC41
+    ADMIN --> UC42
+    
+    %% System Automated Connections
+    SYSTEM -.->|Triggered by| UC4
+    SYSTEM -.->|Triggered by| UC8
+    SYSTEM -.->|Triggered by| UC3
+    SYSTEM -.->|Triggered by| UC34
+    SYSTEM -.->|Triggered by| UC35
+    SYSTEM -.->|Triggered by| UC2
+    SYSTEM -.->|Triggered by| UC12
+    UC4 -.-> UC43
+    UC8 -.-> UC44
+    UC3 -.-> UC45
+    UC34 -.-> UC46
+    UC35 -.-> UC46
+    UC2 -.-> UC47
+    UC12 -.-> UC48
+    UC25 -.-> UC49
+    
+    %% Extend Relationships
+    UC6 -.->|extends| UC7
+    UC28 -.->|includes| UC29
+    UC25 -.->|includes| UC26
+    UC36 -.->|includes| UC35
+    
+    %% Styling
+    classDef actorStyle fill:#4A90E2,stroke:#2E5C8A,stroke-width:3px,color:#fff
+    classDef publicStyle fill:#95E1D3,stroke:#38A89D,stroke-width:2px
+    classDef customerStyle fill:#F6E3C5,stroke:#D4A574,stroke-width:2px
+    classDef chefStyle fill:#FFB6B9,stroke:#C77C7C,stroke-width:2px
+    classDef adminStyle fill:#E8B4F1,stroke:#A569BD,stroke-width:2px
+    classDef systemStyle fill:#D5D8DC,stroke:#85929E,stroke-width:2px
+    
+    class GUEST,CUSTOMER,CHEF,ADMIN,SYSTEM actorStyle
+    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8,UC9,UC10,UC11 publicStyle
+    class UC12,UC13,UC14,UC15,UC16,UC17,UC18,UC19,UC20,UC21,UC22,UC23,UC24 customerStyle
+    class UC25,UC26,UC27,UC28,UC29,UC30,UC31,UC32 chefStyle
+    class UC33,UC34,UC35,UC36,UC37,UC38,UC39,UC40,UC41,UC42 adminStyle
+    class UC43,UC44,UC45,UC46,UC47,UC48,UC49 systemStyle
+```
+
+### Use Case Categories
+
+#### 🌐 Public Access (Guest Users)
+Unauthenticated users can:
+- Browse and search recipe catalog with filters
+- View complete recipe details (ingredients, instructions, ratings)
+- Create account via email or Google OAuth
+- Access terms of service and privacy policy
+- Complete email verification workflow
+- Request and complete password reset
+
+#### 👤 Customer Features
+Authenticated customers can perform all guest actions plus:
+- Rate recipes with 1-5 stars (create, edit, delete)
+- Comment on recipes (create, edit, delete)
+- Save/bookmark favorite recipes for quick access
+- View saved recipe collection
+- Receive real-time push notifications
+- Enable browser push notifications
+- View notification history with filters
+- Manage account settings and logout
+
+#### 👨‍🍳 Chef Features
+Chefs inherit all customer capabilities plus:
+- Submit new recipes with detailed information
+- Upload up to 3 images per recipe
+- View all submitted recipes in "My Recipes"
+- Edit recipe details and update images
+- Track recipe status (pending, approved, rejected)
+- Receive notifications about approval/rejection
+- View analytics on recipe performance
+
+#### 🛡️ Admin Features
+Admins inherit all chef capabilities plus:
+- Review queue of pending recipe submissions
+- Approve recipes for public display
+- Reject recipes with detailed feedback
+- Delete any recipe (pending, approved, rejected)
+- View and manage all user accounts
+- Update user roles (promote/demote)
+- Delete user accounts with confirmation
+- Access system-wide analytics dashboard
+- Moderate user comments and ratings
+- Generate system reports
+
+#### 🤖 System Automated Operations
+The system automatically:
+- Send email verification links upon registration
+- Send password reset emails with secure tokens
+- Track recipe view counts for analytics
+- Send push notifications for key events
+- Generate smart recipe suggestions based on search
+- Calculate and update average recipe ratings
+- Update user statistics and engagement metrics
+
+### Use Case Relationships
+
+**Inheritance (Generalization)**:
+- Customer inherits from Guest User
+- Chef inherits from Customer
+- Admin inherits from Chef
+
+**Extends**:
+- "Login via Google OAuth" extends "Accept Terms of Service" (OAuth users must accept terms)
+- "Edit Recipe" extends "Update Recipe Images" (editing includes image management)
+
+**Includes**:
+- "Submit Recipe" includes "Upload Recipe Images" (required step)
+- "Admin Delete Recipe" includes "Provide Rejection Reason" (required for audit trail)
+
+**System Triggers**:
+- Registration triggers email verification
+- Password reset request triggers reset email
+- Recipe view triggers view count tracking
+- Recipe approval/rejection triggers push notifications
+- Search queries trigger suggestion generation
+- Recipe ratings trigger rating recalculation
+
+---
+
 **Last Updated**: November 24, 2025
 **Current Status**: Authentication system complete, recipe features production-ready, admin features operational
+
