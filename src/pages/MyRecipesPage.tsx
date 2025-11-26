@@ -216,7 +216,7 @@ export function MyRecipesPage() {
             </h1>
             <p className="text-gray-600">Manage and track your submitted recipes</p>
           </div>
-          <Link to="/submit-recipe">
+          <Link to="/chef/submit-recipe">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Submit New Recipe
@@ -322,7 +322,7 @@ export function MyRecipesPage() {
                     : `You don't have any ${filter} recipes at the moment.`}
                 </p>
                 {filter === 'all' && (
-                  <Link to="/submit-recipe">
+                  <Link to="/chef/submit-recipe">
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
                       Submit Your First Recipe
