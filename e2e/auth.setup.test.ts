@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 const appUrl = 'https://fitrecipes-staging.vercel.app/auth';
 const validEmail = 'somethin@mail.com';
