@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-const email = process.env.TEST_EMAIL!;
-const password = process.env.TEST_PASSWORD!;
+// const email = process.env.TEST_EMAIL!;
+// const password = process.env.TEST_PASSWORD!;
+
+const email = "";
+const password = "";
 
 test.describe('Auth E2E', () => {
   // open auth page

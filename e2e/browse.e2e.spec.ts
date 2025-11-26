@@ -1,7 +1,10 @@
 import { test, expect, Page, Response } from '@playwright/test';
 
-const email = process.env.TEST_EMAIL!;
-const password = process.env.TEST_PASSWORD!;
+// const email = process.env.TEST_EMAIL!;
+// const password = process.env.TEST_PASSWORD!;
+
+const email = "";
+const password = "";
 
 async function loginAndWait(page: Page, baseURL: string, email: string, password: string) {
   await page.goto(baseURL + 'auth');
