@@ -1,6 +1,6 @@
 # FitRecipes User Manual
 
-**Version 1.0** | Last Updated: November 2025
+**Version 1.1** | Last Updated: December 2025
 
 ## 📋 Table of Contents
 - [Introduction](#introduction)
@@ -74,8 +74,11 @@
 **All Chef features plus:**
 - Review pending recipe submissions
 - Approve or reject recipes with feedback
-- Manage user-generated content
-- Access admin dashboard for recipe moderation
+- Delete any recipe (pending, approved, or rejected)
+- Manage user accounts (view, ban/unban, change roles)
+- Access admin dashboard with system-wide analytics
+- Moderate comments and ratings
+- View user activity and engagement metrics
 
 ---
 
@@ -83,20 +86,40 @@
 
 ### 🔍 Browsing Recipes
 
-**Search and Filter:**
-- Use the search bar to find recipes by name or ingredients
+**Smart Search (AI-Powered):**
+- **Natural Language Queries**: Search using everyday language
+  - Example: "quick vegan thai dinner under 30 minutes"
+  - Example: "healthy breakfast recipes for weight loss"
+  - Example: "easy italian pasta dishes"
+- **Auto-Filter Extraction**: System automatically detects:
+  - Cuisine types (Thai, Italian, Mexican, etc.)
+  - Dietary restrictions (Vegan, Vegetarian, Keto, etc.)
+  - Preparation time (under 30 minutes, quick, etc.)
+  - Difficulty level (easy, medium, hard)
+  - Meal types (breakfast, lunch, dinner, snack)
+- **Real-time Suggestions**: As you type, see matching recipes and ingredients
+- **Multiple Search Modes**:
+  - Smart Search (default, AI-powered)
+  - Vector Search (semantic similarity)
+  - Ingredient Search (find by specific ingredients)
+  - Hybrid Search (combines multiple methods)
+- **Visual Feedback**: Extracted filters shown as badges with execution time
+
+**Manual Filters:**
 - Filter by:
   - **Meal Type**: Breakfast, Lunch, Dinner, Snack, Dessert
   - **Diet Type**: Vegetarian, Vegan, Keto, Paleo, Gluten-Free
   - **Difficulty**: Easy, Medium, Hard
   - **Cuisine**: Italian, Asian, Mexican, etc.
   - **Allergens**: View allergen information for safety
+  - **Prep Time**: Filter by maximum preparation time
 
 **Recipe Cards Display:**
 - Recipe image with title
 - Prep and cook time
 - Average rating and review count
 - Key dietary indicators (badges)
+- Save/bookmark button for quick access
 
 ### 📖 Viewing Recipe Details
 
@@ -189,12 +212,123 @@
 - See recipe preview with full details
 - Check nutrition information and allergens
 - Review recipe images
+- Track approval statistics (pending, approved, rejected counts)
 
 **Approval Actions:**
 - **Approve**: Make recipe public immediately
+  - Optional: Add admin note for internal tracking
+  - Recipe becomes visible to all users
+  - Chef receives approval notification
 - **Reject**: Provide detailed feedback to chef
-  - Specify reason for rejection
+  - Specify reason for rejection (required, 10+ characters)
   - Chef receives notification with explanation
+  - Recipe remains in chef's collection as "Rejected"
+- **Delete**: Remove recipe permanently from system
+  - Requires deletion reason (minimum 10 characters)
+  - Cascades to remove all comments, ratings, and saved entries
+  - Creates audit log entry for tracking
+  - Available for any recipe status (pending, approved, rejected)
+
+**Bulk Actions:**
+- Delete multiple recipes at once
+- Provide single reason for batch deletion
+- View success/failure status for each item
+
+### 👥 User Management (Admin Only)
+
+**Access User Management:**
+- Navigate to "User Management" from admin menu
+- View complete list of all registered users
+- See user statistics and activity metrics
+
+**User Information Displayed:**
+- Email address and full name
+- User role (Customer, Chef, Admin)
+- Account status (Active, Banned)
+- Registration date
+- Last activity timestamp
+- Number of recipes submitted (for Chefs)
+- Account verification status
+
+**Filter and Search:**
+- Filter by role (Customer, Chef, Admin)
+- Filter by status (Active, Banned)
+- Search by email or name
+- Sort by registration date, last activity, or role
+
+**User Management Actions:**
+
+1. **View User Details**
+   - Click on user to see detailed information
+   - View user's recipe contributions
+   - See comment and rating history
+   - Check engagement metrics
+
+2. **Ban User**
+   - Select "Ban" from user actions
+   - Provide ban reason (required, min 10 characters)
+   - Banned users cannot log in
+   - User receives notification about suspension
+   - Ban reason stored for audit purposes
+
+3. **Unban User**
+   - Select "Unban" for banned users
+   - Immediately restores account access
+   - User receives welcome back notification
+   - Original ban reason remains in audit log
+
+4. **Change User Role**
+   - Promote Customer to Chef (enables recipe submission)
+   - Promote Chef to Admin (grants full admin access)
+   - Demote Admin to Chef or Customer
+   - User receives notification about role change
+   - Role change is immediate and reflected system-wide
+   - Optional: Provide reason for role change
+
+**Audit Trail:**
+- All admin actions are logged
+- Includes timestamp, admin ID, and action details
+- Ban/unban reasons stored for accountability
+- Accessible in admin dashboard
+
+### 📊 Analytics & Dashboard
+
+**Chef Analytics (Chef Only):**
+- Access from "My Recipes" page
+- View recipe performance metrics:
+  - Total views per recipe
+  - Average rating and rating count
+  - Comment count and engagement
+  - Save/bookmark count
+  - Recipe status (pending, approved, rejected)
+- Track recipe trends over time
+- Identify top-performing recipes
+- See approval/rejection feedback
+
+**Admin Dashboard (Admin Only):**
+- System-wide overview and statistics
+- **User Metrics**:
+  - Total registered users
+  - User growth over time
+  - Active vs inactive users
+  - Users by role distribution
+  - Banned users count
+- **Recipe Metrics**:
+  - Total recipes in system
+  - Pending approval count
+  - Approved vs rejected ratio
+  - Most viewed recipes
+  - Top-rated recipes
+  - Recipe submissions over time
+- **Engagement Metrics**:
+  - Total comments and ratings
+  - Average engagement per recipe
+  - User activity trends
+  - Popular cuisines and meal types
+- **Content Moderation**:
+  - Flagged content count
+  - Recent admin actions
+  - Audit log summary
 
 ---
 
@@ -253,6 +387,14 @@
 - Appears 2 seconds after login (first time only)
 - Dismissable with X button
 - Won't show again after dismissal
+- One-time prompt to enable notifications
+
+**Notification Types You'll Receive:**
+- **Recipe Updates**: When your recipe is approved or rejected
+- **Comments**: New comments on your recipes
+- **Ratings**: New ratings on your recipes
+- **Admin Actions**: Account role changes, bans, or warnings
+- **System Announcements**: Important platform updates
 
 ---
 
@@ -344,6 +486,24 @@
 - Check if recipe is approved
 - Verify you're not on a pending recipe
 
+**Search Not Working?**
+- Check your internet connection
+- Try different search terms or queries
+- Use manual filters if Smart Search is unavailable
+- Clear search query and try again
+- System automatically falls back to browse mode if search fails
+
+**Admin Actions Not Available?**
+- Verify you have Admin role
+- Check if you're logged in with correct account
+- Some actions require specific permissions
+- Contact system administrator if issue persists
+
+**User Management Issues?**
+- Ensure ban reason is at least 10 characters
+- Cannot ban yourself as admin
+- Role changes are immediate but may need page refresh
+
 ### Browser Compatibility
 
 **Supported Browsers:**
@@ -385,10 +545,14 @@
 
 ### For Admins
 ✅ Review recipes thoroughly before approval  
-✅ Provide constructive rejection feedback  
+✅ Provide constructive rejection feedback (min 10 characters)  
 ✅ Check for duplicate recipes  
 ✅ Verify nutrition information accuracy  
 ✅ Ensure images are appropriate  
+✅ Always provide clear reasons for deletions or bans  
+✅ Monitor user activity and engagement metrics  
+✅ Use bulk actions for efficient content moderation  
+✅ Review audit logs regularly for accountability  
 
 ---
 
@@ -398,8 +562,11 @@
 |--------|----------|
 | Search recipes | `/` |
 | Close notification panel | `Esc` |
+| Close dialogs/modals | `Esc` |
 | Navigate forms | `Tab` |
 | Submit forms | `Enter` |
+| Navigate search suggestions | `↑` `↓` |
+| Select suggestion | `Enter` |
 
 ---
 
