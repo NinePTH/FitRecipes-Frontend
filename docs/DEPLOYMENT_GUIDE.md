@@ -1,6 +1,6 @@
 # FitRecipes Frontend - Vercel Deployment Guide
 
-**Last Updated**: December 11, 2025
+**Last Updated**: November 5, 2025
 
 This guide will walk you through deploying the FitRecipes frontend to Vercel with separate **Production** and **Staging** environments.
 
